@@ -1,0 +1,1539 @@
+<!doctype html>
+<html lang="ms" id="htmlRoot">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MAIDA ESPORTS — Admin Dashboard</title>
+<style>
+  /* 🌓 Theme variables */
+  :root {
+    --bg:#070607;
+    --card:#0f0f10;
+    --muted:#9b9b9b;
+    --glass: rgba(255,255,255,0.03);
+    --neon-magenta: #ff00d1;
+    --neon-cyan: #00d1ff;
+    --neon-green: #00ff9e;
+    --neon-orange:#ff7a2f;
+    --accent: var(--neon-magenta);
+    --radius:14px;
+    --text-color: #e9e9e9;
+    --contrast-bg: #000;
+    --contrast-text: #fff;
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  /* 🌞 Light theme */
+  .light-theme {
+    --bg: #f8f9fa;
+    --card: #ffffff;
+    --muted: #6c757d;
+    --glass: rgba(0,0,0,0.02);
+    --text-color: #212529;
+  }
+
+  /* 📺 Public Display Mode */
+  .public-display {
+    background: var(--contrast-bg) !important;
+    color: var(--contrast-text) !important;
+  }
+  .public-display .controls,
+  .public-display .zoneActions,
+  .public-display .searchBar,
+  .public-display .statusRow,
+  .public-display header,
+  .public-display .activityLog,
+  .public-display footer {
+    display: none !important;
+  }
+  .public-display .stationCard {
+    background: var(--contrast-bg) !important;
+    border: 3px solid var(--neon-green);
+    box-shadow: none !important;
+    color: var(--contrast-text) !important;
+    min-height: 140px;
+    transition: none !important;
+  }
+  .public-display .stationCard.running {
+    border-color: var(--neon-cyan);
+  }
+  .public-display .stationCard.expired-alert {
+    border-color: var(--neon-magenta);
+    animation: none !important;
+  }
+  .public-display .timerLarge {
+    font-size: 48px !important;
+    color: var(--neon-cyan) !important;
+  }
+  .public-display .stationTitle {
+    font-size: 20px !important;
+    color: white !important;
+  }
+
+  html,body{height:100%; margin:0; padding:0;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 10% 10%, rgba(255,0,200,0.02), transparent 8%),
+      linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.05)),
+      var(--bg);
+    color: var(--text-color);
+    padding:16px;
+    box-sizing:border-box;
+  }
+
+  header{
+    display:flex;
+    gap:16px;
+    align-items:center;
+    margin-bottom:16px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .logo{
+    width:44px;height:44px;border-radius:10px;
+    background:linear-gradient(135deg,var(--neon-magenta),#ff5ca8);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;color:#060606;font-size:20px;
+    flex-shrink: 0;
+  }
+  h1{margin:0;font-size:20px;color:var(--neon-magenta);letter-spacing:0.5px}
+  .sub{color:var(--muted);font-size:12px;margin-top:2px}
+
+  .themeToggle {
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    width: 40px;
+    height: 24px;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+  }
+  .themeToggle::after {
+    content: "🌙";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--neon-orange);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    transition: transform 0.3s;
+    color: #000;
+  }
+  .light-theme .themeToggle::after {
+    transform: translateX(16px);
+    content: "☀️";
+    background: var(--neon-green);
+  }
+
+  .statusRow{
+    display:flex;
+    gap:12px;
+    margin:12px 0 16px;
+    flex-wrap:wrap;
+    align-items: center;
+  }
+  .stat{
+    background: linear-gradient(180deg, var(--glass), rgba(255,255,255,0.01));
+    padding:10px 14px;
+    border-radius:12px;
+    min-width:90px;
+    border:1px solid rgba(255,255,255,0.03);
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1) inset;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .light-theme .stat {
+    border-color: rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05) inset;
+  }
+  .stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2) inset, 0 0 8px rgba(0,200,255,0.2);
+  }
+
+  .stat .num{font-size:18px;color:var(--neon-cyan);font-weight:700}
+  .stat .lbl{font-size:11px;color:var(--muted);margin-top:4px}
+
+  .searchBar {
+    display: flex;
+    gap: 10px;
+    margin: 12px 0 16px;
+    flex-wrap: wrap;
+  }
+  .searchInput {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.2);
+    color: var(--text-color);
+    font-size: 14px;
+    outline: none;
+  }
+  .light-theme .searchInput {
+    background: white;
+    border-color: #dee2e6;
+    color: #212529;
+  }
+  .searchInput::placeholder {
+    color: var(--muted);
+  }
+  .searchInput:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 8px rgba(0,209,255,0.3);
+  }
+
+  .filterTabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .filterTab {
+    padding: 8px 16px;
+    border-radius: 10px;
+    background: var(--glass);
+    border: 1px solid rgba(255,255,255,0.05);
+    color: var(--muted);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+  .light-theme .filterTab {
+    background: #f1f3f5;
+    border-color: #ced4da;
+    color: #495057;
+  }
+  .filterTab.active, .filterTab:hover {
+    background: var(--neon-cyan);
+    color: #000;
+    border-color: var(--neon-cyan);
+  }
+
+  main{max-width:1400px;margin:0 auto; width: 100%;}
+
+  .zonesContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 18px;
+    margin-top: 10px;
+  }
+
+  .zone {
+    border-radius:16px;
+    padding:14px;
+    background:linear-gradient(180deg, var(--glass), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .light-theme .zone {
+    border-color: rgba(0,0,0,0.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  }
+  .zone:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  }
+
+  .zoneHeader{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .zoneTitle{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex: 1;
+    min-width: 200px;
+  }
+  .zoneBadge{
+    background:linear-gradient(90deg, rgba(0,0,0,0.25), var(--glass));
+    padding:7px 11px;
+    border-radius:12px;
+    font-weight:700;
+    display:flex;
+    gap:8px;
+    align-items:center;
+    font-size: 15px;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .light-theme .zoneBadge {
+    background: linear-gradient(90deg, #e9ecef, #f8f9fa);
+    color: #212529;
+  }
+  .zoneBadge:hover {
+    box-shadow: 0 0 10px var(--neon-orange);
+  }
+  .eracing .zoneBadge:hover { box-shadow: 0 0 10px var(--neon-orange); }
+  .ps4 .zoneBadge:hover { box-shadow: 0 0 10px var(--neon-magenta); }
+  .ps5 .zoneBadge:hover { box-shadow: 0 0 10px var(--neon-green); }
+
+  .expiredBadge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #ff3333;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 6px rgba(255,0,0,0.7);
+  }
+
+  .zoneActions{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .addBtn{
+    border-radius:12px;
+    padding:9px 13px;
+    border:0;
+    cursor:pointer;
+    font-weight:800;
+    font-size: 14px;
+    transition: all 0.2s;
+    min-width: 110px;
+    text-align: center;
+  }
+
+  .eracing .addBtn {
+    background: var(--neon-orange);
+    color: #000;
+  }
+  .eracing .addBtn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 14px var(--neon-orange);
+  }
+
+  .ps4 .addBtn {
+    background: var(--neon-magenta);
+    color: #fff;
+  }
+  .ps4 .addBtn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 14px var(--neon-magenta);
+  }
+
+  .ps5 .addBtn {
+    background: var(--neon-green);
+    color: #000;
+  }
+  .ps5 .addBtn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 14px var(--neon-green);
+  }
+
+  .stations{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    margin-top:12px;
+  }
+  .stationCard{
+    border-radius:14px;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stationCard {
+    background: linear-gradient(135deg, #0a2a0a, #0d3d0d);
+    border: 2px solid #2aff6e;
+    box-shadow: 0 4px 15px rgba(0, 50, 0, 0.4);
+    color: #e0ffe0;
+  }
+  .light-theme .stationCard {
+    background: linear-gradient(135deg, #e8f5e8, #d4edda);
+    border-color: #28a745;
+    color: #155724;
+  }
+  .stationCard.running {
+    background: linear-gradient(135deg, #2a2a0a, #3d3d0d);
+    border: 2px solid #ffea00;
+    box-shadow: 0 4px 15px rgba(50, 50, 0, 0.4);
+    color: #ffffe0;
+  }
+  .light-theme .stationCard.running {
+    background: linear-gradient(135deg, #fff8e1, #fff3cd);
+    border-color: #ffc107;
+    color: #856404;
+  }
+  .stationCard.expired-alert {
+    background: linear-gradient(135deg, #300000, #1a0000);
+    border: 2px solid #ff3333;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+    animation: pulseRed 1.5s infinite;
+    color: #ffdddd;
+  }
+  .light-theme .stationCard.expired-alert {
+    background: linear-gradient(135deg, #f8d7da, #f1aeb5);
+    border-color: #dc3545;
+    color: #721c24;
+    animation: none;
+  }
+  @keyframes pulseRed {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.5); }
+    50% { box-shadow: 0 0 35px rgba(255, 50, 50, 0.8); }
+  }
+
+  /* ⚠️ Warning 1 min before expiry */
+  .stationCard.warning {
+    border-color: var(--neon-orange) !important;
+    box-shadow: 0 0 20px rgba(255, 122, 47, 0.6) !important;
+    animation: pulseOrange 2s infinite;
+  }
+  @keyframes pulseOrange {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 122, 47, 0.6); }
+    50% { box-shadow: 0 0 30px rgba(255, 122, 47, 0.9); }
+  }
+
+  .stationCard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+  }
+  .light-theme .stationCard:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  }
+
+  .topRow{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap: wrap;
+  }
+  .stationTitle{
+    font-weight:800;
+    font-size:17px;
+    margin-bottom: 4px;
+  }
+  .statusDot{
+    display:inline-flex;
+    gap:8px;
+    align-items:center;
+    font-weight:700;
+  }
+  .timerLarge{
+    font-size:34px;
+    font-weight:800;
+    letter-spacing:1px;
+    margin:6px 0;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .timerLarge:hover {
+    transform: scale(1.05);
+  }
+  .elapsed{
+    font-size:12px;
+    font-weight:700;
+  }
+
+  .stationCard:not(.running):not(.expired-alert) .timerLarge { color: #2aff6e; }
+  .light-theme .stationCard:not(.running):not(.expired-alert) .timerLarge { color: #28a745; }
+  .stationCard.running .timerLarge { color: #ffea00; }
+  .light-theme .stationCard.running .timerLarge { color: #ffc107; }
+  .stationCard.expired-alert .timerLarge { color: #ff5555; font-weight: 900; }
+  .light-theme .stationCard.expired-alert .timerLarge { color: #dc3545; }
+
+  .controls{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top: 4px;
+  }
+  .btn{
+    padding:8px 12px;
+    border-radius:10px;
+    border:0;
+    cursor:pointer;
+    font-weight:700;
+    background:rgba(0,0,0,0.3);
+    color: inherit;
+    font-size: 13px;
+    transition: all 0.2s;
+    min-width: 70px;
+    text-align: center;
+  }
+  .light-theme .btn {
+    background: #e9ecef;
+    color: #212529;
+  }
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+  }
+  .light-theme .btn:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  .btn:active {
+    transform: translateY(1px);
+  }
+  .btn.primary{
+    border:2px solid;
+    background:transparent;
+  }
+
+  .btn.small{padding:6px 8px;font-size:12px; min-width: auto;}
+  .danger{
+    background:#ff3b3b;
+    color:#fff;
+    border:0;
+  }
+  .danger:hover {
+    background: #ff1a1a;
+  }
+
+  .metaRow{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+    font-size:12px;
+  }
+  .metaItem{color:var(--muted);}
+
+  .zoneStats {
+    margin-top: 12px;
+    padding: 10px;
+    background: var(--glass);
+    border-radius: 10px;
+    font-size: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+  }
+  .statItem {
+    display: flex;
+    flex-direction: column;
+  }
+  .statValue {
+    font-weight: 700;
+    color: var(--neon-cyan);
+  }
+
+  .activityLog {
+    margin-top: 24px;
+    background: var(--card);
+    border-radius: 14px;
+    padding: 16px;
+    border: 1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .light-theme .activityLog {
+    border-color: rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .logTitle {
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--neon-magenta);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .logActions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .logList {
+    max-height: 150px;
+    overflow-y: auto;
+    font-size: 13px;
+  }
+  .logEntry {
+    padding: 6px 0;
+    border-bottom: 1px solid var(--glass);
+    color: var(--muted);
+    display: flex;
+    gap: 8px;
+  }
+  .light-theme .logEntry {
+    border-bottom-color: #e9ecef;
+  }
+  .logTime {
+    color: var(--neon-cyan);
+    font-weight: 600;
+    min-width: 60px;
+  }
+
+  footer{
+    margin-top:28px;
+    color:var(--muted);
+    font-size:12px;
+    text-align:center;
+  }
+
+  @media (max-width: 768px) {
+    .btn, .addBtn, .filterTab {
+      min-height: 44px;
+      padding: 10px 14px;
+    }
+    .controls {
+      gap: 10px;
+    }
+    .btn.small {
+      min-height: 40px;
+      padding: 8px 12px;
+    }
+  }
+
+  @media(max-width:768px){
+    body{padding:12px;}
+    .zonesContainer {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .timerLarge{font-size:28px;}
+    .stationTitle{font-size:16px;}
+    .zoneBadge{font-size:14px; padding:6px 10px;}
+    .addBtn{font-size:13px; padding:8px 12px; min-width: auto;}
+    header{gap:12px;}
+    h1{font-size:19px;}
+    .searchInput { min-width: auto; }
+  }
+
+  @media(max-width:480px){
+    .statusRow{gap:8px; justify-content: space-between;}
+    .stat{min-width: 80px; padding:8px 10px;}
+    .stat .num{font-size:16px;}
+    .stat .lbl{font-size:10px;}
+    .timerLarge{font-size:24px;}
+    .controls{gap:6px;}
+    .btn{padding:6px 10px; font-size:12px;}
+    .zoneHeader{flex-direction: column; align-items: flex-start; gap:8px;}
+    .zoneActions{width: 100%; justify-content: space-between;}
+    .addBtn{width: 100%; min-width: auto;}
+    .filterTabs { width: 100%; justify-content: space-between; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="logo">🎮</div>
+    <div>
+      <h1>MAIDA ESPORTS</h1>
+      <div class="sub">Admin Dashboard</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <button class="btn small" id="publicDisplayBtn" title="Mod Paparan Awam untuk TV">👁️ Awam</button>
+    <div class="themeToggle" id="themeToggle"></div>
+  </div>
+</header>
+
+<main>
+  <div class="statusRow">
+    <div class="stat">
+      <div class="num" id="activeCount">0</div>
+      <div class="lbl">ACTIVE</div>
+    </div>
+    <div class="stat">
+      <div class="num" id="expiredCount">0</div>
+      <div class="lbl">EXPIRED</div>
+    </div>
+    <div style="flex:1"></div>
+    <div class="globalActions">
+      <button class="btn" id="clearStorage">🗑️ Reset All</button>
+    </div>
+  </div>
+
+  <div class="searchBar">
+    <input type="text" id="globalSearch" class="searchInput" placeholder="Cari stesen, team, atau player...">
+    <div class="filterTabs">
+      <button class="filterTab active" data-filter="all">Semua</button>
+      <button class="filterTab" data-filter="running">Aktif</button>
+      <button class="filterTab" data-filter="expired">Tamat</button>
+      <button class="filterTab" data-filter="idle">Paused</button>
+    </div>
+  </div>
+
+  <div class="zonesContainer">
+    <section class="zone eracing" data-zone="eracing">
+      <div class="zoneHeader">
+        <div class="zoneTitle">
+          <div class="zoneBadge">
+            <span class="dot" style="background:var(--neon-orange)"></span> ERACING ZONE
+          </div>
+        </div>
+        <div class="zoneActions">
+          <div class="metaItem">Active: <strong id="eracingCount">0</strong></div>
+          <button class="addBtn" data-zone="eracing">+ Add Station</button>
+        </div>
+      </div>
+      <div class="stations" id="eracingStations"></div>
+      <div class="zoneStats" id="eracingStats"></div>
+    </section>
+
+    <section class="zone ps4" data-zone="ps4">
+      <div class="zoneHeader">
+        <div class="zoneTitle">
+          <div class="zoneBadge">
+            <span class="dot" style="background:var(--neon-magenta)"></span> PLAYSTATION 4 ZONE
+          </div>
+        </div>
+        <div class="zoneActions">
+          <div class="metaItem">Active: <strong id="ps4Count">0</strong></div>
+          <button class="addBtn" data-zone="ps4">+ Add Station</button>
+        </div>
+      </div>
+      <div class="stations" id="ps4Stations"></div>
+      <div class="zoneStats" id="ps4Stats"></div>
+    </section>
+
+    <section class="zone ps5" data-zone="ps5">
+      <div class="zoneHeader">
+        <div class="zoneTitle">
+          <div class="zoneBadge">
+            <span class="dot" style="background:var(--neon-green)"></span> PLAYSTATION 5 ZONE
+          </div>
+        </div>
+        <div class="zoneActions">
+          <div class="metaItem">Active: <strong id="ps5Count">0</strong></div>
+          <button class="addBtn" data-zone="ps5">+ Add Station</button>
+        </div>
+      </div>
+      <div class="stations" id="ps5Stations"></div>
+      <div class="zoneStats" id="ps5Stats"></div>
+    </section>
+  </div>
+
+  <div class="activityLog">
+    <div class="logTitle">
+      <span>Log Aktiviti</span>
+      <div class="logActions">
+        <button class="btn small" id="exportExcel">📥 Excel</button>
+        <button class="btn small" id="printLog">🖨️ Print</button>
+        <button class="btn small" id="whatsappLog">💬 WhatsApp</button>
+        <button class="btn small danger" id="clearLog">🗑️ Kosongkan</button>
+      </div>
+    </div>
+    <div class="logList" id="logList" aria-live="polite"></div>
+  </div>
+
+  <footer>© 2025 maidaesports.my | All Rights Reserved</footer>
+</main>
+
+<template id="stationTpl">
+  <div class="stationCard" data-id="" tabindex="0" role="region" aria-labelledby="stationTitle">
+    <div class="topRow">
+      <div>
+        <div class="statusDot"><span class="dotSmall" style="display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;"></span><span class="stationTitle" id="stationTitle">STATION</span></div>
+        <div class="metaRow" style="margin-top:6px">
+          <div class="metaItem">Team: <span class="teamName">-</span></div>
+          <div class="metaItem">Player: <span class="playerName">-</span></div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div class="timerLarge">00:00:00</div>
+        <div class="elapsed">Elapsed: 00:00:00</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn small durationBtn" data-duration="3600">1 Jam</button>
+      <button class="btn small durationBtn" data-duration="7200">2 Jam</button>
+      <button class="btn small durationBtn" data-duration="10800">3 Jam</button>
+      <button class="btn small customTimeBtn">Custom</button>
+
+      <button class="btn primary small startBtn">▶ Start</button>
+      <button class="btn small pauseBtn">⏸ Pause</button>
+      <button class="btn small resetBtn">⟲ Reset</button>
+
+      <button class="btn small editBtn">✎ Edit</button>
+      <button class="btn small danger removeBtn">Remove</button>
+    </div>
+  </div>
+</template>
+
+<audio id="beepSound" preload="auto">
+  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.mp3" type="audio/mpeg">
+</audio>
+<audio id="warningSound" preload="auto">
+  <source src="https://actions.google.com/sounds/v1/notifications/notification_3.ogg" type="audio/ogg">
+  <source src="https://actions.google.com/sounds/v1/notifications/notification_3.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const uid = ()=> 's'+Math.random().toString(36).slice(2,9);
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+const SAVE_KEY = 'maida_stations_v6';
+const LOG_KEY = 'maida_activity_log_v1';
+const SESSION_LOG_KEY = 'maida_session_log_v1';
+const ADMIN_PASSWORD = 'admin123';
+
+let audioUnlocked = false;
+let sessionLog = [];
+
+document.body.addEventListener('click', () => {
+  if (!audioUnlocked) {
+    const beep = $('#beepSound');
+    if (beep) {
+      beep.volume = 0.7;
+      beep.play().then(() => {}).catch(() => {});
+    }
+    audioUnlocked = true;
+  }
+}, { once: true });
+
+document.body.addEventListener('click', () => {
+  const warn = $('#warningSound');
+  if (warn && !warn.hasAttribute('data-unlocked')) {
+    warn.volume = 0.6;
+    warn.play().then(() => {
+      warn.setAttribute('data-unlocked', 'true');
+    }).catch(() => {});
+  }
+}, { once: true });
+
+let stations = [];
+let currentFilter = 'all';
+let globalSearchTerm = '';
+let activityLog = [];
+let publicDisplayMode = false;
+
+// 📺 Toggle Public Display
+$('#publicDisplayBtn').addEventListener('click', () => {
+  publicDisplayMode = !publicDisplayMode;
+  document.body.classList.toggle('public-display', publicDisplayMode);
+  $('#publicDisplayBtn').textContent = publicDisplayMode ? '🖥️ Admin' : '👁️ Awam';
+  renderAll();
+});
+
+// 🌓 Theme toggle
+const htmlRoot = document.getElementById('htmlRoot');
+const themeToggle = $('#themeToggle');
+const isLight = localStorage.getItem('maida_theme') === 'light';
+if (isLight) htmlRoot.classList.add('light-theme');
+themeToggle.addEventListener('click', () => {
+  htmlRoot.classList.toggle('light-theme');
+  localStorage.setItem('maida_theme', htmlRoot.classList.contains('light-theme') ? 'light' : 'dark');
+});
+
+// 📝 Activity Log
+function addToLog(message) {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('ms-MY', { hour12: false, hour: '2-digit', minute: '2-digit' });
+  activityLog.unshift({ time: timeStr, message });
+  if (activityLog.length > 50) activityLog.pop();
+  localStorage.setItem(LOG_KEY, JSON.stringify(activityLog));
+  renderLog();
+}
+
+function renderLog() {
+  const logList = $('#logList');
+  logList.innerHTML = activityLog.map(entry => 
+    `<div class="logEntry" role="log"><span class="logTime">${entry.time}</span> ${entry.message}</div>`
+  ).join('');
+}
+
+function loadLog() {
+  const raw = localStorage.getItem(LOG_KEY);
+  if (raw) {
+    try { activityLog = JSON.parse(raw); } catch (e) { activityLog = []; }
+  }
+  renderLog();
+}
+
+// 📊 Session Log
+function loadSessionLog() {
+  const raw = localStorage.getItem(SESSION_LOG_KEY);
+  if (raw) {
+    try { sessionLog = JSON.parse(raw); } catch (e) { sessionLog = []; }
+  }
+}
+
+function addSessionRecord(station, actualUsed) {
+  const record = {
+    id: uid(),
+    stationId: station.id,
+    zone: station.zone,
+    name: station.name,
+    team: station.team,
+    player: station.player,
+    durationSet: station.duration,
+    actualUsed,
+    startedAt: station.startedAtHistory || station.startedAt,
+    endedAt: Date.now(),
+    date: new Date().toISOString().split('T')[0]
+  };
+  sessionLog.unshift(record);
+  if (sessionLog.length > 1000) sessionLog = sessionLog.slice(0, 1000);
+  localStorage.setItem(SESSION_LOG_KEY, JSON.stringify(sessionLog));
+}
+
+// 🔍 Search & Filter
+function matchesFilters(station) {
+  if (publicDisplayMode) return true;
+  const matchesSearch = 
+    station.name.toLowerCase().includes(globalSearchTerm) ||
+    station.team.toLowerCase().includes(globalSearchTerm) ||
+    station.player.toLowerCase().includes(globalSearchTerm);
+  const matchesStatus = currentFilter === 'all' || station.status === currentFilter;
+  return matchesSearch && matchesStatus;
+}
+
+// 🔴 Expired badges
+function updateExpiredBadges() {
+  if (publicDisplayMode) return;
+  ['eracing', 'ps4', 'ps5'].forEach(zone => {
+    const badgeContainer = document.querySelector(`.zone[data-zone="${zone}"] .zoneBadge`);
+    const expiredCount = stations.filter(s => s.zone === zone && s.status === 'expired').length;
+    const oldBadge = badgeContainer.querySelector('.expiredBadge');
+    if (oldBadge) oldBadge.remove();
+    if (expiredCount > 0) {
+      const badge = document.createElement('div');
+      badge.className = 'expiredBadge';
+      badge.textContent = expiredCount > 9 ? '9+' : expiredCount;
+      badgeContainer.appendChild(badge);
+    }
+  });
+}
+
+// 📊 Zone stats
+function calculateZoneStats(zone) {
+  const zoneStations = stations.filter(s => s.zone === zone);
+  const totalSessions = zoneStations.length;
+  const totalSeconds = zoneStations.reduce((sum, s) => sum + (s.duration || 0), 0);
+  const avgDuration = totalSessions ? Math.floor(totalSeconds / totalSessions) : 0;
+  const activeCount = zoneStations.filter(s => s.status === 'running').length;
+  return { totalSessions, totalSeconds, avgDuration, activeCount };
+}
+
+function renderZoneStats() {
+  if (publicDisplayMode) return;
+  ['eracing', 'ps4', 'ps5'].forEach(zone => {
+    const stats = calculateZoneStats(zone);
+    const container = $(`#${zone}Stats`);
+    container.innerHTML = `
+      <div class="statItem">
+        <span>Jumlah Stesen</span>
+        <span class="statValue">${stats.totalSessions}</span>
+      </div>
+      <div class="statItem">
+        <span>Purata Tempoh</span>
+        <span class="statValue">${formatTime(stats.avgDuration)}</span>
+      </div>
+      <div class="statItem">
+        <span>Masa Digunakan</span>
+        <span class="statValue">${formatTime(stats.totalSeconds)}</span>
+      </div>
+    `;
+  });
+}
+
+// 🔊 Sounds
+function startBeepForStation(stationId) {
+  if (!audioUnlocked) return;
+  const playBeep = () => {
+    const sound = $('#beepSound');
+    if (sound) {
+      sound.currentTime = 0;
+      sound.play().catch(e => console.log("Beep failed:", e));
+    }
+  };
+  playBeep();
+  const intervalId = setInterval(playBeep, 900);
+  const station = stations.find(s => s.id === stationId);
+  if (station) station.beepInterval = intervalId;
+}
+
+function stopBeepForStation(stationId) {
+  const station = stations.find(s => s.id === stationId);
+  if (station && station.beepInterval) {
+    clearInterval(station.beepInterval);
+    delete station.beepInterval;
+  }
+}
+
+// 🗣️ Ucapkan nama stesen + mainkan bunyi
+function playWarningSound(stationName) {
+  // 🔊 Mainkan bunyi notifikasi
+  const warningSound = $('#warningSound');
+  if (warningSound.hasAttribute('data-unlocked')) {
+    warningSound.currentTime = 0;
+    warningSound.play().catch(() => {});
+  }
+
+  // 🗣️ Ucapkan nama stesen sebenar
+  if ('speechSynthesis' in window) {
+    setTimeout(() => {
+      const utterance = new SpeechSynthesisUtterance(
+        `Peringatan! ${stationName} akan tamat dalam satu minit.`
+      );
+      utterance.lang = 'ms-MY';
+      utterance.rate = 0.9;
+      utterance.pitch = 1.1;
+      utterance.volume = 1.0;
+      
+      const voices = speechSynthesis.getVoices();
+      const malayVoice = voices.find(voice => 
+        voice.lang.startsWith('ms') || 
+        voice.name.toLowerCase().includes('malay')
+      );
+      if (malayVoice) {
+        utterance.voice = malayVoice;
+      }
+      
+      speechSynthesis.speak(utterance);
+    }, 300);
+  }
+
+  addToLog(`⚠️ Peringatan: Masa ${stationName} akan tamat dalam 1 minit!`);
+}
+
+// 💾 Load & Persist
+function load(){
+  const raw = localStorage.getItem(SAVE_KEY);
+  if(!raw){ stations = []; return; }
+  try{
+    const data = JSON.parse(raw);
+    if (Array.isArray(data)) {
+      stations = data.map(s => {
+        const { beepInterval, ...rest } = s;
+        return {
+          ...rest,
+          startedAt: rest.startedAt ? new Date(rest.startedAt).getTime() : null,
+          pausedAt: rest.pausedAt ? new Date(rest.pausedAt).getTime() : null,
+          elapsedWhenPaused: rest.elapsedWhenPaused || 0,
+          warned: rest.warned || false,
+          startedAtHistory: rest.startedAt
+        };
+      });
+    } else {
+      stations = [];
+    }
+  }catch(e){
+    console.error("Failed to load stations:", e);
+    stations = [];
+  }
+}
+
+function persist(){
+  const dataToSave = stations.map(({ beepInterval, ...s }) => ({
+    ...s,
+    startedAt: s.startedAt ? new Date(s.startedAt).toISOString() : null,
+    pausedAt: s.pausedAt ? new Date(s.pausedAt).toISOString() : null
+  }));
+  localStorage.setItem(SAVE_KEY, JSON.stringify(dataToSave));
+  updateCounts();
+  if (!publicDisplayMode) {
+    updateExpiredBadges();
+    renderZoneStats();
+  }
+}
+
+// ⏱️ Time helpers
+function formatTime(sec){
+  sec = Math.max(0, Math.floor(sec));
+  const h = String(Math.floor(sec/3600)).padStart(2,'0');
+  const m = String(Math.floor((sec%3600)/60)).padStart(2,'0');
+  const s = String(sec%60).padStart(2,'0');
+  return `${h}:${m}:${s}`;
+}
+
+function parseHMS(input){
+  if (!input?.trim()) return 0;
+  const parts = input.split(':').map(p => parseInt(p.trim()) || 0);
+  while (parts.length < 3) parts.unshift(0);
+  return (parts[0] * 3600) + (parts[1] * 60) + parts[2];
+}
+
+// 📊 Counts
+function updateCounts(){
+  if (publicDisplayMode) return;
+  const active = stations.filter(s => s.status === 'running').length;
+  const expired = stations.filter(s => s.status === 'expired').length;
+  $('#activeCount').textContent = active;
+  $('#expiredCount').textContent = expired;
+  $('#eracingCount').textContent = stations.filter(s => s.zone === 'eracing' && s.status !== 'expired').length;
+  $('#ps4Count').textContent = stations.filter(s => s.zone === 'ps4' && s.status !== 'expired').length;
+  $('#ps5Count').textContent = stations.filter(s => s.zone === 'ps5' && s.status !== 'expired').length;
+}
+
+// 🛑 Button control
+function disableAllButtonsExceptPause(card) {
+  const buttons = card.querySelectorAll('.btn:not(.pauseBtn)');
+  buttons.forEach(btn => {
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.style.pointerEvents = 'none';
+  });
+  const pauseBtn = card.querySelector('.pauseBtn');
+  pauseBtn.disabled = false;
+  pauseBtn.style.opacity = '1';
+  pauseBtn.style.pointerEvents = 'auto';
+}
+
+function enableAllButtons(card) {
+  const buttons = card.querySelectorAll('.btn');
+  buttons.forEach(btn => {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+  });
+}
+
+// ➕ Create station — dengan format nama baru
+function createStation(zone='eracing', opts={}) {
+  const id = uid();
+  
+  // Format nama mengikut zon
+  let baseName;
+  if (zone === 'eracing') {
+    baseName = 'ERACING ZONE';
+  } else if (zone === 'ps4') {
+    baseName = 'PLAYSTATION 4';
+  } else if (zone === 'ps5') {
+    baseName = 'PLAYSTATION 5';
+  }
+  
+  // Kira bilangan stesen sedia ada dalam zon ini
+  const zoneStations = stations.filter(s => s.zone === zone);
+  const nextNumber = zoneStations.length + 1;
+  const defaultName = `${baseName} #${nextNumber}`;
+  
+  const s = Object.assign({
+    id, zone, name: defaultName,
+    team:'-', player:'-', duration:0, status:'idle',
+    elapsedWhenPaused: 0,
+    warned: false
+  }, opts);
+  
+  stations.push(s);
+  persist(); 
+  renderAll();
+  addToLog(`Stesen baru ditambah: ${s.name}`);
+  return s;
+}
+
+// ❌ Remove station
+function removeStation(id){
+  const station = stations.find(s => s.id === id);
+  if(!confirm('Buang stesen ini?')) return;
+  stopBeepForStation(id);
+  stations = stations.filter(s => s.id !== id);
+  persist(); 
+  renderAll();
+  if (station) addToLog(`Stesen dibuang: ${station.name}`);
+}
+
+// 🖼️ Render UI
+function renderAll(){
+  if (publicDisplayMode) {
+    document.querySelectorAll('.stations').forEach(el => el.innerHTML = '');
+    stations.forEach(s => {
+      const container = $(`#${s.zone}Stations`);
+      const div = document.createElement('div');
+      div.className = 'stationCard';
+      div.setAttribute('aria-label', `${s.name}, ${s.status === 'running' ? 'masa berbaki' : 'tidak aktif'}`);
+      
+      let elapsedSec = s.elapsedWhenPaused;
+      let remainingSec = s.duration || 0;
+      if (s.status === 'running' && s.startedAt) {
+        const now = Date.now();
+        const ran = Math.floor((now - s.startedAt) / 1000);
+        elapsedSec = s.elapsedWhenPaused + ran;
+        remainingSec = Math.max(0, (s.duration || 0) - elapsedSec);
+      } else if (s.status === 'expired') {
+        elapsedSec = s.duration || 0;
+        remainingSec = 0;
+      }
+
+      div.innerHTML = `
+        <div class="topRow">
+          <div class="stationTitle">${s.name}</div>
+          <div class="timerLarge">${formatTime(remainingSec)}</div>
+        </div>
+      `;
+      
+      if (s.status === 'running') div.classList.add('running');
+      if (s.status === 'expired') div.classList.add('expired-alert');
+      if (s.warned) div.classList.add('warning');
+      
+      container.appendChild(div);
+    });
+    return;
+  }
+
+  // Normal admin mode
+  ['eracing','ps4','ps5'].forEach(zone => {
+    const container = document.getElementById(zone+'Stations');
+    container.innerHTML = '';
+    stations
+      .filter(s => s.zone === zone)
+      .filter(matchesFilters)
+      .forEach(s => {
+        const tpl = document.getElementById('stationTpl').content.cloneNode(true);
+        const card = tpl.querySelector('.stationCard');
+        card.dataset.id = s.id;
+        
+        card.className = 'stationCard';
+        if (s.status === 'running') {
+          card.classList.add('running');
+          disableAllButtonsExceptPause(card);
+        } else if (s.status === 'expired') {
+          card.classList.add('expired-alert');
+          enableAllButtons(card);
+        } else {
+          enableAllButtons(card);
+        }
+        if (s.warned) card.classList.add('warning');
+
+        tpl.querySelector('.stationTitle').textContent = s.name;
+        tpl.querySelector('.teamName').textContent = s.team;
+        tpl.querySelector('.playerName').textContent = s.player;
+        
+        const dot = tpl.querySelector('.dotSmall');
+        const root = getComputedStyle(document.documentElement);
+        if(s.zone==='eracing') dot.style.background = root.getPropertyValue('--neon-orange').trim();
+        if(s.zone==='ps4') dot.style.background = root.getPropertyValue('--neon-magenta').trim();
+        if(s.zone==='ps5') dot.style.background = root.getPropertyValue('--neon-green').trim();
+
+        let elapsedSec = s.elapsedWhenPaused;
+        let remainingSec = s.duration || 0;
+        if (s.status === 'running' && s.startedAt) {
+          const now = Date.now();
+          const ran = Math.floor((now - s.startedAt) / 1000);
+          elapsedSec = s.elapsedWhenPaused + ran;
+          remainingSec = Math.max(0, (s.duration || 0) - elapsedSec);
+        } else if (s.status === 'expired') {
+          elapsedSec = s.duration || 0;
+          remainingSec = 0;
+        }
+
+        tpl.querySelector('.timerLarge').textContent = formatTime(remainingSec);
+        tpl.querySelector('.elapsed').textContent = 'Elapsed: ' + formatTime(elapsedSec);
+
+        const setupListeners = (tpl, s) => {
+          tpl.querySelector('.timerLarge').addEventListener('click', () => {
+            const current = formatTime(s.duration || 0);
+            const input = prompt('Masukkan masa (HH:MM:SS)', current);
+            if (input === null) return;
+            const total = parseHMS(input);
+            if (total <= 0) return;
+            s.duration = total;
+            if (s.status === 'expired') {
+              s.status = 'idle';
+              s.elapsedWhenPaused = 0;
+              s.warned = false;
+              stopBeepForStation(s.id);
+            }
+            s.startedAt = null;
+            s.pausedAt = null;
+            persist(); renderAll();
+            addToLog(`Masa dikemaskini untuk ${s.name}: ${formatTime(total)}`);
+          });
+
+          tpl.querySelectorAll('.durationBtn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const sec = Number(btn.dataset.duration) || 0;
+              s.duration = sec;
+              s.status = 'idle';
+              s.elapsedWhenPaused = 0;
+              s.warned = false;
+              s.pausedAt = null;
+              if (s.status === 'expired') stopBeepForStation(s.id);
+              s.startedAt = null;
+              persist(); renderAll();
+              addToLog(`Masa ditetapkan (${formatTime(sec)}) untuk ${s.name}`);
+            });
+          });
+
+          tpl.querySelector('.customTimeBtn').addEventListener('click', () => {
+            const input = prompt('Masukkan masa (HH:MM:SS)', '01:00:00');
+            if (input === null) return;
+            const total = parseHMS(input);
+            if (total <= 0) {
+              alert('Masa mesti lebih daripada 0 saat.');
+              return;
+            }
+            s.duration = total;
+            s.status = 'idle';
+            s.elapsedWhenPaused = 0;
+            s.warned = false;
+            s.pausedAt = null;
+            if (s.status === 'expired') stopBeepForStation(s.id);
+            s.startedAt = null;
+            persist(); renderAll();
+            addToLog(`Masa custom ditetapkan (${formatTime(total)}) untuk ${s.name}`);
+          });
+
+          tpl.querySelector('.startBtn').addEventListener('click', () => {
+            if (!s.duration || s.duration <= 0) {
+              alert('Sila tetapkan tempoh masa dahulu.');
+              return;
+            }
+            s.status = 'running';
+            s.startedAt = Date.now();
+            s.pausedAt = null;
+            s.startedAtHistory = s.startedAt;
+            s.warned = false;
+            if (s.status === 'expired') stopBeepForStation(s.id);
+            persist(); renderAll();
+            addToLog(`Stesen bermula: ${s.name}`);
+          });
+
+          tpl.querySelector('.pauseBtn').addEventListener('click', () => {
+            if (s.status === 'running') {
+              const now = Date.now();
+              const ran = Math.floor((now - s.startedAt) / 1000);
+              s.elapsedWhenPaused += ran;
+              s.status = 'idle';
+              s.startedAt = null;
+              s.pausedAt = now;
+              persist(); renderAll();
+              addToLog(`Stesen di-Pause: ${s.name}`);
+            } else if (s.status === 'idle' && s.duration > 0) {
+              s.status = 'running';
+              s.startedAt = Date.now();
+              s.pausedAt = null;
+              persist(); renderAll();
+              addToLog(`Stesen Resume: ${s.name}`);
+            }
+          });
+
+          tpl.querySelector('.resetBtn').addEventListener('click', () => {
+            if(!confirm('Reset masa stesen ini?')) return;
+            s.status = 'idle';
+            s.startedAt = null;
+            s.pausedAt = null;
+            s.elapsedWhenPaused = 0;
+            s.warned = false;
+            stopBeepForStation(s.id);
+            persist(); renderAll();
+            addToLog(`Masa reset untuk: ${s.name}`);
+          });
+
+          tpl.querySelector('.editBtn').addEventListener('click', () => {
+            const oldName = s.name;
+            const newName = prompt('Nama Stesen', s.name) || s.name;
+            const newTeam = prompt('Nama Team', s.team) || s.team;
+            const newPlayer = prompt('Nama Player', s.player) || s.player;
+            s.name = newName; s.team = newTeam; s.player = newPlayer; persist(); renderAll();
+            if (oldName !== newName) {
+              addToLog(`Nama stesen diubah: ${oldName} → ${newName}`);
+            }
+          });
+
+          tpl.querySelector('.removeBtn').addEventListener('click', () => removeStation(s.id));
+        };
+        setupListeners(tpl, s);
+        container.appendChild(tpl);
+      });
+  });
+  updateCounts();
+  updateExpiredBadges();
+  renderZoneStats();
+}
+
+// ⏳ Main timer loop
+function tick(){
+  const now = Date.now();
+  let changed = false;
+  stations.forEach(s => {
+    if (s.status === 'running' && s.startedAt && s.duration > 0) {
+      const elapsed = s.elapsedWhenPaused + Math.floor((now - s.startedAt) / 1000);
+      const remaining = s.duration - elapsed;
+
+      if (remaining <= 60 && !s.warned) {
+        s.warned = true;
+        playWarningSound(s.name); // 👈 SEBUT NAMA SEBENAR
+        changed = true;
+      }
+
+      if (elapsed >= s.duration) {
+        s.status = 'expired';
+        s.startedAt = null;
+        s.elapsedWhenPaused = s.duration;
+        changed = true;
+        startBeepForStation(s.id);
+        addToLog(`Masa tamat: ${s.name}`);
+        addSessionRecord(s, s.duration);
+      }
+    }
+  });
+  if (changed) persist();
+  if (!publicDisplayMode) renderAll();
+}
+
+// 🔄 Auto-pause on tab switch
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    let pausedAny = false;
+    stations.forEach(s => {
+      if (s.status === 'running') {
+        const now = Date.now();
+        const ran = Math.floor((now - s.startedAt) / 1000);
+        s.elapsedWhenPaused += ran;
+        s.status = 'idle';
+        s.startedAt = null;
+        s.pausedAt = now;
+        pausedAny = true;
+      }
+    });
+    if (pausedAny) {
+      persist();
+      addToLog('Sistem di-Pause secara automatik (pengguna keluar tab)');
+    }
+  }
+});
+
+// 🔍 Search
+$('#globalSearch').addEventListener('input', (e) => {
+  globalSearchTerm = e.target.value.toLowerCase().trim();
+  renderAll();
+});
+
+$$('.filterTab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    $$(`.filterTab`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    renderAll();
+  });
+});
+
+document.querySelectorAll('.addBtn').forEach(b => 
+  b.addEventListener('click', () => createStation(b.dataset.zone))
+);
+
+$('#clearStorage').addEventListener('click', () => {
+  if(confirm('Reset semua data stesen? Tindakan ini tidak boleh asingkan.')){
+    stations.forEach(s => {
+      if (s.status === 'expired') stopBeepForStation(s.id);
+    });
+    stations = []; 
+    persist(); 
+    renderAll();
+    addToLog('Semua data stesen telah direset');
+  }
+});
+
+// 📝 Clear log with password
+$('#clearLog').addEventListener('click', () => {
+  const password = prompt('Masukkan kata laluan admin:');
+  if (password !== ADMIN_PASSWORD) {
+    alert('Kata laluan salah!');
+    return;
+  }
+  if (confirm('Kosongkan log aktiviti?')) {
+    activityLog = [];
+    localStorage.removeItem(LOG_KEY);
+    renderLog();
+    addToLog('Log aktiviti dikosongkan oleh admin');
+  }
+});
+
+// 📤 Export log to Excel
+$('#exportExcel').addEventListener('click', () => {
+  if (activityLog.length === 0) {
+    alert('Tiada log untuk dieksport.');
+    return;
+  }
+  let csv = 'Masa,Log Aktiviti\n';
+  csv += activityLog.map(entry => 
+    `"${entry.time}","${entry.message.replace(/"/g, '""')}"`
+  ).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `maidaesports_log_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+// 🖨️ Print log
+$('#printLog').addEventListener('click', () => {
+  const printContent = `
+    <h2>MAIDA ESPORTS — Log Aktiviti</h2>
+    <p>Tarikh: ${new Date().toLocaleDateString('ms-MY')}</p>
+    <hr>
+    ${activityLog.map(entry => 
+      `<p><strong>${entry.time}</strong> ${entry.message}</p>`
+    ).join('')}
+  `;
+  const win = window.open('', '', 'height=600,width=800');
+  win.document.write(`
+    <html><head><title>Log Aktiviti</title>
+    <style>body{font-family:sans-serif; padding:20px;}</style>
+    </head><body>${printContent}</body></html>
+  `);
+  win.document.close();
+  win.focus();
+  win.print();
+  win.close();
+});
+
+// 💬 WhatsApp
+$('#whatsappLog').addEventListener('click', () => {
+  if (activityLog.length === 0) {
+    alert('Tiada log untuk dikongsi.');
+    return;
+  }
+  const text = encodeURIComponent(
+    '📱 *MAIDA ESPORTS — Log Aktiviti*\n\n' +
+    activityLog.map(entry => 
+      `🕒 ${entry.time} » ${entry.message}`
+    ).join('\n') +
+    '\n\nDijana melalui MAIDA ESPORTS Admin Dashboard.'
+  );
+  const whatsappUrl = `https://wa.me/?text=${text}`;
+  window.open(whatsappUrl, '_blank');
+});
+
+// 🚀 Initialize
+load();
+loadLog();
+loadSessionLog();
+if(stations.length === 0){
+  createStation('eracing', { name:'ERACING ZONE #1', team:'Team Alpha', player:'Player01', duration:3600, status:'running', startedAt: Date.now() - 25000 });
+  createStation('ps4', { name:'PLAYSTATION 4 #1', team:'PixelCrew', player:'P2', duration:7200, status:'idle' });
+  createStation('ps5', { name:'PLAYSTATION 5 #1', team:'NextGen', player:'Ace', duration:10800, status:'idle' });
+}
+renderAll();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>
+
