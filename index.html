@@ -1,1539 +1,709 @@
-<!doctype html>
-<html lang="ms" id="htmlRoot">
+<!DOCTYPE html>
+<html lang="ms">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MAIDA ESPORTS — Admin Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MDE Games</title>
+<meta name="theme-color" content="#f2f2f7">
+
 <style>
-  /* 🌓 Theme variables */
-  :root {
-    --bg:#070607;
-    --card:#0f0f10;
-    --muted:#9b9b9b;
-    --glass: rgba(255,255,255,0.03);
-    --neon-magenta: #ff00d1;
-    --neon-cyan: #00d1ff;
-    --neon-green: #00ff9e;
-    --neon-orange:#ff7a2f;
-    --accent: var(--neon-magenta);
-    --radius:14px;
-    --text-color: #e9e9e9;
-    --contrast-bg: #000;
-    --contrast-text: #fff;
-    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-  }
+:root{
+  --apple-blue:#0A84FF;
+  --apple-red:#FF453A;
+  --label-primary:#1c1c1e;
+  --label-secondary:#3a3a3c;
+  --glass-warm:rgba(255,255,255,.9);
+  --glass-neutral:rgba(255,255,255,.75);
+  --glass-cool:rgba(255,255,255,.6);
+  --blur:26px;
+  --motion:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Segoe UI",Roboto;
+  background:#f2f2f7;
+  color:var(--label-primary);
+}
 
-  /* 🌞 Light theme */
-  .light-theme {
-    --bg: #f8f9fa;
-    --card: #ffffff;
-    --muted: #6c757d;
-    --glass: rgba(0,0,0,0.02);
-    --text-color: #212529;
-  }
+/* ===== HAVOr ===== */
+.havor{transition:transform .25s var(--motion),opacity .25s}
+.havor:hover{transform:translateY(-1px)}
+.havor:active{transform:scale(.96)}
 
-  /* 📺 Public Display Mode */
-  .public-display {
-    background: var(--contrast-bg) !important;
-    color: var(--contrast-text) !important;
-  }
-  .public-display .controls,
-  .public-display .zoneActions,
-  .public-display .searchBar,
-  .public-display .statusRow,
-  .public-display header,
-  .public-display .activityLog,
-  .public-display footer {
-    display: none !important;
-  }
-  .public-display .stationCard {
-    background: var(--contrast-bg) !important;
-    border: 3px solid var(--neon-green);
-    box-shadow: none !important;
-    color: var(--contrast-text) !important;
-    min-height: 140px;
-    transition: none !important;
-  }
-  .public-display .stationCard.running {
-    border-color: var(--neon-cyan);
-  }
-  .public-display .stationCard.expired-alert {
-    border-color: var(--neon-magenta);
-    animation: none !important;
-  }
-  .public-display .timerLarge {
-    font-size: 48px !important;
-    color: var(--neon-cyan) !important;
-  }
-  .public-display .stationTitle {
-    font-size: 20px !important;
-    color: white !important;
-  }
+/* ===== HEADER ===== */
+.header{
+  position:sticky;top:0;z-index:50;
+  padding:12px 14px;
+  backdrop-filter:blur(12px);
+}
+.apple-nav{
+  display:flex;gap:10px;
+  padding:8px 12px;border-radius:24px;
+  background:rgba(255,255,255,.75);
+}
+.apple-tab{
+  flex:1;text-align:center;
+  padding:6px 0;border-radius:18px;
+  font-size:15px;font-weight:600;
+  color:var(--label-secondary);
+  cursor:pointer;
+}
+.apple-tab.active,
+.apple-tab.station-active{
+  background:#fff;
+  color:var(--apple-blue);
+}
+.apple-tab.new{color:var(--apple-red)}
+.station-badge{
+  margin-left:6px;
+  padding:2px 7px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:600;
+  background:rgba(10,132,255,.15);
+  color:var(--apple-blue);
+}
 
-  html,body{height:100%; margin:0; padding:0;}
-  body{
-    margin:0;
-    background:
-      radial-gradient(1200px 600px at 10% 10%, rgba(255,0,200,0.02), transparent 8%),
-      linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.05)),
-      var(--bg);
-    color: var(--text-color);
-    padding:16px;
-    box-sizing:border-box;
-  }
+/* ===== GRID ===== */
+.container{padding:14px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(3,1fr)}
+@media(min-width:768px){.grid{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:1024px){.grid{grid-template-columns:repeat(5,1fr)}}
 
-  header{
-    display:flex;
-    gap:16px;
-    align-items:center;
-    margin-bottom:16px;
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-  .logo{
-    width:44px;height:44px;border-radius:10px;
-    background:linear-gradient(135deg,var(--neon-magenta),#ff5ca8);
-    display:flex;align-items:center;justify-content:center;
-    font-weight:700;color:#060606;font-size:20px;
-    flex-shrink: 0;
-  }
-  h1{margin:0;font-size:20px;color:var(--neon-magenta);letter-spacing:0.5px}
-  .sub{color:var(--muted);font-size:12px;margin-top:2px}
+/* ===== CARD ===== */
+.card{
+  position:relative;
+  border-radius:22px;
+  overflow:hidden;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(var(--blur));
+  box-shadow:0 10px 26px rgba(0,0,0,.12);
+}
+.card.multiplayer{
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 14px 34px rgba(10,132,255,.25);
+}
+.card img{width:100%;aspect-ratio:1/1;object-fit:cover}
+.label{padding:14px;font-size:13px}
+.new-badge{
+  position:absolute;top:10px;left:10px;
+  padding:4px 10px;border-radius:999px;
+  background:var(--apple-red);color:#fff;
+  font-size:11px;font-weight:600;
+}
 
-  .themeToggle {
-    background: var(--card);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 10px;
-    width: 40px;
-    height: 24px;
-    position: relative;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    padding: 0 4px;
-  }
-  .themeToggle::after {
-    content: "🌙";
-    position: absolute;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: var(--neon-orange);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    transition: transform 0.3s;
-    color: #000;
-  }
-  .light-theme .themeToggle::after {
-    transform: translateX(16px);
-    content: "☀️";
-    background: var(--neon-green);
-  }
+/* ===== PLAYER BADGE ===== */
+.player-badge{
+  display:inline-flex;
+  align-items:center;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:600;
+  background:rgba(10,132,255,.12);
+  color:var(--apple-blue);
+}
+.player-badge.single{
+  background:rgba(60,60,67,.12);
+  color:#3a3a3c;
+}
 
-  .statusRow{
-    display:flex;
-    gap:12px;
-    margin:12px 0 16px;
-    flex-wrap:wrap;
-    align-items: center;
-  }
-  .stat{
-    background: linear-gradient(180deg, var(--glass), rgba(255,255,255,0.01));
-    padding:10px 14px;
-    border-radius:12px;
-    min-width:90px;
-    border:1px solid rgba(255,255,255,0.03);
-    display:flex;
-    flex-direction:column;
-    align-items:flex-start;
-    box-shadow:0 4px 12px rgba(0,0,0,0.1) inset;
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-  .light-theme .stat {
-    border-color: rgba(0,0,0,0.1);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05) inset;
-  }
-  .stat:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.2) inset, 0 0 8px rgba(0,200,255,0.2);
-  }
+/* ===== STATION POPUP ===== */
+.station-popup{
+  position:fixed;inset:0;
+  display:none;
+  align-items:flex-end;
+  background:rgba(0,0,0,.28);
+  backdrop-filter:blur(18px) saturate(120%);
+  z-index:200;
+}
+.station-popup.active{display:flex}
 
-  .stat .num{font-size:18px;color:var(--neon-cyan);font-weight:700}
-  .stat .lbl{font-size:11px;color:var(--muted);margin-top:4px}
+.station-box{
+  width:100%;
+  max-height:70vh;
+  padding:10px 16px 30px;
+  border-radius:32px 32px 0 0;
+  background:linear-gradient(
+    180deg,
+    var(--glass-warm),
+    var(--glass-neutral),
+    var(--glass-cool)
+  );
+  backdrop-filter:blur(var(--blur)) saturate(160%);
+  transform:translateY(100%);
+  transition:transform .55s var(--motion);
+  will-change:transform;
+}
+.station-popup.active .station-box{transform:translateY(0)}
 
-  .searchBar {
-    display: flex;
-    gap: 10px;
-    margin: 12px 0 16px;
-    flex-wrap: wrap;
-  }
-  .searchInput {
-    flex: 1;
-    min-width: 200px;
-    padding: 10px 14px;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0,0,0,0.2);
-    color: var(--text-color);
-    font-size: 14px;
-    outline: none;
-  }
-  .light-theme .searchInput {
-    background: white;
-    border-color: #dee2e6;
-    color: #212529;
-  }
-  .searchInput::placeholder {
-    color: var(--muted);
-  }
-  .searchInput:focus {
-    border-color: var(--neon-cyan);
-    box-shadow: 0 0 8px rgba(0,209,255,0.3);
-  }
+.drag-handle{
+  width:36px;height:5px;
+  margin:6px auto 14px;
+  border-radius:999px;
+  background:#c7c7cc;
+}
 
-  .filterTabs {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .filterTab {
-    padding: 8px 16px;
-    border-radius: 10px;
-    background: var(--glass);
-    border: 1px solid rgba(255,255,255,0.05);
-    color: var(--muted);
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 13px;
-    transition: all 0.2s;
-  }
-  .light-theme .filterTab {
-    background: #f1f3f5;
-    border-color: #ced4da;
-    color: #495057;
-  }
-  .filterTab.active, .filterTab:hover {
-    background: var(--neon-cyan);
-    color: #000;
-    border-color: var(--neon-cyan);
-  }
+.station-list{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+}
+.station-item{
+  padding:14px 16px;
+  border-radius:18px;
+  background:rgba(255,255,255,.55);
+  display:flex;
+  justify-content:space-between;
+  font-weight:600;
+}
+.station-count{
+  min-width:28px;height:22px;
+  padding:0 8px;
+  border-radius:999px;
+  background:#fff;
+  font-size:12px;
+}
+@keyframes softPulse{
+  0%{box-shadow:0 0 0 0 rgba(255,69,58,.35)}
+  70%{box-shadow:0 0 0 6px rgba(255,69,58,0)}
+}
+.station-count.pulse{animation:softPulse 1.8s infinite}
 
-  main{max-width:1400px;margin:0 auto; width: 100%;}
+/* ===== ADMIN ===== */
+.admin-float{
+  position:sticky;
+  top:72px;
+  z-index:20;
+  display:flex;
+  justify-content:space-between;
+  padding:10px 12px;
+  margin-bottom:14px;
+  border-radius:22px;
+  background:rgba(255,255,255,.75);
+  backdrop-filter:blur(16px);
+}
+.icon-btn{
+  background:none;
+  border:none;
+  padding:8px;
+  cursor:pointer;
+  color:#1c1c1e;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.icon-btn svg{width:22px;height:22px}
+.icon-btn:hover{opacity:.65}
 
-  .zonesContainer {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 18px;
-    margin-top: 10px;
-  }
+.admin-card{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 14px;
+  margin-bottom:12px;
+  border-radius:18px;
+  background:rgba(255,255,255,.88);
+}
+.admin-card img{
+  width:52px;height:52px;
+  border-radius:12px;
+}
 
-  .zone {
-    border-radius:16px;
-    padding:14px;
-    background:linear-gradient(180deg, var(--glass), rgba(255,255,255,0.02));
-    border:1px solid rgba(255,255,255,0.03);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .light-theme .zone {
-    border-color: rgba(0,0,0,0.1);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-  }
-  .zone:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-  }
+/* ===== POPUP ===== */
+.popup,.lock{
+  position:fixed;inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.25);
+  backdrop-filter:blur(12px);
+  z-index:300;
+}
+.popup-body,.lock-box{
+  width:320px;
+  background:rgba(255,255,255,.92);
+  border-radius:24px;
+  padding:20px;
+}
+.popup-body input,.popup-body select,.lock-box input{
+  width:100%;
+  padding:12px;
+  margin-bottom:10px;
+  border:none;
+  border-radius:14px;
+}
+.station-multi{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(48px,1fr));
+  gap:8px;
+}
+.station-multi div{
+  padding:8px;
+  border-radius:999px;
+  background:#fff;
+  text-align:center;
+  font-weight:600;
+}
+.station-multi .active{
+  background:rgba(10,132,255,.25);
+}
 
-  .zoneHeader{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-  }
-  .zoneTitle{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    flex: 1;
-    min-width: 200px;
-  }
-  .zoneBadge{
-    background:linear-gradient(90deg, rgba(0,0,0,0.25), var(--glass));
-    padding:7px 11px;
-    border-radius:12px;
-    font-weight:700;
-    display:flex;
-    gap:8px;
-    align-items:center;
-    font-size: 15px;
-    transition: all 0.2s;
-    position: relative;
-  }
-  .light-theme .zoneBadge {
-    background: linear-gradient(90deg, #e9ecef, #f8f9fa);
-    color: #212529;
-  }
-  .zoneBadge:hover {
-    box-shadow: 0 0 10px var(--neon-orange);
-  }
-  .eracing .zoneBadge:hover { box-shadow: 0 0 10px var(--neon-orange); }
-  .ps4 .zoneBadge:hover { box-shadow: 0 0 10px var(--neon-magenta); }
-  .ps5 .zoneBadge:hover { box-shadow: 0 0 10px var(--neon-green); }
+/* ===== MODAL ACTION ===== */
+.modal-actions{
+  position:sticky;
+  bottom:0;
+  margin-top:16px;
+  padding-top:14px;
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+  background:linear-gradient(to top,rgba(255,255,255,.95),rgba(255,255,255,0));
+}
+.btn-save{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:12px 20px;
+  border-radius:999px;
+  border:none;
+  background:var(--apple-blue);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+.btn-save svg{width:18px;height:18px}
+.btn-cancel{
+  padding:12px 18px;
+  border-radius:999px;
+  border:none;
+  background:rgba(0,0,0,.08);
+  font-weight:600;
+}
 
-  .expiredBadge {
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    background: #ff3333;
-    color: white;
-    font-size: 10px;
-    font-weight: 800;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 6px rgba(255,0,0,0.7);
-  }
-
-  .zoneActions{
-    display:flex;
-    gap:8px;
-    align-items:center;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
-  .addBtn{
-    border-radius:12px;
-    padding:9px 13px;
-    border:0;
-    cursor:pointer;
-    font-weight:800;
-    font-size: 14px;
-    transition: all 0.2s;
-    min-width: 110px;
-    text-align: center;
-  }
-
-  .eracing .addBtn {
-    background: var(--neon-orange);
-    color: #000;
-  }
-  .eracing .addBtn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 14px var(--neon-orange);
-  }
-
-  .ps4 .addBtn {
-    background: var(--neon-magenta);
-    color: #fff;
-  }
-  .ps4 .addBtn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 14px var(--neon-magenta);
-  }
-
-  .ps5 .addBtn {
-    background: var(--neon-green);
-    color: #000;
-  }
-  .ps5 .addBtn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 14px var(--neon-green);
-  }
-
-  .stations{
-    display:flex;
-    flex-direction:column;
-    gap:14px;
-    margin-top:12px;
-  }
-  .stationCard{
-    border-radius:14px;
-    padding:16px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .stationCard {
-    background: linear-gradient(135deg, #0a2a0a, #0d3d0d);
-    border: 2px solid #2aff6e;
-    box-shadow: 0 4px 15px rgba(0, 50, 0, 0.4);
-    color: #e0ffe0;
-  }
-  .light-theme .stationCard {
-    background: linear-gradient(135deg, #e8f5e8, #d4edda);
-    border-color: #28a745;
-    color: #155724;
-  }
-  .stationCard.running {
-    background: linear-gradient(135deg, #2a2a0a, #3d3d0d);
-    border: 2px solid #ffea00;
-    box-shadow: 0 4px 15px rgba(50, 50, 0, 0.4);
-    color: #ffffe0;
-  }
-  .light-theme .stationCard.running {
-    background: linear-gradient(135deg, #fff8e1, #fff3cd);
-    border-color: #ffc107;
-    color: #856404;
-  }
-  .stationCard.expired-alert {
-    background: linear-gradient(135deg, #300000, #1a0000);
-    border: 2px solid #ff3333;
-    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
-    animation: pulseRed 1.5s infinite;
-    color: #ffdddd;
-  }
-  .light-theme .stationCard.expired-alert {
-    background: linear-gradient(135deg, #f8d7da, #f1aeb5);
-    border-color: #dc3545;
-    color: #721c24;
-    animation: none;
-  }
-  @keyframes pulseRed {
-    0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.5); }
-    50% { box-shadow: 0 0 35px rgba(255, 50, 50, 0.8); }
-  }
-
-  /* ⚠️ Warning 1 min before expiry */
-  .stationCard.warning {
-    border-color: var(--neon-orange) !important;
-    box-shadow: 0 0 20px rgba(255, 122, 47, 0.6) !important;
-    animation: pulseOrange 2s infinite;
-  }
-  @keyframes pulseOrange {
-    0%, 100% { box-shadow: 0 0 20px rgba(255, 122, 47, 0.6); }
-    50% { box-shadow: 0 0 30px rgba(255, 122, 47, 0.9); }
-  }
-
-  .stationCard:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
-  }
-  .light-theme .stationCard:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-  }
-
-  .topRow{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:12px;
-    flex-wrap: wrap;
-  }
-  .stationTitle{
-    font-weight:800;
-    font-size:17px;
-    margin-bottom: 4px;
-  }
-  .statusDot{
-    display:inline-flex;
-    gap:8px;
-    align-items:center;
-    font-weight:700;
-  }
-  .timerLarge{
-    font-size:34px;
-    font-weight:800;
-    letter-spacing:1px;
-    margin:6px 0;
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-  .timerLarge:hover {
-    transform: scale(1.05);
-  }
-  .elapsed{
-    font-size:12px;
-    font-weight:700;
-  }
-
-  .stationCard:not(.running):not(.expired-alert) .timerLarge { color: #2aff6e; }
-  .light-theme .stationCard:not(.running):not(.expired-alert) .timerLarge { color: #28a745; }
-  .stationCard.running .timerLarge { color: #ffea00; }
-  .light-theme .stationCard.running .timerLarge { color: #ffc107; }
-  .stationCard.expired-alert .timerLarge { color: #ff5555; font-weight: 900; }
-  .light-theme .stationCard.expired-alert .timerLarge { color: #dc3545; }
-
-  .controls{
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
-    margin-top: 4px;
-  }
-  .btn{
-    padding:8px 12px;
-    border-radius:10px;
-    border:0;
-    cursor:pointer;
-    font-weight:700;
-    background:rgba(0,0,0,0.3);
-    color: inherit;
-    font-size: 13px;
-    transition: all 0.2s;
-    min-width: 70px;
-    text-align: center;
-  }
-  .light-theme .btn {
-    background: #e9ecef;
-    color: #212529;
-  }
-  .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-  }
-  .light-theme .btn:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  }
-  .btn:active {
-    transform: translateY(1px);
-  }
-  .btn.primary{
-    border:2px solid;
-    background:transparent;
-  }
-
-  .btn.small{padding:6px 8px;font-size:12px; min-width: auto;}
-  .danger{
-    background:#ff3b3b;
-    color:#fff;
-    border:0;
-  }
-  .danger:hover {
-    background: #ff1a1a;
-  }
-
-  .metaRow{
-    display:flex;
-    gap:12px;
-    align-items:center;
-    flex-wrap:wrap;
-    font-size:12px;
-  }
-  .metaItem{color:var(--muted);}
-
-  .zoneStats {
-    margin-top: 12px;
-    padding: 10px;
-    background: var(--glass);
-    border-radius: 10px;
-    font-size: 12px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 8px;
-  }
-  .statItem {
-    display: flex;
-    flex-direction: column;
-  }
-  .statValue {
-    font-weight: 700;
-    color: var(--neon-cyan);
-  }
-
-  .activityLog {
-    margin-top: 24px;
-    background: var(--card);
-    border-radius: 14px;
-    padding: 16px;
-    border: 1px solid rgba(255,255,255,0.03);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  }
-  .light-theme .activityLog {
-    border-color: rgba(0,0,0,0.1);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-  .logTitle {
-    font-weight: 700;
-    margin-bottom: 12px;
-    color: var(--neon-magenta);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .logActions {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-  .logList {
-    max-height: 150px;
-    overflow-y: auto;
-    font-size: 13px;
-  }
-  .logEntry {
-    padding: 6px 0;
-    border-bottom: 1px solid var(--glass);
-    color: var(--muted);
-    display: flex;
-    gap: 8px;
-  }
-  .light-theme .logEntry {
-    border-bottom-color: #e9ecef;
-  }
-  .logTime {
-    color: var(--neon-cyan);
-    font-weight: 600;
-    min-width: 60px;
-  }
-
-  footer{
-    margin-top:28px;
-    color:var(--muted);
-    font-size:12px;
-    text-align:center;
-  }
-
-  @media (max-width: 768px) {
-    .btn, .addBtn, .filterTab {
-      min-height: 44px;
-      padding: 10px 14px;
-    }
-    .controls {
-      gap: 10px;
-    }
-    .btn.small {
-      min-height: 40px;
-      padding: 8px 12px;
-    }
-  }
-
-  @media(max-width:768px){
-    body{padding:12px;}
-    .zonesContainer {
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-    .timerLarge{font-size:28px;}
-    .stationTitle{font-size:16px;}
-    .zoneBadge{font-size:14px; padding:6px 10px;}
-    .addBtn{font-size:13px; padding:8px 12px; min-width: auto;}
-    header{gap:12px;}
-    h1{font-size:19px;}
-    .searchInput { min-width: auto; }
-  }
-
-  @media(max-width:480px){
-    .statusRow{gap:8px; justify-content: space-between;}
-    .stat{min-width: 80px; padding:8px 10px;}
-    .stat .num{font-size:16px;}
-    .stat .lbl{font-size:10px;}
-    .timerLarge{font-size:24px;}
-    .controls{gap:6px;}
-    .btn{padding:6px 10px; font-size:12px;}
-    .zoneHeader{flex-direction: column; align-items: flex-start; gap:8px;}
-    .zoneActions{width: 100%; justify-content: space-between;}
-    .addBtn{width: 100%; min-width: auto;}
-    .filterTabs { width: 100%; justify-content: space-between; }
-  }
+/* ===== TOAST ===== */
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:28px;
+  transform:translateX(-50%) translateY(20px);
+  background:rgba(0,0,0,.85);
+  color:#fff;
+  padding:10px 16px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:600;
+  opacity:0;
+  transition:.35s var(--motion);
+  z-index:500;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
+
 <body>
-<header>
-  <div style="display:flex;align-items:center;gap:16px;">
-    <div class="logo">🎮</div>
-    <div>
-      <h1>MAIDA ESPORTS</h1>
-      <div class="sub">Admin Dashboard</div>
+
+<!-- SVG ICONS -->
+<svg style="display:none">
+  <symbol id="i-add" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20l4-1 10-10-3-3L5 16l-1 4z" fill="currentColor"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M6 7h12M9 7v10M15 7v10M8 7l1-2h6l1 2M6 7v12h12V7" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-backup" viewBox="0 0 24 24"><path d="M12 3v12M8 9l4-4 4 4M5 21h14" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-restore" viewBox="0 0 24 24"><path d="M12 21V9M16 13l-4 4-4-4M5 3h14" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 6l-4 4 4 4M5 10h10M13 3h6v14h-6" stroke="currentColor" stroke-width="2"/></symbol>
+</svg>
+
+<div class="header">
+  <div class="apple-nav">
+    <div class="apple-tab active" onclick="showGames(this)">Games</div>
+    <div class="apple-tab" onclick="openStationPopup()">
+      Station <span id="stationBadge" class="station-badge"></span>
+    </div>
+    <div class="apple-tab new" onclick="showNew(this)">New</div>
+    <div class="apple-tab" onclick="showAdmin(this)">Admin</div>
+  </div>
+</div>
+
+<div class="container" id="gamesTab"></div>
+<div class="container" id="adminTab" style="display:none"></div>
+
+<!-- STATION POPUP -->
+<div class="station-popup" id="stationPopup" onclick="closeStationPopup()">
+  <div class="station-box">
+    <div class="drag-handle"></div>
+    <div class="station-list" id="stationList"></div>
+  </div>
+</div>
+
+<!-- ADD / EDIT -->
+<div class="popup" id="gamePopup">
+  <div class="popup-body">
+    <strong id="popupTitle">Add Game</strong><br><br>
+    <input id="gName" placeholder="Nama Game">
+    <input id="gImg" placeholder="Image URL">
+    <select id="gCat"><option>PS5</option><option>PS4</option></select>
+    <select id="gPlayer"><option value="1">1 Player</option><option value="2">2 Player</option></select>
+    <div class="station-multi" id="stationMulti"></div>
+    <label><input type="checkbox" id="gNew"> NEW</label>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closePopup()">Cancel</button>
+      <button class="btn-save" onclick="saveGame()">
+        <svg id="saveIcon"><use href="#i-add"/></svg>
+        <span id="saveText">Save</span>
+      </button>
     </div>
   </div>
-  <div style="display:flex;gap:10px;align-items:center;">
-    <button class="btn small" id="publicDisplayBtn" title="Mod Paparan Awam untuk TV">👁️ Awam</button>
-    <div class="themeToggle" id="themeToggle"></div>
-  </div>
-</header>
+</div>
 
-<main>
-  <div class="statusRow">
-    <div class="stat">
-      <div class="num" id="activeCount">0</div>
-      <div class="lbl">ACTIVE</div>
-    </div>
-    <div class="stat">
-      <div class="num" id="expiredCount">0</div>
-      <div class="lbl">EXPIRED</div>
-    </div>
-    <div style="flex:1"></div>
-    <div class="globalActions">
-      <button class="btn" id="clearStorage">🗑️ Reset All</button>
+<!-- LOGIN -->
+<div class="lock" id="lock">
+  <div class="lock-box">
+    <strong>Admin Login</strong><br><br>
+    <input id="u" placeholder="User">
+    <input id="p" type="password" placeholder="Password">
+    <div style="display:flex;gap:12px;justify-content:flex-end">
+      <button class="btn-cancel" onclick="goHome()">Home</button>
+      <button class="btn-save" onclick="login()">Login</button>
     </div>
   </div>
+</div>
 
-  <div class="searchBar">
-    <input type="text" id="globalSearch" class="searchInput" placeholder="Cari stesen, team, atau player...">
-    <div class="filterTabs">
-      <button class="filterTab active" data-filter="all">Semua</button>
-      <button class="filterTab" data-filter="running">Aktif</button>
-      <button class="filterTab" data-filter="expired">Tamat</button>
-      <button class="filterTab" data-filter="idle">Paused</button>
-    </div>
-  </div>
-
-  <div class="zonesContainer">
-    <section class="zone eracing" data-zone="eracing">
-      <div class="zoneHeader">
-        <div class="zoneTitle">
-          <div class="zoneBadge">
-            <span class="dot" style="background:var(--neon-orange)"></span> ERACING ZONE
-          </div>
-        </div>
-        <div class="zoneActions">
-          <div class="metaItem">Active: <strong id="eracingCount">0</strong></div>
-          <button class="addBtn" data-zone="eracing">+ Add Station</button>
-        </div>
-      </div>
-      <div class="stations" id="eracingStations"></div>
-      <div class="zoneStats" id="eracingStats"></div>
-    </section>
-
-    <section class="zone ps4" data-zone="ps4">
-      <div class="zoneHeader">
-        <div class="zoneTitle">
-          <div class="zoneBadge">
-            <span class="dot" style="background:var(--neon-magenta)"></span> PLAYSTATION 4 ZONE
-          </div>
-        </div>
-        <div class="zoneActions">
-          <div class="metaItem">Active: <strong id="ps4Count">0</strong></div>
-          <button class="addBtn" data-zone="ps4">+ Add Station</button>
-        </div>
-      </div>
-      <div class="stations" id="ps4Stations"></div>
-      <div class="zoneStats" id="ps4Stats"></div>
-    </section>
-
-    <section class="zone ps5" data-zone="ps5">
-      <div class="zoneHeader">
-        <div class="zoneTitle">
-          <div class="zoneBadge">
-            <span class="dot" style="background:var(--neon-green)"></span> PLAYSTATION 5 ZONE
-          </div>
-        </div>
-        <div class="zoneActions">
-          <div class="metaItem">Active: <strong id="ps5Count">0</strong></div>
-          <button class="addBtn" data-zone="ps5">+ Add Station</button>
-        </div>
-      </div>
-      <div class="stations" id="ps5Stations"></div>
-      <div class="zoneStats" id="ps5Stats"></div>
-    </section>
-  </div>
-
-  <div class="activityLog">
-    <div class="logTitle">
-      <span>Log Aktiviti</span>
-      <div class="logActions">
-        <button class="btn small" id="exportExcel">📥 Excel</button>
-        <button class="btn small" id="printLog">🖨️ Print</button>
-        <button class="btn small" id="whatsappLog">💬 WhatsApp</button>
-        <button class="btn small danger" id="clearLog">🗑️ Kosongkan</button>
-      </div>
-    </div>
-    <div class="logList" id="logList" aria-live="polite"></div>
-  </div>
-
-  <footer>© 2025 maidaesports.my | All Rights Reserved</footer>
-</main>
-
-<template id="stationTpl">
-  <div class="stationCard" data-id="" tabindex="0" role="region" aria-labelledby="stationTitle">
-    <div class="topRow">
-      <div>
-        <div class="statusDot"><span class="dotSmall" style="display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;"></span><span class="stationTitle" id="stationTitle">STATION</span></div>
-        <div class="metaRow" style="margin-top:6px">
-          <div class="metaItem">Team: <span class="teamName">-</span></div>
-          <div class="metaItem">Player: <span class="playerName">-</span></div>
-        </div>
-      </div>
-      <div style="text-align:right">
-        <div class="timerLarge">00:00:00</div>
-        <div class="elapsed">Elapsed: 00:00:00</div>
-      </div>
-    </div>
-
-    <div class="controls">
-      <button class="btn small durationBtn" data-duration="3600">1 Jam</button>
-      <button class="btn small durationBtn" data-duration="7200">2 Jam</button>
-      <button class="btn small durationBtn" data-duration="10800">3 Jam</button>
-      <button class="btn small customTimeBtn">Custom</button>
-
-      <button class="btn primary small startBtn">▶ Start</button>
-      <button class="btn small pauseBtn">⏸ Pause</button>
-      <button class="btn small resetBtn">⟲ Reset</button>
-
-      <button class="btn small editBtn">✎ Edit</button>
-      <button class="btn small danger removeBtn">Remove</button>
-    </div>
-  </div>
-</template>
-
-<audio id="beepSound" preload="auto">
-  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
-  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.mp3" type="audio/mpeg">
-</audio>
-<audio id="warningSound" preload="auto">
-  <source src="https://actions.google.com/sounds/v1/notifications/notification_3.ogg" type="audio/ogg">
-  <source src="https://actions.google.com/sounds/v1/notifications/notification_3.mp3" type="audio/mpeg">
-</audio>
+<div id="toast" class="toast">Saved</div>
 
 <script>
-const uid = ()=> 's'+Math.random().toString(36).slice(2,9);
-const $ = sel => document.querySelector(sel);
-const $$ = sel => Array.from(document.querySelectorAll(sel));
-const SAVE_KEY = 'maida_stations_v6';
-const LOG_KEY = 'maida_activity_log_v1';
-const SESSION_LOG_KEY = 'maida_session_log_v1';
-const ADMIN_PASSWORD = 'admin123';
+const DB='mde_games';
+const SEEN_KEY='mde_seen_stations';
 
-let audioUnlocked = false;
-let sessionLog = [];
-
-document.body.addEventListener('click', () => {
-  if (!audioUnlocked) {
-    const beep = $('#beepSound');
-    if (beep) {
-      beep.volume = 0.7;
-      beep.play().then(() => {}).catch(() => {});
-    }
-    audioUnlocked = true;
-  }
-}, { once: true });
-
-document.body.addEventListener('click', () => {
-  const warn = $('#warningSound');
-  if (warn && !warn.hasAttribute('data-unlocked')) {
-    warn.volume = 0.6;
-    warn.play().then(() => {
-      warn.setAttribute('data-unlocked', 'true');
-    }).catch(() => {});
-  }
-}, { once: true });
-
-let stations = [];
-let currentFilter = 'all';
-let globalSearchTerm = '';
-let activityLog = [];
-let publicDisplayMode = false;
-
-// 📺 Toggle Public Display
-$('#publicDisplayBtn').addEventListener('click', () => {
-  publicDisplayMode = !publicDisplayMode;
-  document.body.classList.toggle('public-display', publicDisplayMode);
-  $('#publicDisplayBtn').textContent = publicDisplayMode ? '🖥️ Admin' : '👁️ Awam';
-  renderAll();
-});
-
-// 🌓 Theme toggle
-const htmlRoot = document.getElementById('htmlRoot');
-const themeToggle = $('#themeToggle');
-const isLight = localStorage.getItem('maida_theme') === 'light';
-if (isLight) htmlRoot.classList.add('light-theme');
-themeToggle.addEventListener('click', () => {
-  htmlRoot.classList.toggle('light-theme');
-  localStorage.setItem('maida_theme', htmlRoot.classList.contains('light-theme') ? 'light' : 'dark');
-});
-
-// 📝 Activity Log
-function addToLog(message) {
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString('ms-MY', { hour12: false, hour: '2-digit', minute: '2-digit' });
-  activityLog.unshift({ time: timeStr, message });
-  if (activityLog.length > 50) activityLog.pop();
-  localStorage.setItem(LOG_KEY, JSON.stringify(activityLog));
-  renderLog();
+/* ===== HAPTIC ===== */
+function haptic(ms=8){
+  if(navigator.vibrate) navigator.vibrate(ms);
 }
 
-function renderLog() {
-  const logList = $('#logList');
-  logList.innerHTML = activityLog.map(entry => 
-    `<div class="logEntry" role="log"><span class="logTime">${entry.time}</span> ${entry.message}</div>`
-  ).join('');
-}
-
-function loadLog() {
-  const raw = localStorage.getItem(LOG_KEY);
-  if (raw) {
-    try { activityLog = JSON.parse(raw); } catch (e) { activityLog = []; }
-  }
-  renderLog();
-}
-
-// 📊 Session Log
-function loadSessionLog() {
-  const raw = localStorage.getItem(SESSION_LOG_KEY);
-  if (raw) {
-    try { sessionLog = JSON.parse(raw); } catch (e) { sessionLog = []; }
-  }
-}
-
-function addSessionRecord(station, actualUsed) {
-  const record = {
-    id: uid(),
-    stationId: station.id,
-    zone: station.zone,
-    name: station.name,
-    team: station.team,
-    player: station.player,
-    durationSet: station.duration,
-    actualUsed,
-    startedAt: station.startedAtHistory || station.startedAt,
-    endedAt: Date.now(),
-    date: new Date().toISOString().split('T')[0]
-  };
-  sessionLog.unshift(record);
-  if (sessionLog.length > 1000) sessionLog = sessionLog.slice(0, 1000);
-  localStorage.setItem(SESSION_LOG_KEY, JSON.stringify(sessionLog));
-}
-
-// 🔍 Search & Filter
-function matchesFilters(station) {
-  if (publicDisplayMode) return true;
-  const matchesSearch = 
-    station.name.toLowerCase().includes(globalSearchTerm) ||
-    station.team.toLowerCase().includes(globalSearchTerm) ||
-    station.player.toLowerCase().includes(globalSearchTerm);
-  const matchesStatus = currentFilter === 'all' || station.status === currentFilter;
-  return matchesSearch && matchesStatus;
-}
-
-// 🔴 Expired badges
-function updateExpiredBadges() {
-  if (publicDisplayMode) return;
-  ['eracing', 'ps4', 'ps5'].forEach(zone => {
-    const badgeContainer = document.querySelector(`.zone[data-zone="${zone}"] .zoneBadge`);
-    const expiredCount = stations.filter(s => s.zone === zone && s.status === 'expired').length;
-    const oldBadge = badgeContainer.querySelector('.expiredBadge');
-    if (oldBadge) oldBadge.remove();
-    if (expiredCount > 0) {
-      const badge = document.createElement('div');
-      badge.className = 'expiredBadge';
-      badge.textContent = expiredCount > 9 ? '9+' : expiredCount;
-      badgeContainer.appendChild(badge);
-    }
-  });
-}
-
-// 📊 Zone stats
-function calculateZoneStats(zone) {
-  const zoneStations = stations.filter(s => s.zone === zone);
-  const totalSessions = zoneStations.length;
-  const totalSeconds = zoneStations.reduce((sum, s) => sum + (s.duration || 0), 0);
-  const avgDuration = totalSessions ? Math.floor(totalSeconds / totalSessions) : 0;
-  const activeCount = zoneStations.filter(s => s.status === 'running').length;
-  return { totalSessions, totalSeconds, avgDuration, activeCount };
-}
-
-function renderZoneStats() {
-  if (publicDisplayMode) return;
-  ['eracing', 'ps4', 'ps5'].forEach(zone => {
-    const stats = calculateZoneStats(zone);
-    const container = $(`#${zone}Stats`);
-    container.innerHTML = `
-      <div class="statItem">
-        <span>Jumlah Stesen</span>
-        <span class="statValue">${stats.totalSessions}</span>
-      </div>
-      <div class="statItem">
-        <span>Purata Tempoh</span>
-        <span class="statValue">${formatTime(stats.avgDuration)}</span>
-      </div>
-      <div class="statItem">
-        <span>Masa Digunakan</span>
-        <span class="statValue">${formatTime(stats.totalSeconds)}</span>
-      </div>
-    `;
-  });
-}
-
-// 🔊 Sounds
-function startBeepForStation(stationId) {
-  if (!audioUnlocked) return;
-  const playBeep = () => {
-    const sound = $('#beepSound');
-    if (sound) {
-      sound.currentTime = 0;
-      sound.play().catch(e => console.log("Beep failed:", e));
-    }
-  };
-  playBeep();
-  const intervalId = setInterval(playBeep, 900);
-  const station = stations.find(s => s.id === stationId);
-  if (station) station.beepInterval = intervalId;
-}
-
-function stopBeepForStation(stationId) {
-  const station = stations.find(s => s.id === stationId);
-  if (station && station.beepInterval) {
-    clearInterval(station.beepInterval);
-    delete station.beepInterval;
-  }
-}
-
-// 🗣️ Ucapkan nama stesen + mainkan bunyi
-function playWarningSound(stationName) {
-  // 🔊 Mainkan bunyi notifikasi
-  const warningSound = $('#warningSound');
-  if (warningSound.hasAttribute('data-unlocked')) {
-    warningSound.currentTime = 0;
-    warningSound.play().catch(() => {});
-  }
-
-  // 🗣️ Ucapkan nama stesen sebenar
-  if ('speechSynthesis' in window) {
-    setTimeout(() => {
-      const utterance = new SpeechSynthesisUtterance(
-        `Peringatan! ${stationName} akan tamat dalam satu minit.`
-      );
-      utterance.lang = 'ms-MY';
-      utterance.rate = 0.9;
-      utterance.pitch = 1.1;
-      utterance.volume = 1.0;
-      
-      const voices = speechSynthesis.getVoices();
-      const malayVoice = voices.find(voice => 
-        voice.lang.startsWith('ms') || 
-        voice.name.toLowerCase().includes('malay')
-      );
-      if (malayVoice) {
-        utterance.voice = malayVoice;
-      }
-      
-      speechSynthesis.speak(utterance);
-    }, 300);
-  }
-
-  addToLog(`⚠️ Peringatan: Masa ${stationName} akan tamat dalam 1 minit!`);
-}
-
-// 💾 Load & Persist
-function load(){
-  const raw = localStorage.getItem(SAVE_KEY);
-  if(!raw){ stations = []; return; }
-  try{
-    const data = JSON.parse(raw);
-    if (Array.isArray(data)) {
-      stations = data.map(s => {
-        const { beepInterval, ...rest } = s;
-        return {
-          ...rest,
-          startedAt: rest.startedAt ? new Date(rest.startedAt).getTime() : null,
-          pausedAt: rest.pausedAt ? new Date(rest.pausedAt).getTime() : null,
-          elapsedWhenPaused: rest.elapsedWhenPaused || 0,
-          warned: rest.warned || false,
-          startedAtHistory: rest.startedAt
-        };
-      });
-    } else {
-      stations = [];
-    }
-  }catch(e){
-    console.error("Failed to load stations:", e);
-    stations = [];
-  }
-}
-
-function persist(){
-  const dataToSave = stations.map(({ beepInterval, ...s }) => ({
-    ...s,
-    startedAt: s.startedAt ? new Date(s.startedAt).toISOString() : null,
-    pausedAt: s.pausedAt ? new Date(s.pausedAt).toISOString() : null
+/* ===== LOAD & CLEAN DATA (ANTI UNDEFINED) ===== */
+let games = JSON.parse(localStorage.getItem(DB)) || [];
+games = games
+  .filter(g => g && typeof g.name === 'string' && g.name.trim() !== '')
+  .map(g => ({
+    name: (g.name || '').trim(),
+    img: (g.img || 'https://picsum.photos/300').trim(),
+    cat: typeof g.cat === 'string' && ['PS5','PS4'].includes(g.cat) ? g.cat : 'PS5',
+    player: g.player === 2 ? 2 : 1,
+    stations: Array.isArray(g.stations) ? g.stations.map(s => parseInt(s)).filter(s => !isNaN(s) && s >= 1 && s <= 10) : [],
+    isNew: Boolean(g.isNew)
   }));
-  localStorage.setItem(SAVE_KEY, JSON.stringify(dataToSave));
-  updateCounts();
-  if (!publicDisplayMode) {
-    updateExpiredBadges();
-    renderZoneStats();
-  }
+localStorage.setItem(DB, JSON.stringify(games));
+
+let seenStations = JSON.parse(localStorage.getItem(SEEN_KEY)) || [];
+let editIndex=null;
+
+/* ===== NAV ===== */
+function setActive(el){
+  document.querySelectorAll('.apple-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+function closeAllTabsHighlight(){
+  document.querySelectorAll('.apple-tab').forEach(t=>t.classList.remove('station-active'));
 }
 
-// ⏱️ Time helpers
-function formatTime(sec){
-  sec = Math.max(0, Math.floor(sec));
-  const h = String(Math.floor(sec/3600)).padStart(2,'0');
-  const m = String(Math.floor((sec%3600)/60)).padStart(2,'0');
-  const s = String(sec%60).padStart(2,'0');
-  return `${h}:${m}:${s}`;
-}
-
-function parseHMS(input){
-  if (!input?.trim()) return 0;
-  const parts = input.split(':').map(p => parseInt(p.trim()) || 0);
-  while (parts.length < 3) parts.unshift(0);
-  return (parts[0] * 3600) + (parts[1] * 60) + parts[2];
-}
-
-// 📊 Counts
-function updateCounts(){
-  if (publicDisplayMode) return;
-  const active = stations.filter(s => s.status === 'running').length;
-  const expired = stations.filter(s => s.status === 'expired').length;
-  $('#activeCount').textContent = active;
-  $('#expiredCount').textContent = expired;
-  $('#eracingCount').textContent = stations.filter(s => s.zone === 'eracing' && s.status !== 'expired').length;
-  $('#ps4Count').textContent = stations.filter(s => s.zone === 'ps4' && s.status !== 'expired').length;
-  $('#ps5Count').textContent = stations.filter(s => s.zone === 'ps5' && s.status !== 'expired').length;
-}
-
-// 🛑 Button control
-function disableAllButtonsExceptPause(card) {
-  const buttons = card.querySelectorAll('.btn:not(.pauseBtn)');
-  buttons.forEach(btn => {
-    btn.disabled = true;
-    btn.style.opacity = '0.5';
-    btn.style.pointerEvents = 'none';
-  });
-  const pauseBtn = card.querySelector('.pauseBtn');
-  pauseBtn.disabled = false;
-  pauseBtn.style.opacity = '1';
-  pauseBtn.style.pointerEvents = 'auto';
-}
-
-function enableAllButtons(card) {
-  const buttons = card.querySelectorAll('.btn');
-  buttons.forEach(btn => {
-    btn.disabled = false;
-    btn.style.opacity = '1';
-    btn.style.pointerEvents = 'auto';
-  });
-}
-
-// ➕ Create station — dengan format nama baru
-function createStation(zone='eracing', opts={}) {
-  const id = uid();
-  
-  // Format nama mengikut zon
-  let baseName;
-  if (zone === 'eracing') {
-    baseName = 'ERACING ZONE';
-  } else if (zone === 'ps4') {
-    baseName = 'PLAYSTATION 4';
-  } else if (zone === 'ps5') {
-    baseName = 'PLAYSTATION 5';
-  }
-  
-  // Kira bilangan stesen sedia ada dalam zon ini
-  const zoneStations = stations.filter(s => s.zone === zone);
-  const nextNumber = zoneStations.length + 1;
-  const defaultName = `${baseName} #${nextNumber}`;
-  
-  const s = Object.assign({
-    id, zone, name: defaultName,
-    team:'-', player:'-', duration:0, status:'idle',
-    elapsedWhenPaused: 0,
-    warned: false
-  }, opts);
-  
-  stations.push(s);
-  persist(); 
-  renderAll();
-  addToLog(`Stesen baru ditambah: ${s.name}`);
-  return s;
-}
-
-// ❌ Remove station
-function removeStation(id){
-  const station = stations.find(s => s.id === id);
-  if(!confirm('Buang stesen ini?')) return;
-  stopBeepForStation(id);
-  stations = stations.filter(s => s.id !== id);
-  persist(); 
-  renderAll();
-  if (station) addToLog(`Stesen dibuang: ${station.name}`);
-}
-
-// 🖼️ Render UI
-function renderAll(){
-  if (publicDisplayMode) {
-    document.querySelectorAll('.stations').forEach(el => el.innerHTML = '');
-    stations.forEach(s => {
-      const container = $(`#${s.zone}Stations`);
-      const div = document.createElement('div');
-      div.className = 'stationCard';
-      div.setAttribute('aria-label', `${s.name}, ${s.status === 'running' ? 'masa berbaki' : 'tidak aktif'}`);
-      
-      let elapsedSec = s.elapsedWhenPaused;
-      let remainingSec = s.duration || 0;
-      if (s.status === 'running' && s.startedAt) {
-        const now = Date.now();
-        const ran = Math.floor((now - s.startedAt) / 1000);
-        elapsedSec = s.elapsedWhenPaused + ran;
-        remainingSec = Math.max(0, (s.duration || 0) - elapsedSec);
-      } else if (s.status === 'expired') {
-        elapsedSec = s.duration || 0;
-        remainingSec = 0;
-      }
-
-      div.innerHTML = `
-        <div class="topRow">
-          <div class="stationTitle">${s.name}</div>
-          <div class="timerLarge">${formatTime(remainingSec)}</div>
+/* ===== RENDER GAMES ===== */
+function renderGames(list=games){
+  gamesTab.innerHTML='<div class="grid">'+list.map(g=>`
+    <div class="card havor ${g.player>1?'multiplayer':''}">
+      ${g.isNew?'<div class="new-badge">NEW</div>':''}
+      <img src="${g.img}">
+      <div class="label">
+        <strong>${g.name}</strong><br>
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+          <span class="player-badge ${g.player>1?'':'single'}">${'ð®'.repeat(g.player||1)}</span>
+          <span class="player-badge single">${g.cat||'PS5'}</span>
         </div>
-      `;
-      
-      if (s.status === 'running') div.classList.add('running');
-      if (s.status === 'expired') div.classList.add('expired-alert');
-      if (s.warned) div.classList.add('warning');
-      
-      container.appendChild(div);
-    });
-    return;
-  }
-
-  // Normal admin mode
-  ['eracing','ps4','ps5'].forEach(zone => {
-    const container = document.getElementById(zone+'Stations');
-    container.innerHTML = '';
-    stations
-      .filter(s => s.zone === zone)
-      .filter(matchesFilters)
-      .forEach(s => {
-        const tpl = document.getElementById('stationTpl').content.cloneNode(true);
-        const card = tpl.querySelector('.stationCard');
-        card.dataset.id = s.id;
-        
-        card.className = 'stationCard';
-        if (s.status === 'running') {
-          card.classList.add('running');
-          disableAllButtonsExceptPause(card);
-        } else if (s.status === 'expired') {
-          card.classList.add('expired-alert');
-          enableAllButtons(card);
-        } else {
-          enableAllButtons(card);
-        }
-        if (s.warned) card.classList.add('warning');
-
-        tpl.querySelector('.stationTitle').textContent = s.name;
-        tpl.querySelector('.teamName').textContent = s.team;
-        tpl.querySelector('.playerName').textContent = s.player;
-        
-        const dot = tpl.querySelector('.dotSmall');
-        const root = getComputedStyle(document.documentElement);
-        if(s.zone==='eracing') dot.style.background = root.getPropertyValue('--neon-orange').trim();
-        if(s.zone==='ps4') dot.style.background = root.getPropertyValue('--neon-magenta').trim();
-        if(s.zone==='ps5') dot.style.background = root.getPropertyValue('--neon-green').trim();
-
-        let elapsedSec = s.elapsedWhenPaused;
-        let remainingSec = s.duration || 0;
-        if (s.status === 'running' && s.startedAt) {
-          const now = Date.now();
-          const ran = Math.floor((now - s.startedAt) / 1000);
-          elapsedSec = s.elapsedWhenPaused + ran;
-          remainingSec = Math.max(0, (s.duration || 0) - elapsedSec);
-        } else if (s.status === 'expired') {
-          elapsedSec = s.duration || 0;
-          remainingSec = 0;
-        }
-
-        tpl.querySelector('.timerLarge').textContent = formatTime(remainingSec);
-        tpl.querySelector('.elapsed').textContent = 'Elapsed: ' + formatTime(elapsedSec);
-
-        const setupListeners = (tpl, s) => {
-          tpl.querySelector('.timerLarge').addEventListener('click', () => {
-            const current = formatTime(s.duration || 0);
-            const input = prompt('Masukkan masa (HH:MM:SS)', current);
-            if (input === null) return;
-            const total = parseHMS(input);
-            if (total <= 0) return;
-            s.duration = total;
-            if (s.status === 'expired') {
-              s.status = 'idle';
-              s.elapsedWhenPaused = 0;
-              s.warned = false;
-              stopBeepForStation(s.id);
-            }
-            s.startedAt = null;
-            s.pausedAt = null;
-            persist(); renderAll();
-            addToLog(`Masa dikemaskini untuk ${s.name}: ${formatTime(total)}`);
-          });
-
-          tpl.querySelectorAll('.durationBtn').forEach(btn => {
-            btn.addEventListener('click', () => {
-              const sec = Number(btn.dataset.duration) || 0;
-              s.duration = sec;
-              s.status = 'idle';
-              s.elapsedWhenPaused = 0;
-              s.warned = false;
-              s.pausedAt = null;
-              if (s.status === 'expired') stopBeepForStation(s.id);
-              s.startedAt = null;
-              persist(); renderAll();
-              addToLog(`Masa ditetapkan (${formatTime(sec)}) untuk ${s.name}`);
-            });
-          });
-
-          tpl.querySelector('.customTimeBtn').addEventListener('click', () => {
-            const input = prompt('Masukkan masa (HH:MM:SS)', '01:00:00');
-            if (input === null) return;
-            const total = parseHMS(input);
-            if (total <= 0) {
-              alert('Masa mesti lebih daripada 0 saat.');
-              return;
-            }
-            s.duration = total;
-            s.status = 'idle';
-            s.elapsedWhenPaused = 0;
-            s.warned = false;
-            s.pausedAt = null;
-            if (s.status === 'expired') stopBeepForStation(s.id);
-            s.startedAt = null;
-            persist(); renderAll();
-            addToLog(`Masa custom ditetapkan (${formatTime(total)}) untuk ${s.name}`);
-          });
-
-          tpl.querySelector('.startBtn').addEventListener('click', () => {
-            if (!s.duration || s.duration <= 0) {
-              alert('Sila tetapkan tempoh masa dahulu.');
-              return;
-            }
-            s.status = 'running';
-            s.startedAt = Date.now();
-            s.pausedAt = null;
-            s.startedAtHistory = s.startedAt;
-            s.warned = false;
-            if (s.status === 'expired') stopBeepForStation(s.id);
-            persist(); renderAll();
-            addToLog(`Stesen bermula: ${s.name}`);
-          });
-
-          tpl.querySelector('.pauseBtn').addEventListener('click', () => {
-            if (s.status === 'running') {
-              const now = Date.now();
-              const ran = Math.floor((now - s.startedAt) / 1000);
-              s.elapsedWhenPaused += ran;
-              s.status = 'idle';
-              s.startedAt = null;
-              s.pausedAt = now;
-              persist(); renderAll();
-              addToLog(`Stesen di-Pause: ${s.name}`);
-            } else if (s.status === 'idle' && s.duration > 0) {
-              s.status = 'running';
-              s.startedAt = Date.now();
-              s.pausedAt = null;
-              persist(); renderAll();
-              addToLog(`Stesen Resume: ${s.name}`);
-            }
-          });
-
-          tpl.querySelector('.resetBtn').addEventListener('click', () => {
-            if(!confirm('Reset masa stesen ini?')) return;
-            s.status = 'idle';
-            s.startedAt = null;
-            s.pausedAt = null;
-            s.elapsedWhenPaused = 0;
-            s.warned = false;
-            stopBeepForStation(s.id);
-            persist(); renderAll();
-            addToLog(`Masa reset untuk: ${s.name}`);
-          });
-
-          tpl.querySelector('.editBtn').addEventListener('click', () => {
-            const oldName = s.name;
-            const newName = prompt('Nama Stesen', s.name) || s.name;
-            const newTeam = prompt('Nama Team', s.team) || s.team;
-            const newPlayer = prompt('Nama Player', s.player) || s.player;
-            s.name = newName; s.team = newTeam; s.player = newPlayer; persist(); renderAll();
-            if (oldName !== newName) {
-              addToLog(`Nama stesen diubah: ${oldName} → ${newName}`);
-            }
-          });
-
-          tpl.querySelector('.removeBtn').addEventListener('click', () => removeStation(s.id));
-        };
-        setupListeners(tpl, s);
-        container.appendChild(tpl);
-      });
-  });
-  updateCounts();
-  updateExpiredBadges();
-  renderZoneStats();
+      </div>
+    </div>
+  `).join('')+'</div>';
 }
 
-// ⏳ Main timer loop
-function tick(){
-  const now = Date.now();
-  let changed = false;
-  stations.forEach(s => {
-    if (s.status === 'running' && s.startedAt && s.duration > 0) {
-      const elapsed = s.elapsedWhenPaused + Math.floor((now - s.startedAt) / 1000);
-      const remaining = s.duration - elapsed;
-
-      if (remaining <= 60 && !s.warned) {
-        s.warned = true;
-        playWarningSound(s.name); // 👈 SEBUT NAMA SEBENAR
-        changed = true;
-      }
-
-      if (elapsed >= s.duration) {
-        s.status = 'expired';
-        s.startedAt = null;
-        s.elapsedWhenPaused = s.duration;
-        changed = true;
-        startBeepForStation(s.id);
-        addToLog(`Masa tamat: ${s.name}`);
-        addSessionRecord(s, s.duration);
-      }
-    }
-  });
-  if (changed) persist();
-  if (!publicDisplayMode) renderAll();
+/* ===== TABS ===== */
+function showGames(el){
+  closeStationPopup();
+  setActive(el);
+  adminTab.style.display='none';
+  gamesTab.style.display='block';
+  renderGames();
+}
+function showNew(el){
+  closeStationPopup();
+  setActive(el);
+  adminTab.style.display='none';
+  gamesTab.style.display='block';
+  renderGames(games.filter(g=>g.isNew));
 }
 
-// 🔄 Auto-pause on tab switch
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) {
-    let pausedAny = false;
-    stations.forEach(s => {
-      if (s.status === 'running') {
-        const now = Date.now();
-        const ran = Math.floor((now - s.startedAt) / 1000);
-        s.elapsedWhenPaused += ran;
-        s.status = 'idle';
-        s.startedAt = null;
-        s.pausedAt = now;
-        pausedAny = true;
-      }
-    });
-    if (pausedAny) {
-      persist();
-      addToLog('Sistem di-Pause secara automatik (pengguna keluar tab)');
-    }
+/* ===== STATION ===== */
+function updateStationBadge(){
+  let count=0;
+  for(let i=1;i<=10;i++){
+    if(games.some(g=>g.stations.includes(i))) count++;
   }
-});
-
-// 🔍 Search
-$('#globalSearch').addEventListener('input', (e) => {
-  globalSearchTerm = e.target.value.toLowerCase().trim();
-  renderAll();
-});
-
-$$('.filterTab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    $$(`.filterTab`).forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentFilter = btn.dataset.filter;
-    renderAll();
+  stationBadge.textContent=count||'';
+}
+function openStationPopup(){
+  closeAllTabsHighlight();
+  document.querySelectorAll('.apple-tab').forEach(t=>{
+    if(t.textContent.includes('Station')) t.classList.add('station-active');
   });
-});
-
-document.querySelectorAll('.addBtn').forEach(b => 
-  b.addEventListener('click', () => createStation(b.dataset.zone))
-);
-
-$('#clearStorage').addEventListener('click', () => {
-  if(confirm('Reset semua data stesen? Tindakan ini tidak boleh asingkan.')){
-    stations.forEach(s => {
-      if (s.status === 'expired') stopBeepForStation(s.id);
-    });
-    stations = []; 
-    persist(); 
-    renderAll();
-    addToLog('Semua data stesen telah direset');
+  stationList.innerHTML='';
+  for(let i=1;i<=10;i++){
+    const list=games.filter(g=>g.stations.includes(i));
+    const pulse=list.some(g=>g.isNew)&&!seenStations.includes(i);
+    stationList.innerHTML+=`
+      <div class="station-item havor" onclick="filterStation(${i})">
+        Station ${i}
+        <span class="station-count ${pulse?'pulse':''}">${list.length}</span>
+      </div>`;
   }
-});
+  stationPopup.classList.add('active');
+}
+function closeStationPopup(){
+  if(!stationPopup.classList.contains('active')) return;
+  const box=document.querySelector('.station-box');
+  box.style.transform='translateY(100%)';
+  setTimeout(()=>{
+    stationPopup.classList.remove('active');
+    box.style.transform='translateY(0)';
+  },300);
+  closeAllTabsHighlight();
+}
+function filterStation(n){
+  haptic(10);
+  if(!seenStations.includes(n)){
+    seenStations.push(n);
+    localStorage.setItem(SEEN_KEY,JSON.stringify(seenStations));
+  }
+  closeStationPopup();
+  renderGames(games.filter(g=>g.stations.includes(n)));
+}
 
-// 📝 Clear log with password
-$('#clearLog').addEventListener('click', () => {
-  const password = prompt('Masukkan kata laluan admin:');
-  if (password !== ADMIN_PASSWORD) {
-    alert('Kata laluan salah!');
+/* ===== ADMIN ===== */
+function showAdmin(el){
+  closeStationPopup();
+  setActive(el);
+  gamesTab.style.display='none';
+  adminTab.style.display='block';
+  if(!sessionStorage.getItem('admin')){
+    lock.style.display='flex';
     return;
   }
-  if (confirm('Kosongkan log aktiviti?')) {
-    activityLog = [];
-    localStorage.removeItem(LOG_KEY);
-    renderLog();
-    addToLog('Log aktiviti dikosongkan oleh admin');
-  }
-});
+  renderAdmin();
+}
+function renderAdmin(){
+  adminTab.innerHTML=`
+    <div class="admin-float">
+      <div style="display:flex;gap:14px">
+        <button class="icon-btn" onclick="openAdd()"><svg><use href="#i-add"/></svg></button>
+        <button class="icon-btn" onclick="backup()"><svg><use href="#i-backup"/></svg></button>
+        <button class="icon-btn" onclick="restore()"><svg><use href="#i-restore"/></svg></button>
+      </div>
+      <button class="icon-btn" onclick="logout()"><svg><use href="#i-logout"/></svg></button>
+    </div>
+    ${games.map((g,i)=>`
+      <div class="admin-card havor">
+        <img src="${g.img}">
+        <div style="flex:1"><strong>${g.name}</strong><br>${g.cat||'PS5'}</div>
+        <button class="icon-btn" onclick="editGame(${i})"><svg><use href="#i-edit"/></svg></button>
+        <button class="icon-btn" onclick="deleteGame(${i})"><svg><use href="#i-trash"/></svg></button>
+      </div>
+    `).join('')}
+  `;
+}
 
-// 📤 Export log to Excel
-$('#exportExcel').addEventListener('click', () => {
-  if (activityLog.length === 0) {
-    alert('Tiada log untuk dieksport.');
+/* ===== ADD / EDIT ===== */
+function openAdd(){
+  editIndex=null;
+  popupTitle.textContent='Add Game';
+  saveText.textContent='Save';
+  saveIcon.querySelector('use').setAttribute('href','#i-add');
+  gName.value='';gImg.value='';gCat.value='PS5';gPlayer.value='1';gNew.checked=false;
+  stationMulti.innerHTML='';
+  for(let i=1;i<=10;i++){
+    const d=document.createElement('div');
+    d.textContent='S'+i;
+    d.onclick=()=>d.classList.toggle('active');
+    stationMulti.appendChild(d);
+  }
+  gamePopup.style.display='flex';
+}
+function editGame(i){
+  const g=games[i];
+  editIndex=i;
+  openAdd();
+  popupTitle.textContent='Edit Game';
+  saveText.textContent='Update';
+  saveIcon.querySelector('use').setAttribute('href','#i-edit');
+  gName.value=g.name;
+  gImg.value=g.img;
+  gCat.value=g.cat||'PS5';
+  gPlayer.value=g.player||1;
+  gNew.checked=g.isNew;
+  [...stationMulti.children].forEach((d,j)=>{
+    if(g.stations.includes(j+1)) d.classList.add('active');
+  });
+}
+function saveGame(){
+  const name = (gName.value || '').trim();
+  if(!name){
+    showToast('Nama game diperlukan');
     return;
   }
-  let csv = 'Masa,Log Aktiviti\n';
-  csv += activityLog.map(entry => 
-    `"${entry.time}","${entry.message.replace(/"/g, '""')}"`
-  ).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const img = (gImg.value || '').trim() || 'https://picsum.photos/300';
+  const cat = ['PS5','PS4'].includes(gCat.value) ? gCat.value : 'PS5';
+  const player = (gPlayer.value === '2') ? 2 : 1;
+  const isNew = gNew.checked;
+
+  const stations = [...stationMulti.children]
+    .map((d,i) => d.classList.contains('active') ? i+1 : null)
+    .filter(n => n !== null);
+
+  const g = { name, img, cat, player, stations, isNew };
+
+  if(editIndex !== null){
+    games[editIndex] = g;
+  } else {
+    games.push(g);
+  }
+  localStorage.setItem(DB, JSON.stringify(games));
+  closePopup();
+  renderGames();
+  if(adminTab.style.display === 'block') renderAdmin();
+  updateStationBadge();
+  showToast(editIndex !== null ? 'Updated successfully' : 'Saved successfully');
+}
+function deleteGame(i){
+  if(confirm('Padam game ini?')){
+    games.splice(i,1);
+    localStorage.setItem(DB,JSON.stringify(games));
+    renderGames();
+    renderAdmin();
+    updateStationBadge();
+  }
+}
+function closePopup(){gamePopup.style.display='none'}
+
+/* ===== AUTH ===== */
+function login(){
+  if(u.value==='ak'&&p.value==='ak7777'){
+    sessionStorage.setItem('admin',1);
+    lock.style.display='none';
+    renderAdmin();
+  } else {
+    showToast('Login failed');
+  }
+}
+function logout(){
+  sessionStorage.removeItem('admin');
+  showGames(document.querySelector('.apple-tab'));
+}
+function goHome(){
+  lock.style.display='none';
+  showGames(document.querySelector('.apple-tab'));
+}
+
+/* ===== BACKUP / RESTORE ===== */
+function backup(){
+  const dataStr = JSON.stringify(games, null, 2);
+  const blob = new Blob([dataStr], {type: 'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `maidaesports_log_${new Date().toISOString().slice(0,10)}.csv`;
-  document.body.appendChild(a);
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  a.download = `mde_games_backup_${timestamp}.json`;
   a.click();
-  document.body.removeChild(a);
   URL.revokeObjectURL(url);
-});
-
-// 🖨️ Print log
-$('#printLog').addEventListener('click', () => {
-  const printContent = `
-    <h2>MAIDA ESPORTS — Log Aktiviti</h2>
-    <p>Tarikh: ${new Date().toLocaleDateString('ms-MY')}</p>
-    <hr>
-    ${activityLog.map(entry => 
-      `<p><strong>${entry.time}</strong> ${entry.message}</p>`
-    ).join('')}
-  `;
-  const win = window.open('', '', 'height=600,width=800');
-  win.document.write(`
-    <html><head><title>Log Aktiviti</title>
-    <style>body{font-family:sans-serif; padding:20px;}</style>
-    </head><body>${printContent}</body></html>
-  `);
-  win.document.close();
-  win.focus();
-  win.print();
-  win.close();
-});
-
-// 💬 WhatsApp
-$('#whatsappLog').addEventListener('click', () => {
-  if (activityLog.length === 0) {
-    alert('Tiada log untuk dikongsi.');
-    return;
-  }
-  const text = encodeURIComponent(
-    '📱 *MAIDA ESPORTS — Log Aktiviti*\n\n' +
-    activityLog.map(entry => 
-      `🕒 ${entry.time} » ${entry.message}`
-    ).join('\n') +
-    '\n\nDijana melalui MAIDA ESPORTS Admin Dashboard.'
-  );
-  const whatsappUrl = `https://wa.me/?text=${text}`;
-  window.open(whatsappUrl, '_blank');
-});
-
-// 🚀 Initialize
-load();
-loadLog();
-loadSessionLog();
-if(stations.length === 0){
-  createStation('eracing', { name:'ERACING ZONE #1', team:'Team Alpha', player:'Player01', duration:3600, status:'running', startedAt: Date.now() - 25000 });
-  createStation('ps4', { name:'PLAYSTATION 4 #1', team:'PixelCrew', player:'P2', duration:7200, status:'idle' });
-  createStation('ps5', { name:'PLAYSTATION 5 #1', team:'NextGen', player:'Ace', duration:10800, status:'idle' });
 }
-renderAll();
-setInterval(tick, 1000);
+function restore(){
+  const i=document.createElement('input');
+  i.type='file';
+  i.accept='.json';
+  i.onchange=e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const r=new FileReader();
+    r.onload=()=>{
+      try{
+        const parsed = JSON.parse(r.result);
+        if(Array.isArray(parsed)){
+          games = parsed
+            .filter(g => g && typeof g.name === 'string' && g.name.trim() !== '')
+            .map(g => ({
+              name: (g.name || '').trim(),
+              img: (g.img || 'https://picsum.photos/300').trim(),
+              cat: ['PS5','PS4'].includes(g.cat) ? g.cat : 'PS5',
+              player: g.player === 2 ? 2 : 1,
+              stations: Array.isArray(g.stations) ? g.stations.map(s => parseInt(s)).filter(s => !isNaN(s) && s >= 1 && s <= 10) : [],
+              isNew: Boolean(g.isNew)
+            }));
+          localStorage.setItem(DB, JSON.stringify(games));
+          renderGames();
+          renderAdmin();
+          updateStationBadge();
+          showToast('Restore successful');
+        } else {
+          throw new Error('Not an array');
+        }
+      } catch (err) {
+        showToast('Fail: JSON tidak sah');
+        console.error(err);
+      }
+    };
+    r.readAsText(file);
+  };
+  i.click();
+}
+
+/* ===== TOAST ===== */
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+/* ===== INIT ===== */
+renderGames();
+updateStationBadge();
+
+/* ===== SWIPE DOWN TO CLOSE (iOS-like) ===== */
+let startY=0,currentY=0,dragging=false;
+const sheet=document.querySelector('.station-box');
+
+sheet.addEventListener('touchstart',e=>{
+  startY=e.touches[0].clientY;
+  dragging=true;
+  sheet.style.transition='none';
+});
+sheet.addEventListener('touchmove',e=>{
+  if(!dragging) return;
+  currentY=e.touches[0].clientY;
+  const diff=currentY-startY;
+  if(diff>0){
+    sheet.style.transform=`translateY(${diff}px)`;
+  }
+});
+sheet.addEventListener('touchend',()=>{
+  dragging=false;
+  sheet.style.transition='transform .55s var(--motion)';
+  const diff=currentY-startY;
+  if(diff>120){
+    closeStationPopup();
+  }else{
+    sheet.style.transform='translateY(0)';
+  }
+  startY=0;currentY=0;
+});
 </script>
+
 </body>
 </html>
 
