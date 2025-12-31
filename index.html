@@ -385,14 +385,14 @@ function haptic(ms=8){
 /* ===== LOAD & CLEAN DATA (ANTI UNDEFINED) ===== */
 let games = JSON.parse(localStorage.getItem(DB)) || [];
 games = games
-  .filter(g => g && typeof g.name === 'string' && g.name.trim() !== '')
+  .filter(g => g && g.name)
   .map(g => ({
-    name: (g.name || '').trim(),
-    img: (g.img || 'https://picsum.photos/300').trim(),
-    cat: typeof g.cat === 'string' && ['PS5','PS4'].includes(g.cat) ? g.cat : 'PS5',
+    name: g.name,
+    img: g.img || 'https://picsum.photos/300',
+    cat: typeof g.cat === 'string' ? g.cat : 'PS5',
     player: g.player === 2 ? 2 : 1,
-    stations: Array.isArray(g.stations) ? g.stations.map(s => parseInt(s)).filter(s => !isNaN(s) && s >= 1 && s <= 10) : [],
-    isNew: Boolean(g.isNew)
+    stations: Array.isArray(g.stations) ? g.stations : [],
+    isNew: g.isNew === true
   }));
 localStorage.setItem(DB, JSON.stringify(games));
 
@@ -417,7 +417,7 @@ function renderGames(list=games){
       <div class="label">
         <strong>${g.name}</strong><br>
         <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
-          <span class="player-badge ${g.player>1?'':'single'}">${'ð®'.repeat(g.player||1)}</span>
+          <span class="player-badge ${g.player>1?'':'single'}">${'🎮'.repeat(g.player||1)}</span>
           <span class="player-badge single">${g.cat||'PS5'}</span>
         </div>
       </div>
@@ -552,33 +552,27 @@ function editGame(i){
   });
 }
 function saveGame(){
-  const name = (gName.value || '').trim();
-  if(!name){
-    showToast('Nama game diperlukan');
-    return;
-  }
-  const img = (gImg.value || '').trim() || 'https://picsum.photos/300';
-  const cat = ['PS5','PS4'].includes(gCat.value) ? gCat.value : 'PS5';
-  const player = (gPlayer.value === '2') ? 2 : 1;
-  const isNew = gNew.checked;
+  if(!gName.value.trim()) return alert('Nama game diperlukan');
+  const stations=[...stationMulti.children]
+    .map((d,i)=>d.classList.contains('active')?i+1:null)
+    .filter(Boolean);
 
-  const stations = [...stationMulti.children]
-    .map((d,i) => d.classList.contains('active') ? i+1 : null)
-    .filter(n => n !== null);
+  const g={
+    name:gName.value,
+    img:gImg.value||'https://picsum.photos/300',
+    cat:gCat.value,
+    player:+gPlayer.value===2?2:1,
+    stations,
+    isNew:gNew.checked
+  };
 
-  const g = { name, img, cat, player, stations, isNew };
-
-  if(editIndex !== null){
-    games[editIndex] = g;
-  } else {
-    games.push(g);
-  }
-  localStorage.setItem(DB, JSON.stringify(games));
+  editIndex!==null ? games[editIndex]=g : games.push(g);
+  localStorage.setItem(DB,JSON.stringify(games));
   closePopup();
   renderGames();
-  if(adminTab.style.display === 'block') renderAdmin();
+  renderAdmin();
   updateStationBadge();
-  showToast(editIndex !== null ? 'Updated successfully' : 'Saved successfully');
+  showToast(editIndex!==null?'Updated successfully':'Saved successfully');
 }
 function deleteGame(i){
   if(confirm('Padam game ini?')){
@@ -597,8 +591,6 @@ function login(){
     sessionStorage.setItem('admin',1);
     lock.style.display='none';
     renderAdmin();
-  } else {
-    showToast('Login failed');
   }
 }
 function logout(){
@@ -612,52 +604,26 @@ function goHome(){
 
 /* ===== BACKUP / RESTORE ===== */
 function backup(){
-  const dataStr = JSON.stringify(games, null, 2);
-  const blob = new Blob([dataStr], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  a.download = `mde_games_backup_${timestamp}.json`;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(
+    new Blob([JSON.stringify(games,null,2)],{type:'application/json'})
+  );
+  a.download='mde_games_backup.json';
   a.click();
-  URL.revokeObjectURL(url);
 }
 function restore(){
   const i=document.createElement('input');
   i.type='file';
-  i.accept='.json';
   i.onchange=e=>{
-    const file = e.target.files[0];
-    if(!file) return;
     const r=new FileReader();
     r.onload=()=>{
-      try{
-        const parsed = JSON.parse(r.result);
-        if(Array.isArray(parsed)){
-          games = parsed
-            .filter(g => g && typeof g.name === 'string' && g.name.trim() !== '')
-            .map(g => ({
-              name: (g.name || '').trim(),
-              img: (g.img || 'https://picsum.photos/300').trim(),
-              cat: ['PS5','PS4'].includes(g.cat) ? g.cat : 'PS5',
-              player: g.player === 2 ? 2 : 1,
-              stations: Array.isArray(g.stations) ? g.stations.map(s => parseInt(s)).filter(s => !isNaN(s) && s >= 1 && s <= 10) : [],
-              isNew: Boolean(g.isNew)
-            }));
-          localStorage.setItem(DB, JSON.stringify(games));
-          renderGames();
-          renderAdmin();
-          updateStationBadge();
-          showToast('Restore successful');
-        } else {
-          throw new Error('Not an array');
-        }
-      } catch (err) {
-        showToast('Fail: JSON tidak sah');
-        console.error(err);
-      }
+      games=JSON.parse(r.result)||[];
+      localStorage.setItem(DB,JSON.stringify(games));
+      renderGames();
+      renderAdmin();
+      updateStationBadge();
     };
-    r.readAsText(file);
+    r.readAsText(e.target.files[0]);
   };
   i.click();
 }
@@ -706,4 +672,3 @@ sheet.addEventListener('touchend',()=>{
 
 </body>
 </html>
-
