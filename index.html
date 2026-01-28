@@ -1,427 +1,314 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ms">
 <head>
 <meta charset="UTF-8">
-<title>PUBG Tournament Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ESPORTS CHALLENGE HSWP 2026</title>
 
 <style>
-:root{
-  --bg:#f5f7fb;
-  --sidebar:#0f172a;
-  --sidebar-active:#6366f1;
-  --sidebar-text:#cbd5f5;
-  --card:#ffffff;
-  --border:#e5e7eb;
-  --primary:#6366f1;
-  --green:#22c55e;
-  --red:#ef4444;
-  --text:#111827;
-}
-*{box-sizing:border-box}
 body{
+  font-family:-apple-system,BlinkMacSystemFont,system-ui;
   margin:0;
-  background:var(--bg);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;
+  background:#fff;
 }
-.app{display:grid;grid-template-columns:260px 1fr;height:100vh}
-
-/* SIDEBAR */
-.sidebar{
-  background:var(--sidebar);
-  padding:20px;
-  color:var(--sidebar-text);
-}
-.logo{
-  font-size:18px;
-  font-weight:700;
-  color:white;
-  margin-bottom:30px;
-}
-.nav-item{
-  padding:10px 14px;
-  border-radius:10px;
-  cursor:pointer;
-  margin-bottom:6px;
-}
-.nav-item.active{
-  background:var(--sidebar-active);
-  color:white;
+h1{text-align:center;font-size:18px;margin:12px 0}
+.tabs{text-align:center;margin-bottom:8px}
+.tab{
+  padding:8px 18px;
+  border-radius:20px;
+  border:1px solid #ddd;
+  background:#c9a24d;
+  font-weight:600;
 }
 
-/* MAIN */
-.main{display:flex;flex-direction:column}
-.header{
-  height:64px;
-  background:white;
-  border-bottom:1px solid var(--border);
+.container{
   display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 24px;
-}
-.header h2{margin:0;font-size:18px}
-.status{
-  padding:6px 14px;
-  border-radius:999px;
-  font-size:13px;
-  font-weight:700;
-  cursor:pointer;
-}
-.content{padding:24px;overflow:auto}
-
-/* SECTION */
-.section{display:none}
-.section.active{display:block}
-
-/* ADMIN GRID */
-.admin-grid{
-  display:grid;
-  grid-template-columns:1.6fr 1fr 1fr;
-  gap:24px;
+  flex-wrap:wrap;
+  gap:12px;
+  padding:10px;
 }
 .card{
-  position:relative;
-  background:var(--card);
-  border:1px solid var(--border);
+  flex:1;
+  min-width:340px;
+  border:1px solid #e5e5e5;
   border-radius:16px;
-  padding:20px;
+  padding:10px;
 }
-.card.locked{
-  pointer-events:none;
-  filter:blur(1px);
-}
-.lock-overlay{
-  position:absolute;
-  inset:0;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  font-weight:700;
-  color:#991b1b;
-}
-.card.locked .lock-overlay{display:flex}
+.card h3{margin:6px 0}
 
-h3{margin:0 0 14px;font-size:16px}
-.label{font-size:13px;font-weight:600;margin-bottom:6px;display:block}
-.input{
-  width:100%;
-  padding:10px 14px;
-  border-radius:10px;
-  border:1px solid var(--border);
+.map-tabs button{
+  padding:6px 14px;
+  border-radius:20px;
+  border:1px solid #ddd;
+  background:#fff;
+  margin-right:6px;
 }
-table{width:100%;border-collapse:collapse}
-th,td{border:1px solid var(--border);padding:10px;text-align:center}
-th{background:#f9fafb}
-select{padding:8px 14px;border-radius:12px}
-.btn{
-  padding:10px 16px;
-  border-radius:999px;
+.map-tabs .active{background:#c9a24d}
+
+button{
   border:none;
-  font-weight:600;
+  padding:6px 14px;
+  border-radius:14px;
+  font-size:12px;
   cursor:pointer;
 }
-.blue{background:var(--primary);color:white}
-.green{background:var(--green);color:white}
-.red{background:var(--red);color:white}
-.btn-row{display:flex;gap:12px;margin-top:14px}
+.lock{background:#27ae60;color:#fff}
+.unlock{background:#7f8c8d;color:#fff}
+.reset{background:#c0392b;color:#fff}
 
-/* TEAM */
-.team-count{display:flex;gap:10px;flex-wrap:wrap}
-.team-pill{
-  padding:10px 16px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  cursor:pointer;
-}
-.team-pill.active{background:var(--primary);color:white}
-
-/* MAP DB */
-.map-pill{
-  display:inline-flex;
-  gap:8px;
-  padding:6px 12px;
-  border-radius:999px;
-  background:#eef2ff;
-  margin:4px;
-}
-.map-pill button{
-  border:none;background:none;color:#ef4444;font-weight:700;cursor:pointer;
-}
-
-/* ADVANCED */
-.advanced-toggle{
-  margin-top:12px;
+table{
+  width:100%;
+  border-collapse:collapse;
   font-size:13px;
-  cursor:pointer;
+}
+th,td{
+  padding:6px;
+  border-bottom:1px solid #eee;
+  text-align:center;
+}
+td:first-child,th:first-child{text-align:left}
+
+.kill-input{
+  width:42px;
+  padding:4px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  text-align:center;
+  background:#f7f7f7;
 }
 
-/* MODAL */
-.modal{
+/* ===== POPUP KILL ===== */
+.overlay{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.4);
+  background:rgba(0,0,0,.35);
   display:none;
-  align-items:center;
-  justify-content:center;
+  align-items:flex-end;
   z-index:999;
 }
-.modal.active{display:flex}
-.modal-box{
-  background:white;
-  border-radius:16px;
-  width:420px;
-  padding:20px;
+.kill-modal{
+  background:#f4f4f6;
+  width:100%;
+  max-width:420px;
+  margin:auto;
+  border-radius:18px 18px 0 0;
+  padding:14px;
 }
+.kill-title{text-align:center;font-weight:600}
+.kill-wheel{
+  display:flex;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  padding:10px 0;
+}
+.kill-wheel::-webkit-scrollbar{display:none}
+.kill-item{
+  flex:0 0 80px;
+  text-align:center;
+  font-size:26px;
+  font-weight:600;
+  color:#aaa;
+  scroll-snap-align:center;
+}
+.kill-item.active{color:#000;font-size:34px}
+.kill-actions{
+  display:flex;
+  gap:10px;
+}
+.kill-actions button{
+  flex:1;
+  padding:10px;
+  border-radius:14px;
+}
+.btn-ok{background:#c9a24d;font-weight:bold}
+.btn-cancel{background:#ddd}
 </style>
 </head>
 
 <body>
 
-<div class="app">
+<h1>ESPORTS CHALLENGE HSWP 2026</h1>
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="logo">🎮 PUBG DASHBOARD</div>
-  <div class="nav-item active" onclick="openTab('home',this)">HOME</div>
-  <div class="nav-item" onclick="openTab('admin',this)">ADMIN PANEL</div>
-  <div class="nav-item" onclick="openTab('team',this)">TEAM</div>
-  <div class="nav-item" onclick="openTab('point',this)">POINT SYSTEM</div>
-  <div class="nav-item" onclick="openTab('standing',this)">STANDING</div>
-</aside>
+<div class="tabs">
+  <span class="tab">DASHBOARD</span>
+</div>
 
-<div class="main">
+<div class="container">
 
-<header class="header">
-  <h2 id="pageTitle">HOME</h2>
-  <div id="lockStatus" class="status" onclick="toggleAdminLock()">🔒 Locked</div>
-</header>
-
-<main class="content">
-
-<section id="home" class="section active">
-  <div class="card"><h3>Dashboard Home</h3></div>
-</section>
-
-<section id="admin" class="section">
-<div class="admin-grid">
-
+<!-- MAP STANDING -->
 <div class="card">
-<div class="lock-overlay">🔒 Locked</div>
-<h3>Tournament Setup</h3>
-<label class="label">Tournament Name</label>
-<input id="tournamentName" class="input">
+  <h3>MAP STANDING</h3>
 
-<h3>Round & Map</h3>
-<table>
-<thead><tr><th>No</th><th>Map</th></tr></thead>
-<tbody id="roundTable"></tbody>
-</table>
+  <div class="map-tabs">
+    <button class="active">Erangel</button>
+    <button>Miramar</button>
+    <button>Rondo</button>
+  </div>
 
-<div class="btn-row">
-<button class="btn green" onclick="addRound()">+ Add Round</button>
-<button class="btn red" onclick="removeRound()">− Remove</button>
+  <div style="margin:8px 0">
+    <button id="lockBtn" class="lock" onclick="toggleLock()">LOCK</button>
+    <button class="reset" onclick="resetMap()">RESET MAP</button>
+  </div>
+
+  <table id="mapTable">
+    <thead>
+      <tr>
+        <th>No</th><th>Team</th><th>WWCD</th>
+        <th>Placement</th><th>Kill</th><th>Total</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 
-<h3>Map Database</h3>
-<div class="btn-row">
-<input id="newMap" class="input" placeholder="Tambah map">
-<button class="btn blue" onclick="addMap()">Add</button>
-</div>
-<div id="mapList"></div>
-</div>
-
+<!-- ALL STANDING -->
 <div class="card">
-<div class="lock-overlay">🔒 Locked</div>
-<h3>Tie-Break</h3>
-<table>
-<thead><tr><th>#</th><th>Code</th><th>Description</th></tr></thead>
-<tbody id="tieTable"></tbody>
-</table>
-<button class="btn blue" onclick="openTieModal()">Edit Tie-Break</button>
-
-<h3>Team Count</h3>
-<div id="teamCount" class="team-count"></div>
-<button class="btn blue" onclick="applyTeam()">Apply</button>
-</div>
-
-<div class="card">
-<div class="lock-overlay">🔒 Locked</div>
-<h3>Point System</h3>
-<table>
-<thead><tr><th>Place</th><th>Point</th></tr></thead>
-<tbody id="pointMain"></tbody>
-</table>
-
-<div class="advanced-toggle" onclick="toggleAdvanced()">▶ Placement 9–20</div>
-<div id="advancedBox" style="display:none">
-<table><tbody id="pointAdv"></tbody></table>
-</div>
-
-<label class="label">Kill Point</label>
-<input id="killPoint" class="input" type="number">
-
-<button class="btn green" onclick="saveAll()">💾 Save All</button>
+  <h3>ALL STANDING</h3>
+  <table id="allTable">
+    <thead>
+      <tr>
+        <th>No</th><th>Team</th><th>WWCD</th>
+        <th>Placement</th><th>Kill</th><th>Total</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 
 </div>
-</section>
 
-<section id="team" class="section"><div class="card"><h3>TEAM</h3></div></section>
-<section id="point" class="section"><div class="card"><h3>POINT SYSTEM</h3></div></section>
-<section id="standing" class="section"><div class="card"><h3>STANDING</h3></div></section>
+<!-- POPUP KILL -->
+<div id="killOverlay" class="overlay">
+  <div class="kill-modal">
+    <div class="kill-title">SET KILL</div>
+    <div class="kill-wheel" id="killWheel"></div>
+    <div class="kill-actions">
+      <button class="btn-cancel" onclick="closeKill()">Cancel</button>
+      <button class="btn-ok" onclick="saveKill()">Save</button>
+    </div>
+  </div>
+</div>
 
-</main>
-</div>
-</div>
-
-<div class="modal" id="tieModal">
-<div class="modal-box">
-<h3>Edit Tie-Break</h3>
-<div id="tieSelectors"></div>
-<button class="btn green" onclick="applyTie()">Apply</button>
-<button class="btn red" onclick="closeTie()">Close</button>
-</div>
-</div>
+<audio id="beep">
+  <source src="data:audio/wav;base64,UklGRhQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=">
+</audio>
 
 <script>
-const ADMIN_PASSCODE="77770";
-const TIE_OPTIONS=[
- {code:"TP",label:"Total Point"},
- {code:"W",label:"WWCD"},
- {code:"K",label:"Kill"},
- {code:"P",label:"Placement"},
- {code:"LMP",label:"Last Map Placement"}
+const teams=[
+"OL","Zentra","JURNEE 52","HEe ESPORT","AING BALANG",
+"MANTARAY GIANT","SolJar","Yelnats","Martabak Esport",
+"THE RED X","SANTAi KiLLERs","TOP PANDA","ROBOX","DND",
+"FAM UNITED","REDBULL 26 ESPORTS"
 ];
 
-let config=JSON.parse(localStorage.getItem("PUBG_ADMIN"))||{
- tournamentName:"ESPORTS CHALLENGE HSWP 2026 : PUBG MOBILE",
- maps:["Erangel","Miramar","Sanhok","Vikendi","Rondo"],
- rounds:["Erangel","Miramar","Rondo"],
- teamCount:20,
- tieBreak:["TP","W","K","P","LMP"],
- placementPoints:{},
- killPoint:1,
- adminLock:true
-};
+let locked=false;
 
-for(let i=1;i<=20;i++){
- if(config.placementPoints[i]==null)
-  config.placementPoints[i]=i<=8?[0,10,6,5,4,3,2,1,1][i]||0:0;
-}
+let mapData=teams.map((t,i)=>({
+  team:t, wwcd:i==0?1:0, place:Math.max(10-i,0), kill:0
+}));
 
-function openTab(id,el){
- document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
- document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
- document.getElementById(id).classList.add("active");
- el.classList.add("active");
- pageTitle.textContent=el.textContent;
-}
+let allData=JSON.parse(localStorage.getItem("allData"))
+|| teams.map(t=>({team:t,wwcd:0,place:0,kill:0,total:0}));
 
-function toggleAdminLock(){
- if(!config.adminLock){
-  if(confirm("Lock Admin Panel?")){
-   config.adminLock=true;save();applyLock();
-  }
-  return;
- }
- const p=prompt("Masukkan Admin Passcode:");
- if(p===ADMIN_PASSCODE){
-  config.adminLock=false;save();applyLock();
- }else alert("❌ Passcode salah");
-}
-
-function applyLock(){
- document.querySelectorAll(".card")
-  .forEach(c=>c.classList.toggle("locked",config.adminLock));
- lockStatus.textContent=config.adminLock?"🔒 Locked":"🔓 Editable";
- lockStatus.style.background=config.adminLock?"#fee2e2":"#dcfce7";
- lockStatus.style.color=config.adminLock?"#991b1b":"#166534";
- document.querySelectorAll("input,select,button").forEach(el=>{
-  if(el.closest(".modal")) return;
-  if(el.innerText?.includes("Save")) return;
-  el.disabled=config.adminLock;
- });
+function renderMap(){
+  const tb=document.querySelector("#mapTable tbody");
+  tb.innerHTML="";
+  mapData.forEach((r,i)=>{
+    r.total=r.place+r.kill;
+    tb.innerHTML+=`
+    <tr>
+      <td>${i+1}</td>
+      <td>${r.team}</td>
+      <td>${r.wwcd?"WWCD":""}</td>
+      <td>${r.place}</td>
+      <td>
+        <input class="kill-input" readonly value="${r.kill}"
+        onclick="openKill(${i})">
+      </td>
+      <td>${r.total}</td>
+    </tr>`;
+  });
 }
 
 function renderAll(){
- tournamentName.value=config.tournamentName;
- killPoint.value=config.killPoint;
- renderRounds();renderMaps();renderTeam();renderTie();renderPoints();applyLock();
-}
-function renderRounds(){
- roundTable.innerHTML="";
- config.rounds.forEach((m,i)=>{
-  roundTable.innerHTML+=`<tr><td>${i+1}</td><td>${m}</td></tr>`;
- });
-}
-function renderMaps(){
- mapList.innerHTML="";
- config.maps.forEach(m=>{
-  mapList.innerHTML+=`<div class="map-pill">${m}
-  <button onclick="removeMap('${m}')">×</button></div>`;
- });
-}
-function renderTeam(){
- teamCount.innerHTML="";
- for(let i=16;i<=20;i++){
-  teamCount.innerHTML+=`
-  <div class="team-pill ${i===config.teamCount?"active":""}"
-   onclick="config.teamCount=${i};renderTeam()">${i}</div>`;
- }
-}
-function renderTie(){
- tieTable.innerHTML="";
- config.tieBreak.forEach((c,i)=>{
-  const t=TIE_OPTIONS.find(o=>o.code===c);
-  tieTable.innerHTML+=`<tr><td>${i+1}</td><td>${t.code}</td><td>${t.label}</td></tr>`;
- });
-}
-function renderPoints(){
- pointMain.innerHTML="";pointAdv.innerHTML="";
- for(let i=1;i<=20;i++){
-  const row=`<tr><td>${i}</td>
-  <td><input class="input" type="number"
-  value="${config.placementPoints[i]}"
-  onchange="config.placementPoints[${i}]=Number(this.value)"></td></tr>`;
-  if(i<=8) pointMain.innerHTML+=row;
-  else pointAdv.innerHTML+=row;
- }
+  const tb=document.querySelector("#allTable tbody");
+  tb.innerHTML="";
+  allData.forEach((r,i)=>{
+    tb.innerHTML+=`
+    <tr>
+      <td>${i+1}</td><td>${r.team}</td>
+      <td>${r.wwcd}</td>
+      <td>${r.place}</td>
+      <td>${r.kill}</td>
+      <td>${r.total}</td>
+    </tr>`;
+  });
 }
 
-function addRound(){if(config.adminLock)return;config.rounds.push(config.maps[0]);renderRounds();}
-function removeRound(){if(config.adminLock)return;if(config.rounds.length>1){config.rounds.pop();renderRounds();}}
-function addMap(){if(config.adminLock)return;if(!newMap.value||config.maps.includes(newMap.value))return;config.maps.push(newMap.value);newMap.value="";renderMaps();renderRounds();}
-function removeMap(m){if(config.adminLock)return;if(config.rounds.includes(m))return alert("Map digunakan");config.maps=config.maps.filter(x=>x!==m);renderMaps();renderRounds();}
-function applyTeam(){alert("Team Count Applied");}
+function toggleLock(){
+  document.getElementById("beep").play();
+  locked=!locked;
+  const btn=document.getElementById("lockBtn");
+  btn.textContent=locked?"UNLOCK":"LOCK";
+  btn.className=locked?"unlock":"lock";
 
-function openTieModal(){
- if(config.adminLock)return;
- tieSelectors.innerHTML="";
- config.tieBreak.forEach((c,i)=>{
-  tieSelectors.innerHTML+=`
-  <div class="modal-row">
-   <b>${i+1}</b>
-   <select onchange="config.tieBreak[${i}]=this.value">
-   ${TIE_OPTIONS.map(o=>`<option value="${o.code}" ${o.code===c?"selected":""}>${o.code} – ${o.label}</option>`).join("")}
-   </select></div>`;
- });
- tieModal.classList.add("active");
-}
-function closeTie(){tieModal.classList.remove("active")}
-function applyTie(){
- if(new Set(config.tieBreak).size!==config.tieBreak.length)return alert("Duplicate");
- renderTie();closeTie();
+  if(locked){
+    mapData.forEach((r,i)=>{
+      allData[i].wwcd+=r.wwcd;
+      allData[i].place+=r.place;
+      allData[i].kill+=r.kill;
+      allData[i].total=allData[i].place+allData[i].kill;
+    });
+    localStorage.setItem("allData",JSON.stringify(allData));
+    renderAll();
+    alert("Map dikunci & data disimpan");
+  }
 }
 
-function toggleAdvanced(){
- advancedBox.style.display=advancedBox.style.display==="none"?"block":"none";
+function resetMap(){
+  if(!confirm("Reset MAP ini?"))return;
+  document.getElementById("beep").play();
+  mapData.forEach(r=>r.kill=0);
+  renderMap();
 }
 
-function save(){localStorage.setItem("PUBG_ADMIN",JSON.stringify(config))}
-function saveAll(){config.tournamentName=tournamentName.value;config.killPoint=Number(killPoint.value);save();alert("Saved")}
+let currentIndex=0,selectedKill=0;
 
+function openKill(i){
+  currentIndex=i;
+  selectedKill=mapData[i].kill;
+  const w=document.getElementById("killWheel");
+  w.innerHTML="";
+  for(let k=0;k<=99;k++){
+    w.innerHTML+=`<div class="kill-item ${k==selectedKill?"active":""}">${k}</div>`;
+  }
+  setTimeout(()=>w.scrollLeft=selectedKill*80,50);
+  document.getElementById("killOverlay").style.display="flex";
+  w.onscroll=()=>highlight(w);
+}
+
+function highlight(w){
+  const c=w.scrollLeft+w.offsetWidth/2;
+  [...w.children].forEach((el,i)=>{
+    const e=el.offsetLeft+el.offsetWidth/2;
+    el.classList.toggle("active",Math.abs(e-c)<40);
+    if(Math.abs(e-c)<40)selectedKill=i;
+  });
+}
+
+function saveKill(){
+  mapData[currentIndex].kill=selectedKill;
+  closeKill();
+  renderMap();
+}
+
+function closeKill(){
+  document.getElementById("killOverlay").style.display="none";
+}
+
+renderMap();
 renderAll();
 </script>
+
 </body>
 </html>
