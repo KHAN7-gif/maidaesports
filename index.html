@@ -5,114 +5,48 @@
 <title>ESPORTS CHALLENGE HSWP 2026</title>
 
 <style>
-body{
-  font-family:Arial, Helvetica, sans-serif;
-  background:#f5f5f5;
-  margin:0;
-  padding:20px;
-}
+body{font-family:Arial;background:#f5f5f5;margin:0;padding:20px}
 h1{text-align:center}
 
-.container{
-  display:grid;
-  grid-template-columns:1.2fr 1fr;
-  gap:20px;
-}
+.container{display:grid;grid-template-columns:1.2fr 1fr;gap:20px}
+.card{background:#fff;border-radius:20px;padding:20px}
 
-.card{
-  background:#fff;
-  border-radius:20px;
-  padding:20px;
-}
-
-.tabs button{
-  border:none;
-  padding:10px 20px;
-  border-radius:20px;
-  margin-right:6px;
-  cursor:pointer;
-  background:#eee;
-  font-size:15px;
-}
+.tabs button{border:none;padding:10px 20px;border-radius:20px;margin-right:6px;background:#eee;cursor:pointer}
 .tabs .active{background:#caa24d}
 
-.btn{
-  border:none;
-  padding:10px 22px;
-  border-radius:22px;
-  color:#fff;
-  cursor:pointer;
-  font-size:15px;
-}
+.btn{border:none;padding:10px 22px;border-radius:22px;color:#fff;cursor:pointer}
 .btn-lock{background:#2ecc71}
 .btn-unlock{background:#999}
 .btn-reset{background:#e74c3c}
 
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:16px;
-}
-th,td{
-  border-bottom:1px solid #eee;
-  padding:14px 10px;
-  text-align:center;
-  font-size:15px;
-}
+table{width:100%;border-collapse:collapse;margin-top:16px}
+th,td{border-bottom:1px solid #eee;padding:14px 10px;text-align:center}
 td.team{text-align:left}
 
-.badge{
-  background:#000;
-  color:#fff;
-  padding:4px 10px;
-  border-radius:14px;
-  font-size:12px;
-}
-
-.box{
-  background:#eee;
-  border-radius:14px;
-  padding:8px 14px;
-  min-width:40px;
-  display:inline-block;
-}
+.badge{background:#000;color:#fff;padding:4px 10px;border-radius:14px;font-size:12px}
+.box{background:#eee;border-radius:14px;padding:8px 14px;min-width:40px;display:inline-block}
 .clickable{cursor:pointer}
 
-/* Drag handle (desktop only) */
-.drag-handle{
-  cursor:grab;
-  font-size:20px;
-  color:#888;
-  margin-right:6px;
-}
+.drag-handle{font-size:20px;color:#888;margin-right:6px}
+.move-btn{border:none;background:#eee;border-radius:10px;padding:6px 10px;font-size:16px}
 
-/* Up / Down button */
-.move-btn{
-  border:none;
-  background:#eee;
-  border-radius:10px;
-  padding:6px 10px;
-  font-size:16px;
-  margin:0 2px;
-}
-.move-btn:active{background:#caa24d}
-
-/* Hide drag on mobile */
-.hide-drag .drag-handle{display:none}
-
-/* Toast */
 .toast{
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#333;
-  color:#fff;
-  padding:12px 20px;
-  border-radius:18px;
-  display:none;
-  z-index:999;
+ position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+ background:#333;color:#fff;padding:12px 20px;border-radius:18px;display:none
 }
+
+/* popup */
+.popup{
+ position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;
+ align-items:center;justify-content:center;z-index:1000
+}
+.popup-box{background:#fff;border-radius:18px;padding:20px}
+.kill-grid{display:grid;grid-template-columns:repeat(5,60px);gap:8px}
+.kill-grid div{border:1px solid #000;padding:10px;text-align:center;cursor:pointer}
+.kill-grid .active{background:#caa24d}
+.popup-actions{text-align:right;margin-top:12px}
+.btn-save{background:#2ecc71}
+.btn-cancel{background:#aaa}
 </style>
 </head>
 
@@ -122,8 +56,7 @@ td.team{text-align:left}
 
 <div class="container">
 
-<!-- MAP STANDING -->
-<div class="card" id="mapCard">
+<div class="card">
 <h3>MAP STANDING</h3>
 
 <div class="tabs">
@@ -140,30 +73,21 @@ td.team{text-align:left}
 <table>
 <thead>
 <tr>
-  <th>No</th>
-  <th style="text-align:left">Team</th>
-  <th>WWCD</th>
-  <th>Placement</th>
-  <th>Kill</th>
-  <th>Total</th>
+  <th>No</th><th style="text-align:left">Team</th>
+  <th>WWCD</th><th>Placement</th><th>Kill</th><th>Total</th>
 </tr>
 </thead>
 <tbody id="mapTable"></tbody>
 </table>
 </div>
 
-<!-- ALL STANDING -->
 <div class="card">
 <h3>ALL STANDING</h3>
 <table>
 <thead>
 <tr>
-  <th>No</th>
-  <th style="text-align:left">Team</th>
-  <th>WWCD</th>
-  <th>Placement</th>
-  <th>Kill</th>
-  <th>Total</th>
+  <th>No</th><th style="text-align:left">Team</th>
+  <th>WWCD</th><th>Placement</th><th>Kill</th><th>Total</th>
 </tr>
 </thead>
 <tbody id="allTable"></tbody>
@@ -174,49 +98,52 @@ td.team{text-align:left}
 
 <div class="toast" id="toast"></div>
 
-<script>
-/* ================= DEVICE DETECT ================= */
-const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-if(IS_IOS) document.getElementById("mapCard").classList.add("hide-drag");
+<div class="popup" id="killPopup">
+ <div class="popup-box">
+  <h4>Pilih Kill</h4>
+  <div class="kill-grid" id="killGrid"></div>
+  <div class="popup-actions">
+   <button class="btn btn-cancel" onclick="closeKill()">CANCEL</button>
+   <button class="btn btn-save" onclick="saveKill()">SAVE</button>
+  </div>
+ </div>
+</div>
 
-/* ================= DATA ================= */
+<script>
+const IS_IOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
 const STORAGE_KEY="HSWP_2026";
+
 const TEAMS=[
 "OL","Zentra","JURNEE 52","HEe ESPORT","AING BALANG","MANTARAY GIANT",
 "SolJar","Yelnats","Martabak Esport","THE RED X","SANTAi KiLLERs",
 "TOP PANDA","ROBOX","DND","FAM | United","REDBULL 26 ESPORTS"
 ];
+
 const placementPoint=p=>p===1?10:p===2?6:p===3?5:p===4?4:p===5?3:p===6?2:(p===7||p===8)?1:0;
 
-/* ================= STATE ================= */
-function freshState(){
- return {
-  currentMap:"erangel",
-  maps:{
-   erangel:{locked:false,order:[...TEAMS],data:{}},
-   miramar:{locked:false,order:[...TEAMS],data:{}},
-   rondo:{locked:false,order:[...TEAMS],data:{}}
-  }
- };
-}
+let state=JSON.parse(localStorage.getItem(STORAGE_KEY))||{
+ currentMap:"erangel",
+ maps:{erangel:{locked:false,order:[...TEAMS],data:{}},
+       miramar:{locked:false,order:[...TEAMS],data:{}},
+       rondo:{locked:false,order:[...TEAMS],data:{}}}
+};
 
-let state=JSON.parse(localStorage.getItem(STORAGE_KEY))||freshState();
 TEAMS.forEach(t=>{
  for(const m in state.maps){
   if(!state.maps[m].data[t]) state.maps[m].data[t]={kill:0};
  }
 });
-function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
 
-/* ================= UI ================= */
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
 const $=id=>document.getElementById(id);
+
 function toast(msg){
  $("toast").innerText=msg;
  $("toast").style.display="block";
  setTimeout(()=>$("toast").style.display="none",2000);
 }
 
-/* ================= MAP ================= */
+/* MAP */
 ["erangel","miramar","rondo"].forEach(m=>{
  $("tab-"+m).onclick=()=>switchMap(m);
 });
@@ -224,78 +151,97 @@ function switchMap(m){
  state.currentMap=m;
  document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
  $("tab-"+m).classList.add("active");
- save(); render();
+ render();
 }
 
-/* ================= LOCK ================= */
+/* LOCK / UNLOCK */
 $("lockBtn").onclick=()=>{
  const map=state.maps[state.currentMap];
  map.locked=!map.locked;
+
  $("lockBtn").innerText=map.locked?"UNLOCK":"LOCK";
  $("lockBtn").className="btn "+(map.locked?"btn-unlock":"btn-lock");
- toast(map.locked?"🔒 Map dikunci":"🔓 Map dibuka");
+
+ toast(map.locked?"🔒 Map dikunci":"🔓 Map dibuka (data kekal)");
  save(); render();
 };
 
+/* RESET */
 $("resetBtn").onclick=()=>{
  if(!confirm("Reset map ini?"))return;
  const map=state.maps[state.currentMap];
- map.locked=false;
+ map.locked=true;
  map.order=[...TEAMS];
  TEAMS.forEach(t=>map.data[t].kill=0);
+
+ $("lockBtn").innerText="LOCK";
+ $("lockBtn").className="btn btn-lock";
+
+ toast("♻️ Map di reset & dikunci");
  save(); render();
 };
 
-/* ================= MOVE (iOS) ================= */
+/* MOVE */
 function moveUp(i){
- if(i===0) return;
- const o=state.maps[state.currentMap].order;
- [o[i-1],o[i]]=[o[i],o[i-1]];
+ const map=state.maps[state.currentMap];
+ if(map.locked||i===0)return;
+ [map.order[i-1],map.order[i]]=[map.order[i],map.order[i-1]];
  save(); render();
 }
 function moveDown(i){
- const o=state.maps[state.currentMap].order;
- if(i===o.length-1) return;
- [o[i+1],o[i]]=[o[i],o[i+1]];
+ const map=state.maps[state.currentMap];
+ if(map.locked||i===map.order.length-1)return;
+ [map.order[i+1],map.order[i]]=[map.order[i],map.order[i+1]];
  save(); render();
 }
 
-/* ================= DRAG (DESKTOP) ================= */
-let dragIndex=null;
-function dragStart(i){
- if(IS_IOS || state.maps[state.currentMap].locked) return;
- dragIndex=i;
-}
-function dropRow(i){
- if(IS_IOS) return;
- const o=state.maps[state.currentMap].order;
- o.splice(i,0,o.splice(dragIndex,1)[0]);
- save(); render();
-}
+/* KILL POPUP */
+let selectedTeam=null,tempKill=0;
+function openKill(team){
+ const map=state.maps[state.currentMap];
+ if(map.locked)return;
+ selectedTeam=team;
+ tempKill=map.data[team].kill;
 
-/* ================= RENDER ================= */
+ const g=$("killGrid"); g.innerHTML="";
+ for(let i=0;i<=34;i++){
+  const d=document.createElement("div");
+  d.innerText=i;
+  if(i===tempKill)d.classList.add("active");
+  d.onclick=()=>{
+   tempKill=i;
+   document.querySelectorAll(".kill-grid div").forEach(x=>x.classList.remove("active"));
+   d.classList.add("active");
+  };
+  g.appendChild(d);
+ }
+ $("killPopup").style.display="flex";
+}
+function saveKill(){
+ state.maps[state.currentMap].data[selectedTeam].kill=tempKill;
+ save(); closeKill(); render();
+}
+function closeKill(){$("killPopup").style.display="none";}
+
+/* RENDER */
 function render(){
  const map=state.maps[state.currentMap];
  const tb=$("mapTable"); tb.innerHTML="";
  map.order.forEach((t,i)=>{
-  const p=placementPoint(i+1);
-  const k=map.data[t].kill;
+  const p=placementPoint(i+1),k=map.data[t].kill;
   tb.innerHTML+=`
   <tr>
-   <td draggable="${!IS_IOS}"
-     ondragstart="dragStart(${i})"
-     ondragover="event.preventDefault()"
-     ondrop="dropRow(${i})">
+   <td>
     ${IS_IOS?`
-      <button class="move-btn" onclick="moveUp(${i})">⬆️</button>
-      <button class="move-btn" onclick="moveDown(${i})">⬇️</button>
+     <button class="move-btn" onclick="moveUp(${i})">⬆️</button>
+     <button class="move-btn" onclick="moveDown(${i})">⬇️</button>
     `:`<span class="drag-handle">≡</span>`}
     ${i+1}
    </td>
    <td class="team">${t}</td>
    <td>${i===0?'<span class="badge">WWCD</span>':''}</td>
    <td><span class="box">${p}</span></td>
-   <td><span class="box">${k}</span></td>
+   <td><span class="box clickable" onclick="openKill('${t}')">${k}</span></td>
    <td>${p+k}</td>
   </tr>`;
  });
@@ -305,11 +251,11 @@ function render(){
 function renderAll(){
  const agg={}; TEAMS.forEach(t=>agg[t]={wwcd:0,placement:0,kill:0,total:0});
  for(const m in state.maps){
-  const map=state.maps[m]; if(!map.locked) continue;
+  const map=state.maps[m]; if(!map.locked)continue;
   map.order.forEach((t,i)=>{
    const p=placementPoint(i+1),k=map.data[t].kill;
    agg[t].placement+=p; agg[t].kill+=k; agg[t].total+=p+k;
-   if(i===0) agg[t].wwcd++;
+   if(i===0)agg[t].wwcd++;
   });
  }
  const sorted=[...TEAMS].sort((a,b)=>{
@@ -328,7 +274,7 @@ function renderAll(){
  });
 }
 
-/* ================= INIT ================= */
+/* INIT */
 switchMap(state.currentMap);
 </script>
 
