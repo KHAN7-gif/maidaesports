@@ -13,10 +13,10 @@ body{
   padding:16px;
 }
 h1{
-  text-align:center;
   color:#fff;
-  margin:0 0 14px;
-  font-size:22px;
+  font-size:18px;
+  margin:0 0 12px;
+  font-weight:700;
 }
 
 /* ================= LAYOUT ================= */
@@ -26,18 +26,18 @@ h1{
   gap:16px;
 }
 .card{
-  background:rgba(255,255,255,.9);
+  background:rgba(255,255,255,.92);
   backdrop-filter:blur(14px);
   border-radius:22px;
   padding:16px;
   box-shadow:0 10px 26px rgba(0,0,0,.35);
 }
-
-/* ================= HEADER ================= */
 .card h3{
   margin:0 0 6px;
-  font-size:16px;
+  font-size:15px;
 }
+
+/* ================= MAP HEADER ================= */
 .map-header{
   display:flex;
   justify-content:space-between;
@@ -46,7 +46,7 @@ h1{
   margin-bottom:6px;
 }
 
-/* ================= TABS ================= */
+/* ================= MAP TABS ================= */
 .tabs button{
   border:none;
   padding:6px 14px;
@@ -86,15 +86,12 @@ th,td{
   padding:6px;
   text-align:center;
   font-size:12px;
-  line-height:1.2;
 }
 td.team{text-align:left}
 
 /* ================= DRAG ================= */
 .drag-row{
-  transition:
-    background .15s ease,
-    transform .25s cubic-bezier(.2,.8,.3,1);
+  transition:background .15s, transform .25s cubic-bezier(.2,.8,.3,1);
 }
 .drag-row.dragging{
   background:rgba(214,177,95,.35);
@@ -124,8 +121,6 @@ td.team{text-align:left}
 /* ================= BADGE ================= */
 .badge{
   display:inline-flex;
-  align-items:center;
-  justify-content:center;
   padding:4px 12px;
   border-radius:999px;
   font-size:11px;
@@ -255,9 +250,8 @@ const teams=[
  "TOP PANDA","ROBOX","DND","FAM | United","REDBULL 26 ESPORTS"
 ];
 const maps=["erangel","miramar","rondo"];
-const point=p=>[10,6,5,4,3,2,1,1][p]||0;
+const point=i=>[10,6,5,4,3,2,1,1][i]||0;
 
-/* ================= STATE ================= */
 let state=JSON.parse(localStorage.getItem("hswp"))||{
  currentMap:"erangel",
  maps:{
@@ -269,9 +263,9 @@ let state=JSON.parse(localStorage.getItem("hswp"))||{
 maps.forEach(m=>teams.forEach(t=>{
  if(state.maps[m].kill[t]===undefined) state.maps[m].kill[t]=null;
 }));
-function save(){localStorage.setItem("hswp",JSON.stringify(state));}
+const save=()=>localStorage.setItem("hswp",JSON.stringify(state));
 
-/* ================= MAP ================= */
+/* ================= MAP SWITCH ================= */
 function switchMap(m){
  state.currentMap=m;
  document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
@@ -302,61 +296,57 @@ let dragFrom=null;
 function enableDrag(){
  const map=state.maps[state.currentMap];
  document.querySelectorAll("#mapTable tr").forEach((row,i)=>{
-   row.draggable=!map.locked;
-   row.classList.remove("dragging","drag-over");
+  row.draggable=!map.locked;
+  row.classList.remove("dragging","drag-over");
 
-   row.addEventListener("dragstart",e=>{
-     if(map.locked)return;
-     dragFrom=i;
-     row.classList.add("dragging");
-     e.dataTransfer.effectAllowed="move";
-   });
+  row.addEventListener("dragstart",e=>{
+    if(map.locked)return;
+    dragFrom=i;
+    row.classList.add("dragging");
+    e.dataTransfer.effectAllowed="move";
+  });
 
-   row.addEventListener("dragover",e=>{
-     if(map.locked)return;
-     e.preventDefault();
-     row.classList.add("drag-over");
-   });
+  row.addEventListener("dragover",e=>{
+    if(map.locked)return;
+    e.preventDefault();
+    row.classList.add("drag-over");
+  });
 
-   row.addEventListener("dragleave",()=>{
-     row.classList.remove("drag-over");
-   });
+  row.addEventListener("dragleave",()=>row.classList.remove("drag-over"));
 
-   row.addEventListener("drop",e=>{
-     if(map.locked)return;
-     e.preventDefault();
-     row.classList.remove("drag-over");
-     if(dragFrom===null||dragFrom===i)return;
+  row.addEventListener("drop",e=>{
+    if(map.locked)return;
+    e.preventDefault();
+    row.classList.remove("drag-over");
+    if(dragFrom===null||dragFrom===i)return;
+    const moved=map.order.splice(dragFrom,1)[0];
+    map.order.splice(i,0,moved);
+    dragFrom=null;
+    save();
+    renderMap(i);
+  });
 
-     const moved=map.order.splice(dragFrom,1)[0];
-     map.order.splice(i,0,moved);
-     dragFrom=null;
-     save();
-     renderMap(i);
-   });
-
-   row.addEventListener("dragend",()=>{
-     row.classList.remove("dragging","drag-over");
-     dragFrom=null;
-   });
+  row.addEventListener("dragend",()=>{
+    row.classList.remove("dragging","drag-over");
+    dragFrom=null;
+  });
  });
 }
 
-/* ================= RENDER MAP ================= */
-function renderMap(animateIndex){
+/* ================= RENDER ================= */
+function renderMap(animate){
  const map=state.maps[state.currentMap];
  const lockBtn=document.getElementById("lockBtn");
- lockBtn.className="btn "+(map.locked?"btn-unlock":"btn-lock");
  lockBtn.innerText=map.locked?"UNLOCK":"LOCK";
+ lockBtn.className="btn "+(map.locked?"btn-unlock":"btn-lock");
 
- const tbody=document.getElementById("mapTable");
- tbody.innerHTML="";
+ const tb=document.getElementById("mapTable");
+ tb.innerHTML="";
  map.order.forEach((t,i)=>{
-   const p=point(i);
-   const k=map.kill[t];
-   const tr=document.createElement("tr");
-   tr.className="drag-row"+(i===animateIndex?" drop-animate":"");
-   tr.innerHTML=`
+  const p=point(i);
+  const k=map.kill[t];
+  tb.innerHTML+=`
+   <tr class="drag-row ${i===animate?"drop-animate":""}">
     <td><span class="drag-handle ${map.locked?"disabled":""}">≡</span> ${i+1}</td>
     <td class="team">${t}</td>
     <td>${i===0?'<span class="badge wwcd">WWCD</span>':""}</td>
@@ -364,8 +354,8 @@ function renderMap(animateIndex){
     <td onclick="${map.locked?"":"openKill('"+t+"')"}">
       ${k===null?'<span class="kill-plain">0</span>':'<span class="badge kill">'+k+'</span>'}
     </td>
-    <td>${p+(k||0)}</td>`;
-   tbody.appendChild(tr);
+    <td>${p+(k||0)}</td>
+   </tr>`;
  });
  enableDrag();
  renderAll();
@@ -375,31 +365,28 @@ function renderMap(animateIndex){
 function renderAll(){
  const agg={}; teams.forEach(t=>agg[t]={w:0,p:0,k:0});
  Object.values(state.maps).forEach(m=>{
-   if(m.locked){
-     m.order.forEach((t,i)=>{
-       agg[t].p+=point(i);
-       if(i===0)agg[t].w++;
-       if(m.kill[t])agg[t].k+=m.kill[t];
-     });
-   }
+  if(m.locked){
+    m.order.forEach((t,i)=>{
+      agg[t].p+=point(i);
+      if(i===0)agg[t].w++;
+      if(m.kill[t])agg[t].k+=m.kill[t];
+    });
+  }
  });
- const sorted=[...teams].sort((a,b)=>{
-   const A=agg[a],B=agg[b];
-   return (B.p+B.k)-(A.p+A.k);
- });
+ const sorted=[...teams].sort((a,b)=>(agg[b].p+agg[b].k)-(agg[a].p+agg[a].k));
  const tb=document.getElementById("allTable");
  tb.innerHTML="";
  sorted.forEach((t,i)=>{
-   const A=agg[t];
-   tb.innerHTML+=`
-    <tr>
-      <td>${i+1}</td>
-      <td class="team">${t}</td>
-      <td>${A.w}</td>
-      <td>${A.p}</td>
-      <td>${A.k}</td>
-      <td>${A.p+A.k}</td>
-    </tr>`;
+  const A=agg[t];
+  tb.innerHTML+=`
+   <tr>
+    <td>${i+1}</td>
+    <td class="team">${t}</td>
+    <td>${A.w}</td>
+    <td>${A.p}</td>
+    <td>${A.k}</td>
+    <td>${A.p+A.k}</td>
+   </tr>`;
  });
 }
 
@@ -411,14 +398,14 @@ function openKill(t){
  const g=document.getElementById("killGrid");
  g.innerHTML="";
  for(let i=0;i<=34;i++){
-   const d=document.createElement("div");
-   d.innerText=i;
-   d.onclick=()=>{
-     document.querySelectorAll(".kill-grid div").forEach(x=>x.classList.remove("active"));
-     d.classList.add("active");
-     selectedKill=i;
-   };
-   g.appendChild(d);
+  const d=document.createElement("div");
+  d.innerText=i;
+  d.onclick=()=>{
+    document.querySelectorAll(".kill-grid div").forEach(x=>x.classList.remove("active"));
+    d.classList.add("active");
+    selectedKill=i;
+  };
+  g.appendChild(d);
  }
  document.getElementById("killPopup").style.display="flex";
 }
@@ -449,11 +436,11 @@ document.getElementById("importFile").addEventListener("change",e=>{
  if(!file)return;
  const r=new FileReader();
  r.onload=()=>{
-   if(confirm("Import akan gantikan semua data. Teruskan?")){
-     state=JSON.parse(r.result);
-     save();
-     renderMap();
-   }
+  if(confirm("Import akan gantikan semua data. Teruskan?")){
+    state=JSON.parse(r.result);
+    save();
+    renderMap();
+  }
  };
  r.readAsText(file);
 });
