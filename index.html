@@ -2,126 +2,50 @@
 <html lang="ms">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ESPORTS CHALLENGE HSWP 2026</title>
 
 <style>
-body{
-  font-family:-apple-system,BlinkMacSystemFont,system-ui;
-  margin:0;
-  background:#fff;
-}
-h1{text-align:center;font-size:18px;margin:12px 0}
-.tabs{text-align:center;margin-bottom:8px}
-.tab{
-  padding:8px 18px;
-  border-radius:20px;
-  border:1px solid #ddd;
-  background:#c9a24d;
-  font-weight:600;
+body{font-family:Arial;background:#f5f5f5;margin:0;padding:20px}
+h1{text-align:center}
+
+.container{display:grid;grid-template-columns:1.2fr 1fr;gap:20px}
+.card{background:#fff;border-radius:20px;padding:20px}
+
+.tabs button{border:none;padding:8px 18px;border-radius:20px;margin-right:6px;cursor:pointer;background:#eee}
+.tabs .active{background:#caa24d}
+
+.btn{border:none;padding:8px 18px;border-radius:20px;color:#fff;cursor:pointer}
+.btn-lock{background:#2ecc71}
+.btn-unlock{background:#999}
+.btn-reset{background:#e74c3c}
+
+table{width:100%;border-collapse:collapse;margin-top:14px}
+th,td{border-bottom:1px solid #eee;padding:8px;text-align:center}
+td.team{text-align:left}
+
+.badge{background:#000;color:#fff;padding:2px 8px;border-radius:12px;font-size:11px}
+.box{background:#eee;border-radius:10px;padding:6px 10px;min-width:36px;display:inline-block}
+.clickable{cursor:pointer}
+
+.drag-handle{cursor:grab;font-size:18px;color:#888;padding-right:6px}
+
+.toast{
+ position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+ background:#333;color:#fff;padding:10px 18px;border-radius:16px;display:none
 }
 
-.container{
-  display:flex;
-  flex-wrap:wrap;
-  gap:12px;
-  padding:10px;
+/* popup */
+.popup{
+ position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;
+ align-items:center;justify-content:center;z-index:1000
 }
-.card{
-  flex:1;
-  min-width:340px;
-  border:1px solid #e5e5e5;
-  border-radius:16px;
-  padding:10px;
-}
-.card h3{margin:6px 0}
-
-.map-tabs button{
-  padding:6px 14px;
-  border-radius:20px;
-  border:1px solid #ddd;
-  background:#fff;
-  margin-right:6px;
-}
-.map-tabs .active{background:#c9a24d}
-
-button{
-  border:none;
-  padding:6px 14px;
-  border-radius:14px;
-  font-size:12px;
-  cursor:pointer;
-}
-.lock{background:#27ae60;color:#fff}
-.unlock{background:#7f8c8d;color:#fff}
-.reset{background:#c0392b;color:#fff}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:13px;
-}
-th,td{
-  padding:6px;
-  border-bottom:1px solid #eee;
-  text-align:center;
-}
-td:first-child,th:first-child{text-align:left}
-
-.kill-input{
-  width:42px;
-  padding:4px;
-  border-radius:6px;
-  border:1px solid #ccc;
-  text-align:center;
-  background:#f7f7f7;
-}
-
-/* ===== POPUP KILL ===== */
-.overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.35);
-  display:none;
-  align-items:flex-end;
-  z-index:999;
-}
-.kill-modal{
-  background:#f4f4f6;
-  width:100%;
-  max-width:420px;
-  margin:auto;
-  border-radius:18px 18px 0 0;
-  padding:14px;
-}
-.kill-title{text-align:center;font-weight:600}
-.kill-wheel{
-  display:flex;
-  overflow-x:auto;
-  scroll-snap-type:x mandatory;
-  padding:10px 0;
-}
-.kill-wheel::-webkit-scrollbar{display:none}
-.kill-item{
-  flex:0 0 80px;
-  text-align:center;
-  font-size:26px;
-  font-weight:600;
-  color:#aaa;
-  scroll-snap-align:center;
-}
-.kill-item.active{color:#000;font-size:34px}
-.kill-actions{
-  display:flex;
-  gap:10px;
-}
-.kill-actions button{
-  flex:1;
-  padding:10px;
-  border-radius:14px;
-}
-.btn-ok{background:#c9a24d;font-weight:bold}
-.btn-cancel{background:#ddd}
+.popup-box{background:#fff;border-radius:18px;padding:20px}
+.kill-grid{display:grid;grid-template-columns:repeat(5,60px);gap:8px}
+.kill-grid div{border:1px solid #000;padding:10px;text-align:center;cursor:pointer}
+.kill-grid .active{background:#caa24d}
+.popup-actions{text-align:right;margin-top:12px}
+.btn-save{background:#2ecc71}
+.btn-cancel{background:#aaa}
 </style>
 </head>
 
@@ -129,185 +53,241 @@ td:first-child,th:first-child{text-align:left}
 
 <h1>ESPORTS CHALLENGE HSWP 2026</h1>
 
-<div class="tabs">
-  <span class="tab">DASHBOARD</span>
-</div>
-
 <div class="container">
 
 <!-- MAP STANDING -->
 <div class="card">
-  <h3>MAP STANDING</h3>
+<h3>MAP STANDING</h3>
 
-  <div class="map-tabs">
-    <button class="active">Erangel</button>
-    <button>Miramar</button>
-    <button>Rondo</button>
-  </div>
+<div class="tabs">
+  <button id="tab-erangel">Erangel</button>
+  <button id="tab-miramar">Miramar</button>
+  <button id="tab-rondo">Rondo</button>
+</div>
 
-  <div style="margin:8px 0">
-    <button id="lockBtn" class="lock" onclick="toggleLock()">LOCK</button>
-    <button class="reset" onclick="resetMap()">RESET MAP</button>
-  </div>
+<div style="margin-top:10px">
+  <button id="lockBtn" class="btn btn-lock">LOCK</button>
+  <button id="resetBtn" class="btn btn-reset">RESET MAP</button>
+</div>
 
-  <table id="mapTable">
-    <thead>
-      <tr>
-        <th>No</th><th>Team</th><th>WWCD</th>
-        <th>Placement</th><th>Kill</th><th>Total</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+<table>
+<thead>
+<tr>
+  <th>No</th><th style="text-align:left">Team</th>
+  <th>WWCD</th><th>Placement</th><th>Kill</th><th>Total</th>
+</tr>
+</thead>
+<tbody id="mapTable"></tbody>
+</table>
 </div>
 
 <!-- ALL STANDING -->
 <div class="card">
-  <h3>ALL STANDING</h3>
-  <table id="allTable">
-    <thead>
-      <tr>
-        <th>No</th><th>Team</th><th>WWCD</th>
-        <th>Placement</th><th>Kill</th><th>Total</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+<h3>ALL STANDING</h3>
+<table>
+<thead>
+<tr>
+  <th>No</th><th style="text-align:left">Team</th>
+  <th>WWCD</th><th>Placement</th><th>Kill</th><th>Total</th>
+</tr>
+</thead>
+<tbody id="allTable"></tbody>
+</table>
 </div>
 
 </div>
 
-<!-- POPUP KILL -->
-<div id="killOverlay" class="overlay">
-  <div class="kill-modal">
-    <div class="kill-title">SET KILL</div>
-    <div class="kill-wheel" id="killWheel"></div>
-    <div class="kill-actions">
-      <button class="btn-cancel" onclick="closeKill()">Cancel</button>
-      <button class="btn-ok" onclick="saveKill()">Save</button>
+<div class="toast" id="toast"></div>
+
+<!-- KILL POPUP -->
+<div class="popup" id="killPopup">
+  <div class="popup-box">
+    <h4>Pilih Kill</h4>
+    <div class="kill-grid" id="killGrid"></div>
+    <div class="popup-actions">
+      <button class="btn btn-cancel">CANCEL</button>
+      <button class="btn btn-save">SAVE</button>
     </div>
   </div>
 </div>
 
-<audio id="beep">
-  <source src="data:audio/wav;base64,UklGRhQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=">
-</audio>
-
 <script>
-const teams=[
-"OL","Zentra","JURNEE 52","HEe ESPORT","AING BALANG",
-"MANTARAY GIANT","SolJar","Yelnats","Martabak Esport",
-"THE RED X","SANTAi KiLLERs","TOP PANDA","ROBOX","DND",
-"FAM UNITED","REDBULL 26 ESPORTS"
+/* ================= DATA ================= */
+const STORAGE_KEY = "HSWP_2026";
+
+const TEAMS=[
+"OL","Zentra","JURNEE 52","HEe ESPORT","AING BALANG","MANTARAY GIANT",
+"SolJar","Yelnats","Martabak Esport","THE RED X","SANTAi KiLLERs",
+"TOP PANDA","ROBOX","DND","FAM | United","REDBULL 26 ESPORTS"
 ];
 
-let locked=false;
+const placementPoint=p=>p===1?10:p===2?6:p===3?5:p===4?4:p===5?3:p===6?2:(p===7||p===8)?1:0;
 
-let mapData=teams.map((t,i)=>({
-  team:t, wwcd:i==0?1:0, place:Math.max(10-i,0), kill:0
-}));
+/* ================= STATE ================= */
+function freshState(){
+ return {
+  currentMap:"erangel",
+  maps:{
+   erangel:{locked:false,order:[...TEAMS],data:{}},
+   miramar:{locked:false,order:[...TEAMS],data:{}},
+   rondo:{locked:false,order:[...TEAMS],data:{}}
+  }
+ };
+}
 
-let allData=JSON.parse(localStorage.getItem("allData"))
-|| teams.map(t=>({team:t,wwcd:0,place:0,kill:0,total:0}));
+let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || freshState();
 
-function renderMap(){
-  const tb=document.querySelector("#mapTable tbody");
-  tb.innerHTML="";
-  mapData.forEach((r,i)=>{
-    r.total=r.place+r.kill;
-    tb.innerHTML+=`
-    <tr>
-      <td>${i+1}</td>
-      <td>${r.team}</td>
-      <td>${r.wwcd?"WWCD":""}</td>
-      <td>${r.place}</td>
-      <td>
-        <input class="kill-input" readonly value="${r.kill}"
-        onclick="openKill(${i})">
-      </td>
-      <td>${r.total}</td>
-    </tr>`;
-  });
+// ensure structure
+TEAMS.forEach(t=>{
+ for(const m in state.maps){
+  if(!state.maps[m].data[t]) state.maps[m].data[t]={kill:0};
+ }
+});
+
+function saveState(){
+ localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+}
+
+/* ================= UTIL ================= */
+const $=id=>document.getElementById(id);
+function toast(msg){
+ $("toast").innerText=msg;
+ $("toast").style.display="block";
+ setTimeout(()=>$("toast").style.display="none",2000);
+}
+
+/* ================= MAP SWITCH ================= */
+["erangel","miramar","rondo"].forEach(m=>{
+ $("tab-"+m).onclick=()=>switchMap(m);
+});
+
+function switchMap(m){
+ state.currentMap=m;
+ document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
+ $("tab-"+m).classList.add("active");
+ saveState();
+ render();
+}
+
+/* ================= LOCK / RESET ================= */
+$("lockBtn").onclick=()=>{
+ const map=state.maps[state.currentMap];
+ map.locked=!map.locked;
+ $("lockBtn").innerText=map.locked?"UNLOCK":"LOCK";
+ $("lockBtn").className="btn "+(map.locked?"btn-unlock":"btn-lock");
+ toast(map.locked?"🔒 Map dikunci":"🔓 Map dibuka");
+ saveState();
+ render();
+};
+
+$("resetBtn").onclick=()=>{
+ if(!confirm("Reset map ini?"))return;
+ const map=state.maps[state.currentMap];
+ map.locked=false;
+ map.order=[...TEAMS];
+ TEAMS.forEach(t=>map.data[t].kill=0);
+ $("lockBtn").innerText="LOCK";
+ $("lockBtn").className="btn btn-lock";
+ saveState();
+ render();
+};
+
+/* ================= DRAG ================= */
+let dragIndex=null;
+function dragStart(i){
+ if(state.maps[state.currentMap].locked) return;
+ dragIndex=i;
+}
+function dropRow(i){
+ const o=state.maps[state.currentMap].order;
+ o.splice(i,0,o.splice(dragIndex,1)[0]);
+ saveState();
+ render();
+}
+
+/* ================= KILL POPUP ================= */
+let selectedTeam=null,tempKill=0;
+
+function openKill(team){
+ if(state.maps[state.currentMap].locked) return;
+ selectedTeam=team;
+ tempKill=state.maps[state.currentMap].data[team].kill;
+ const g=$("killGrid"); g.innerHTML="";
+ for(let i=0;i<=34;i++){
+  const d=document.createElement("div");
+  d.innerText=i;
+  if(i===tempKill)d.classList.add("active");
+  d.onclick=()=>{
+   tempKill=i;
+   document.querySelectorAll(".kill-grid div").forEach(x=>x.classList.remove("active"));
+   d.classList.add("active");
+  };
+  g.appendChild(d);
+ }
+ $("killPopup").style.display="flex";
+}
+
+document.querySelector(".btn-save").onclick=()=>{
+ state.maps[state.currentMap].data[selectedTeam].kill=tempKill;
+ saveState();
+ $("killPopup").style.display="none";
+ render();
+};
+document.querySelector(".btn-cancel").onclick=()=>$("killPopup").style.display="none";
+
+/* ================= RENDER ================= */
+function render(){
+ const map=state.maps[state.currentMap];
+ const tb=$("mapTable"); tb.innerHTML="";
+ map.order.forEach((t,i)=>{
+  const p=placementPoint(i+1);
+  const k=map.data[t].kill;
+  tb.innerHTML+=`
+  <tr>
+   <td draggable="true"
+     ondragstart="dragStart(${i})"
+     ondragover="event.preventDefault()"
+     ondrop="dropRow(${i})">
+    <span class="drag-handle">≡</span>${i+1}
+   </td>
+   <td class="team">${t}</td>
+   <td>${i===0?'<span class="badge">WWCD</span>':''}</td>
+   <td><span class="box">${p}</span></td>
+   <td><span class="box clickable" onclick="openKill('${t}')">${k}</span></td>
+   <td>${p+k}</td>
+  </tr>`;
+ });
+ renderAll();
 }
 
 function renderAll(){
-  const tb=document.querySelector("#allTable tbody");
-  tb.innerHTML="";
-  allData.forEach((r,i)=>{
-    tb.innerHTML+=`
-    <tr>
-      <td>${i+1}</td><td>${r.team}</td>
-      <td>${r.wwcd}</td>
-      <td>${r.place}</td>
-      <td>${r.kill}</td>
-      <td>${r.total}</td>
-    </tr>`;
+ const agg={}; TEAMS.forEach(t=>agg[t]={wwcd:0,placement:0,kill:0,total:0});
+ for(const m in state.maps){
+  const map=state.maps[m]; if(!map.locked)continue;
+  map.order.forEach((t,i)=>{
+   const p=placementPoint(i+1),k=map.data[t].kill;
+   agg[t].placement+=p; agg[t].kill+=k; agg[t].total+=p+k;
+   if(i===0)agg[t].wwcd++;
   });
+ }
+ const sorted=[...TEAMS].sort((a,b)=>{
+  const A=agg[a],B=agg[b];
+  return B.total-A.total||B.wwcd-A.wwcd||B.placement-A.placement||B.kill-A.kill;
+ });
+ const tb=$("allTable"); tb.innerHTML="";
+ sorted.forEach((t,i)=>{
+  const A=agg[t];
+  tb.innerHTML+=`
+  <tr>
+   <td>${i+1}</td><td class="team">${t}</td>
+   <td>${A.wwcd}</td><td>${A.placement}</td>
+   <td>${A.kill}</td><td>${A.total}</td>
+  </tr>`;
+ });
 }
 
-function toggleLock(){
-  document.getElementById("beep").play();
-  locked=!locked;
-  const btn=document.getElementById("lockBtn");
-  btn.textContent=locked?"UNLOCK":"LOCK";
-  btn.className=locked?"unlock":"lock";
-
-  if(locked){
-    mapData.forEach((r,i)=>{
-      allData[i].wwcd+=r.wwcd;
-      allData[i].place+=r.place;
-      allData[i].kill+=r.kill;
-      allData[i].total=allData[i].place+allData[i].kill;
-    });
-    localStorage.setItem("allData",JSON.stringify(allData));
-    renderAll();
-    alert("Map dikunci & data disimpan");
-  }
-}
-
-function resetMap(){
-  if(!confirm("Reset MAP ini?"))return;
-  document.getElementById("beep").play();
-  mapData.forEach(r=>r.kill=0);
-  renderMap();
-}
-
-let currentIndex=0,selectedKill=0;
-
-function openKill(i){
-  currentIndex=i;
-  selectedKill=mapData[i].kill;
-  const w=document.getElementById("killWheel");
-  w.innerHTML="";
-  for(let k=0;k<=99;k++){
-    w.innerHTML+=`<div class="kill-item ${k==selectedKill?"active":""}">${k}</div>`;
-  }
-  setTimeout(()=>w.scrollLeft=selectedKill*80,50);
-  document.getElementById("killOverlay").style.display="flex";
-  w.onscroll=()=>highlight(w);
-}
-
-function highlight(w){
-  const c=w.scrollLeft+w.offsetWidth/2;
-  [...w.children].forEach((el,i)=>{
-    const e=el.offsetLeft+el.offsetWidth/2;
-    el.classList.toggle("active",Math.abs(e-c)<40);
-    if(Math.abs(e-c)<40)selectedKill=i;
-  });
-}
-
-function saveKill(){
-  mapData[currentIndex].kill=selectedKill;
-  closeKill();
-  renderMap();
-}
-
-function closeKill(){
-  document.getElementById("killOverlay").style.display="none";
-}
-
-renderMap();
-renderAll();
+/* ================= INIT ================= */
+switchMap(state.currentMap);
 </script>
 
 </body>
