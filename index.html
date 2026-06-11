@@ -2,452 +2,716 @@
 <html lang="ms">
 <head>
 <meta charset="UTF-8">
-<title>ESPORTS CHALLENGE HSWP 2026</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MAIDA ESPORTS — TOURNAMENT SYSTEM</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Barlow+Condensed:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-/* ================= BASE ================= */
-body{
-  font-family:Arial,Helvetica,sans-serif;
-  background:radial-gradient(circle at top,#333,#000);
-  margin:0;
-  padding:16px;
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --mg:#cc00cc;--mg2:#ff00ff;--mg3:rgba(204,0,204,.15);
+  --bg:#06000e;--bg2:#0e0018;--bg3:#160022;
+  --gold:#ffb400;--green:#18e868;--red:#ff3b5c;--blue:#2979ff;
+  --text:#f0e8ff;--muted:rgba(255,255,255,.45);
 }
-h1{
-  color:#fff;
-  font-size:18px;
-  margin:0 0 12px;
-  font-weight:700;
-}
+html,body{min-height:100vh;background:var(--bg);font-family:"Barlow Condensed",sans-serif;color:var(--text);overflow-x:hidden;}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%,rgba(204,0,204,.2) 0%,transparent 65%),
+    radial-gradient(ellipse 40% 40% at 5% 95%,rgba(100,0,200,.1) 0%,transparent 60%),
+    repeating-linear-gradient(0deg,transparent,transparent 80px,rgba(204,0,204,.025) 80px,rgba(204,0,204,.025) 81px),
+    repeating-linear-gradient(90deg,transparent,transparent 80px,rgba(204,0,204,.025) 80px,rgba(204,0,204,.025) 81px);}
+.scanline{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);}
 
-/* ================= LAYOUT ================= */
-.container{
-  display:grid;
-  grid-template-columns:1.2fr 1fr;
-  gap:16px;
-}
-.card{
-  background:rgba(255,255,255,.92);
-  backdrop-filter:blur(14px);
-  border-radius:22px;
-  padding:16px;
-  box-shadow:0 10px 26px rgba(0,0,0,.35);
-}
-.card h3{
-  margin:0 0 6px;
-  font-size:15px;
-}
+/* ── LOGIN OVERLAY ── */
+.login-overlay{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.92);
+  display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
+.login-box{background:linear-gradient(160deg,#0e0018,#160025);border:1.5px solid rgba(204,0,204,.4);
+  border-radius:20px;padding:36px 32px;width:min(420px,94vw);display:flex;flex-direction:column;
+  align-items:center;box-shadow:0 24px 80px rgba(204,0,204,.25);}
+.login-logo{font-family:"Orbitron",monospace;font-size:22px;font-weight:900;color:#fff;letter-spacing:2px;margin-bottom:4px;}
+.login-logo span{color:var(--mg2);}
+.login-sub{font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:28px;}
+.login-tabs{display:flex;gap:8px;margin-bottom:24px;width:100%;}
+.ltab{flex:1;padding:9px;border:1.5px solid rgba(255,255,255,.1);border-radius:9px;
+  background:rgba(255,255,255,.04);color:var(--muted);font-family:"Orbitron",monospace;
+  font-size:11px;font-weight:800;letter-spacing:1px;cursor:pointer;transition:.2s;text-align:center;}
+.ltab:hover{border-color:var(--mg);color:var(--mg);}
+.ltab.active{background:rgba(204,0,204,.2);border-color:var(--mg);color:#fff;}
+.ltab.ladmin.active{background:rgba(255,180,0,.15);border-color:var(--gold);color:var(--gold);}
+.lsec{width:100%;display:none;flex-direction:column;gap:12px;}
+.lsec.show{display:flex;}
+.lfield{display:flex;flex-direction:column;gap:5px;width:100%;}
+.llabel{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.linput{width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);
+  color:#fff;padding:10px 14px;border-radius:9px;font-family:"Barlow Condensed",sans-serif;
+  font-size:15px;font-weight:700;outline:none;letter-spacing:1px;}
+.linput:focus{border-color:var(--mg);background:rgba(204,0,204,.08);}
+.lbtn{width:100%;padding:11px;border:none;border-radius:9px;font-family:"Orbitron",monospace;
+  font-size:12px;font-weight:800;letter-spacing:1.5px;cursor:pointer;transition:.2s;margin-top:4px;}
+.lbtn:hover{filter:brightness(1.15);transform:translateY(-1px);}
+.lbtn.admin-btn{background:linear-gradient(135deg,#b07d00,#ffb400);color:#000;}
+.lerr{font-size:11px;color:var(--red);font-weight:700;text-align:center;min-height:16px;letter-spacing:.5px;}
+.crew-list{display:flex;flex-direction:column;gap:6px;width:100%;max-height:220px;overflow-y:auto;}
+.crew-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);border-radius:9px;padding:9px 12px;cursor:pointer;transition:.2s;}
+.crew-item:hover{border-color:var(--mg);background:rgba(204,0,204,.1);}
+.crew-av{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-family:"Orbitron",monospace;font-size:13px;font-weight:900;}
+.crew-nm{font-family:"Orbitron",monospace;font-size:12px;font-weight:800;color:#fff;letter-spacing:1px;}
+.crew-rl{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-top:1px;}
+.crew-del{width:26px;height:26px;border:1px solid rgba(255,59,92,.3);border-radius:6px;
+  background:rgba(255,59,92,.1);color:var(--red);font-size:13px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0;}
+.crew-del:hover{background:var(--red);color:#fff;}
+.add-row{display:flex;gap:6px;width:100%;margin-top:4px;}
+.add-inp{flex:1;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);
+  color:#fff;padding:8px 12px;border-radius:7px;font-family:"Barlow Condensed",sans-serif;
+  font-size:13px;font-weight:700;outline:none;}
+.add-inp:focus{border-color:var(--mg);}
+.add-btn{border:none;padding:8px 14px;border-radius:7px;background:rgba(204,0,204,.3);
+  color:var(--mg2);border:1px solid rgba(204,0,204,.4);font-family:"Barlow Condensed",sans-serif;
+  font-size:12px;font-weight:800;cursor:pointer;transition:.15s;white-space:nowrap;}
+.add-btn:hover{background:var(--mg);color:#fff;}
+.add-hint{font-size:9px;color:var(--muted);text-align:center;letter-spacing:.5px;margin-top:2px;}
 
-/* ================= MAP HEADER ================= */
-.map-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:8px;
-  margin-bottom:6px;
-}
+/* ── USER BADGE ── */
+.ubadge{position:fixed;top:10px;right:14px;z-index:9999;display:none;align-items:center;gap:7px;
+  background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.12);border-radius:20px;
+  padding:5px 12px 5px 8px;cursor:pointer;transition:.15s;}
+.ubadge:hover{border-color:var(--mg);background:rgba(204,0,204,.12);}
+.ubdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.ubname{font-family:"Orbitron",monospace;font-size:9px;font-weight:800;color:#fff;letter-spacing:1px;}
+.ubrole{font-size:9px;color:var(--muted);font-weight:600;letter-spacing:.5px;}
 
-/* ================= MAP TABS ================= */
-.tabs button{
-  border:none;
-  padding:6px 14px;
-  border-radius:999px;
-  background:#eee;
-  cursor:pointer;
-  font-weight:600;
-  font-size:12px;
-}
-.tabs .active{background:#d6b15f}
+/* ── MAIN WRAP ── */
+.wrap{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;}
 
-/* ================= BUTTON ================= */
-.btn{
-  border:none;
-  padding:6px 14px;
-  border-radius:999px;
-  color:#fff;
-  cursor:pointer;
-  font-weight:600;
-  font-size:12px;
-}
-.btn-lock{background:#2ecc71}
-.btn-unlock{background:#777}
-.btn-reset{background:#e74c3c}
-.btn-export{background:#3498db}
-.btn-import{background:#9b59b6}
-.map-actions .btn{margin-left:4px}
+/* ── HEADER ── */
+.header{text-align:center;padding:52px 20px 32px;}
+.eyebrow{font-family:"Barlow Condensed",sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:5px;text-transform:uppercase;color:var(--mg);margin-bottom:14px;
+  display:flex;align-items:center;justify-content:center;gap:10px;}
+.eyebrow::before,.eyebrow::after{content:"";width:40px;height:1px;background:var(--mg);}
+.main-title{font-family:"Barlow Condensed",sans-serif;font-size:clamp(32px,6vw,72px);
+  font-weight:900;text-transform:uppercase;letter-spacing:.04em;line-height:1;
+  background:linear-gradient(135deg,#fff 15%,var(--mg2) 50%,var(--gold) 85%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  margin-bottom:10px;cursor:pointer;}
+.sub-title{font-size:clamp(11px,1.5vw,14px);color:var(--muted);letter-spacing:3px;
+  text-transform:uppercase;font-weight:700;margin-bottom:20px;}
+.live-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(24,232,104,.1);
+  border:1px solid rgba(24,232,104,.3);color:var(--green);padding:5px 14px;border-radius:20px;
+  font-family:"Barlow Condensed",sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;}
+.ldot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:ldot .9s infinite;}
+@keyframes ldot{0%,100%{opacity:1;}50%{opacity:.2;}}
+.tedit-wrap{display:none;align-items:center;justify-content:center;gap:8px;margin-top:10px;}
+.tedit-wrap.show{display:flex;}
+.tedit-inp{background:rgba(204,0,204,.1);border:1.5px solid var(--mg);color:#fff;
+  padding:7px 16px;border-radius:8px;font-family:"Barlow Condensed",sans-serif;
+  font-size:18px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+  outline:none;min-width:320px;text-align:center;}
+.tedit-save{background:var(--mg);border:none;color:#fff;padding:7px 14px;border-radius:7px;font-weight:800;font-size:12px;cursor:pointer;}
 
-/* ================= TABLE ================= */
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:8px;
-}
-th,td{
-  border-bottom:1px solid rgba(0,0,0,.12);
-  padding:6px;
-  text-align:center;
-  font-size:12px;
-}
-td.team{text-align:left}
+/* ── SECTION LABEL ── */
+.slabel{text-align:center;font-size:10px;font-weight:800;letter-spacing:4px;text-transform:uppercase;
+  color:var(--muted);margin:8px 0 16px;display:flex;align-items:center;justify-content:center;gap:12px;}
+.slabel::before,.slabel::after{content:"";flex:1;max-width:120px;height:1px;background:rgba(255,255,255,.1);}
 
-/* ================= DRAG ================= */
-.drag-row{
-  transition:background .15s, transform .25s cubic-bezier(.2,.8,.3,1);
-}
-.drag-row.dragging{
-  background:rgba(214,177,95,.35);
-  opacity:.55;
-}
-.drag-row.drag-over{
-  background:rgba(214,177,95,.25);
-}
-.drag-row.drop-animate{
-  animation:dropSnap .28s ease;
-}
-@keyframes dropSnap{
-  0%{transform:scale(.96)}
-  100%{transform:scale(1)}
-}
-.drag-handle{
-  cursor:grab;
-  font-size:15px;
-  color:#777;
-  user-select:none;
-}
-.drag-handle.disabled{
-  cursor:not-allowed;
-  opacity:.4;
-}
+/* ── CREW VIEW BAR ── */
+.cvbar{max-width:1100px;margin:0 auto 18px;padding:0 32px;width:100%;display:none;}
+.cvbar.show{display:block;}
+.cvinner{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);border-radius:10px;
+  padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.cvlabel{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;flex-shrink:0;}
+.cvbtns{display:flex;gap:6px;flex-wrap:wrap;}
+.cvbtn{padding:5px 13px;border:1px solid rgba(255,255,255,.1);border-radius:6px;
+  background:rgba(255,255,255,.04);color:var(--muted);font-family:"Barlow Condensed",sans-serif;
+  font-size:11px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:.15s;}
+.cvbtn:hover{border-color:var(--mg);color:var(--mg);}
+.cvbtn.active{background:rgba(204,0,204,.2);border-color:var(--mg);color:#fff;}
 
-/* ================= BADGE ================= */
-.badge{
-  display:inline-flex;
-  padding:4px 12px;
-  border-radius:999px;
-  font-size:11px;
-  font-weight:600;
-}
-.badge.wwcd{background:#d6b15f;color:#000}
-.badge.kill{background:#e3c77a;color:#000}
-.kill-plain{color:#555;font-weight:600}
+/* ── NAV GRID ── */
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:0 32px 14px;max-width:1100px;margin:0 auto;width:100%;}
+.ncard{border-radius:18px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;padding:28px 16px 22px;position:relative;overflow:hidden;
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s;
+  background:linear-gradient(135deg,rgba(204,0,204,.25),rgba(130,0,130,.18));
+  border:1.5px solid rgba(204,0,204,.35);box-shadow:0 4px 24px rgba(204,0,204,.18);
+  text-decoration:none;color:inherit;}
+.ncard::before{content:"";position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.1) 0%,transparent 55%,rgba(0,0,0,.08) 100%);pointer-events:none;}
+.ncard:hover{transform:scale(1.05) translateY(-4px);box-shadow:0 16px 48px rgba(204,0,204,.45);}
+.ncard:active{transform:scale(.97);}
+.cblue{background:linear-gradient(135deg,rgba(0,80,204,.3),rgba(0,50,140,.2));border-color:rgba(0,120,255,.4);box-shadow:0 4px 24px rgba(0,80,204,.2);}
+.cblue:hover{box-shadow:0 16px 48px rgba(0,100,255,.5);}
+.cgold{background:linear-gradient(135deg,rgba(180,120,0,.3),rgba(120,80,0,.2));border-color:rgba(255,180,0,.4);box-shadow:0 4px 24px rgba(180,120,0,.2);}
+.cgold:hover{box-shadow:0 16px 48px rgba(255,180,0,.5);}
+.cgreen{background:linear-gradient(135deg,rgba(0,140,60,.28),rgba(0,80,40,.18));border-color:rgba(24,232,104,.35);}
+.cgreen:hover{box-shadow:0 16px 48px rgba(24,232,104,.4);}
+.cdark{background:linear-gradient(135deg,rgba(40,40,80,.4),rgba(20,20,50,.3));border-color:rgba(100,100,200,.25);}
+.cdark:hover{box-shadow:0 16px 48px rgba(100,100,255,.3);}
+.cred{background:linear-gradient(135deg,rgba(180,0,60,.28),rgba(120,0,40,.18));border-color:rgba(255,59,92,.35);}
+.cred:hover{box-shadow:0 16px 48px rgba(255,59,92,.45);}
+.cchip{position:absolute;top:10px;right:12px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.18);
+  border-radius:4px;padding:2px 7px;font-family:"Barlow Condensed",sans-serif;font-size:9px;
+  font-weight:800;letter-spacing:1.5px;color:rgba(255,255,255,.65);text-transform:uppercase;}
+.chip-live{background:rgba(24,232,104,.18);border-color:rgba(24,232,104,.5);color:var(--green);}
+.chip-obs{background:rgba(255,59,92,.15);border-color:rgba(255,59,92,.4);color:var(--red);}
+.cicon{width:clamp(44px,5.5vw,64px);height:clamp(44px,5.5vw,64px);filter:drop-shadow(0 3px 10px rgba(0,0,0,.5));flex-shrink:0;}
+.clabel{font-family:"Orbitron",monospace;font-size:clamp(11px,1.3vw,14px);font-weight:900;
+  color:#fff;letter-spacing:1.5px;text-transform:uppercase;text-align:center;line-height:1.25;text-shadow:0 1px 6px rgba(0,0,0,.5);}
+.cdesc{font-size:clamp(9px,1vw,11px);color:rgba(255,255,255,.45);font-weight:600;letter-spacing:.5px;text-align:center;line-height:1.3;}
 
-/* ================= POPUP ================= */
-.popup{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.55);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:999;
-}
-.popup-box{
-  background:#fff;
-  border-radius:18px;
-  padding:16px;
-}
-.kill-grid{
-  display:grid;
-  grid-template-columns:repeat(5,48px);
-  gap:6px;
-}
-.kill-grid div{
-  border:1px solid #ccc;
-  padding:8px;
-  text-align:center;
-  cursor:pointer;
-  border-radius:8px;
-  font-size:12px;
-}
-.kill-grid .active{
-  background:#d6b15f;
-  font-weight:bold;
-}
-.popup-actions{
-  text-align:right;
-  margin-top:10px;
-}
+/* ── OBS SECTION ── */
+.obs-section{max-width:1100px;margin:0 auto 32px;padding:0 32px;width:100%;}
+.obs-hdr{background:linear-gradient(90deg,rgba(0,30,80,.8),rgba(0,15,60,.6));border:1.5px solid rgba(0,100,255,.3);
+  border-radius:14px 14px 0 0;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;}
+.obs-hdr-title{font-family:"Orbitron",monospace;font-size:12px;font-weight:800;color:#66aaff;letter-spacing:2px;}
+.obs-grid{background:rgba(0,10,40,.5);border:1.5px solid rgba(0,100,255,.2);border-top:none;
+  border-radius:0 0 14px 14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px;}
+.obs-card{background:rgba(0,30,80,.6);border:1.5px solid rgba(0,100,255,.2);border-radius:10px;padding:12px 14px;
+  display:flex;align-items:flex-start;gap:10px;transition:.2s;}
+.obs-card:hover{border-color:rgba(0,150,255,.5);background:rgba(0,50,120,.7);transform:translateY(-2px);}
+.obs-ibox{width:40px;height:40px;border-radius:8px;flex-shrink:0;background:rgba(0,60,140,.5);
+  border:1px solid rgba(0,120,255,.3);display:flex;align-items:center;justify-content:center;}
+.obs-info{flex:1;min-width:0;}
+.obs-lbl{font-family:"Orbitron",monospace;font-size:10px;font-weight:800;color:#fff;letter-spacing:1px;margin-bottom:2px;}
+.obs-url{font-size:9px;color:rgba(100,180,255,.65);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:"Barlow Condensed",monospace;}
+.obs-bdg{font-size:8px;font-weight:800;padding:2px 6px;border-radius:3px;flex-shrink:0;letter-spacing:.5px;}
+.bdg-live{background:rgba(24,232,104,.15);border:1px solid rgba(24,232,104,.4);color:var(--green);}
+.bdg-obs{background:rgba(255,59,92,.12);border:1px solid rgba(255,59,92,.3);color:var(--red);}
+.bdg-admin{background:rgba(255,180,0,.12);border:1px solid rgba(255,180,0,.3);color:var(--gold);}
+.obs-btns{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;}
+.obtn{border:none;padding:3px 9px;border-radius:4px;font-family:"Barlow Condensed",sans-serif;
+  font-size:10px;font-weight:800;letter-spacing:.5px;cursor:pointer;transition:.15s;}
+.obtn:hover{filter:brightness(1.2);}
+.obtn-o{background:rgba(0,100,255,.3);color:#66aaff;border:1px solid rgba(0,100,255,.3);}
+.obtn-c{background:rgba(255,180,0,.15);color:var(--gold);border:1px solid rgba(255,180,0,.25);}
+.obtn-e{background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1);}
+.obtn-s{background:rgba(24,232,104,.2);color:var(--green);border:1px solid rgba(24,232,104,.3);}
+.obs-erow{display:none;gap:4px;margin-top:6px;}
+.obs-card.editing .obs-erow{display:flex;}
+.obs-card.editing{border-color:rgba(0,200,255,.4);}
+.obs-einp{flex:1;background:rgba(0,0,0,.4);border:1.5px solid rgba(0,150,255,.35);color:#fff;
+  padding:4px 8px;border-radius:4px;font-family:"Barlow Condensed",monospace;font-size:10px;outline:none;}
+.obs-einp:focus{border-color:#3399ff;}
+
+/* ── INFO PANEL ── */
+.info-panel{display:none;max-width:1100px;margin:0 auto 32px;padding:0 32px;width:100%;}
+.ibox{background:rgba(0,10,30,.6);border:1.5px solid rgba(100,100,255,.2);border-radius:14px;padding:22px 24px;}
+.ititle{font-family:"Orbitron",monospace;font-size:12px;font-weight:800;color:#66aaff;letter-spacing:2px;margin-bottom:16px;}
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.isub{font-size:11px;font-weight:800;color:var(--gold);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase;}
+.icode{background:rgba(0,0,0,.3);border-radius:8px;padding:12px;font-family:monospace;font-size:11px;color:rgba(255,255,255,.7);line-height:1.8;}
+.itext{font-size:11px;color:rgba(255,255,255,.6);line-height:1.9;}
+
+/* ── FOOTER ── */
+.footer{text-align:center;padding:24px;margin-top:auto;border-top:1px solid rgba(255,255,255,.06);
+  font-size:10px;color:var(--muted);letter-spacing:1.5px;font-weight:700;}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:rgba(15,0,30,.95);border:1.5px solid var(--mg);color:#fff;padding:10px 20px;
+  border-radius:10px;font-family:"Barlow Condensed",sans-serif;font-size:13px;font-weight:700;
+  opacity:0;transition:all .3s;pointer-events:none;z-index:9999;
+  box-shadow:0 8px 30px rgba(204,0,204,.35);white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media(max-width:900px){.mgrid,.obs-grid{grid-template-columns:repeat(2,1fr);}.igrid{grid-template-columns:1fr;}}
+@media(max-width:560px){.mgrid{grid-template-columns:1fr 1fr;gap:10px;padding:0 14px 14px;}.obs-section,.info-panel,.cvbar{padding:0 14px;}}
 </style>
 </head>
-
 <body>
+<div class="scanline"></div>
 
-<h1>ESPORTS CHALLENGE HSWP 2026</h1>
+<!-- LOGIN OVERLAY -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">MAIDA <span>ESPORTS</span></div>
+    <div class="login-sub">TOURNAMENT SYSTEM &middot; PILIH PERANAN</div>
+    <div class="login-tabs">
+      <div class="ltab ladmin active" onclick="switchTab('admin')">&#x1F451; ADMIN</div>
+      <div class="ltab lcrew" onclick="switchTab('crew')">&#x1F465; CREW</div>
+    </div>
+    <!-- ADMIN -->
+    <div class="lsec show" id="secAdmin">
+      <div class="lfield">
+        <span class="llabel">Password Admin</span>
+        <input type="password" class="linput" id="adminPw" placeholder="Masukkan password..."
+          onkeydown="if(event.key==='Enter')doAdminLogin()">
+      </div>
+      <div class="lerr" id="adminErr"></div>
+      <button class="lbtn admin-btn" onclick="doAdminLogin()">&#x1F513; MASUK SEBAGAI ADMIN</button>
+    </div>
+    <!-- CREW -->
+    <div class="lsec" id="secCrew">
+      <div class="llabel" style="margin-bottom:4px">Pilih nama anda:</div>
+      <div class="crew-list" id="crewList"></div>
+      <div class="lerr" id="crewErr"></div>
+      <div class="add-row">
+        <input class="add-inp" id="newCrewInp" placeholder="Nama crew baru..."
+          onkeydown="if(event.key==='Enter')doAddCrew()">
+        <button class="add-btn" onclick="doAddCrew()">+ TAMBAH</button>
+      </div>
+      <div class="add-hint">Crew boleh tambah &amp; padam nama &middot; Admin boleh tambah dari dalam sistem</div>
+    </div>
+  </div>
+</div>
 
-<div class="container">
+<!-- USER BADGE -->
+<div class="ubadge" id="ubadge" onclick="doLogout()">
+  <div class="ubdot" id="ubdot"></div>
+  <div>
+    <div class="ubname" id="ubname">-</div>
+    <div class="ubrole" id="ubrole">-</div>
+  </div>
+  <span style="font-size:10px;color:var(--muted);margin-left:4px">&#x23FB;</span>
+</div>
 
-<!-- MAP STANDING -->
-<div class="card">
-<h3>MAP STANDING</h3>
+<!-- MAIN WRAP -->
+<div class="wrap">
 
-<div class="map-header">
-  <div class="tabs">
-    <button id="tab-erangel" onclick="switchMap('erangel')">Erangel</button>
-    <button id="tab-miramar" onclick="switchMap('miramar')">Miramar</button>
-    <button id="tab-rondo" onclick="switchMap('rondo')">Rondo</button>
+  <!-- HEADER -->
+  <div class="header">
+    <div class="eyebrow">PUBG MOBILE &middot; ESPORTS TOURNAMENT</div>
+    <div class="main-title" id="mainTitle" onclick="editTitle()" title="Klik untuk edit">ESPORTS TOURNAMENT 2026</div>
+    <div class="tedit-wrap" id="tEditWrap">
+      <input class="tedit-inp" id="tEditInp" placeholder="NAMA TOURNAMENT"
+        onkeydown="if(event.key==='Enter')saveTitle();if(event.key==='Escape')cancelEditTitle()">
+      <button class="tedit-save" onclick="saveTitle()">&#x2713; SAVE</button>
+    </div>
+    <div class="sub-title">LIVE TOURNAMENT MANAGEMENT SYSTEM</div>
+    <div class="live-badge"><div class="ldot"></div><span id="liveStatus">SYSTEM READY</span></div>
   </div>
 
-  <div class="map-actions">
-    <button id="lockBtn" class="btn btn-lock" onclick="toggleLock()">LOCK</button>
-    <button class="btn btn-reset" onclick="resetMap()">RESET</button>
-    <button class="btn btn-export" onclick="exportData()">EXPORT</button>
-    <button class="btn btn-import" onclick="importData()">IMPORT</button>
-    <input type="file" id="importFile" hidden accept=".json">
+  <!-- MAIN GRID -->
+  <div class="slabel">MODUL UTAMA</div>
+
+  <!-- CREW VIEW BAR -->
+  <div class="cvbar" id="cvbar">
+    <div class="cvinner">
+      <span class="cvlabel">&#x1F4FA; Lihat:</span>
+      <div class="cvbtns">
+        <button class="cvbtn active" onclick="setView('all',this)">&#x2705; SEMUA</button>
+        <button class="cvbtn" onclick="setView('standing',this)">Standing</button>
+        <button class="cvbtn" onclick="setView('leaderboard',this)">Leaderboard</button>
+        <button class="cvbtn" onclick="setView('popup',this)">Popup Kill</button>
+        <button class="cvbtn" onclick="setView('obs',this)">OBS LB</button>
+        <button class="cvbtn" onclick="setView('dashboard',this)">Dashboard</button>
+      </div>
+    </div>
   </div>
-</div>
 
-<table>
-<thead>
-<tr>
-  <th>No</th>
-  <th style="text-align:left">Team</th>
-  <th>WWCD</th>
-  <th>Place</th>
-  <th>Kill</th>
-  <th>Total</th>
-</tr>
-</thead>
-<tbody id="mapTable"></tbody>
-</table>
-</div>
-
-<!-- ALL STANDING -->
-<div class="card">
-<h3>ALL STANDING</h3>
-<table>
-<thead>
-<tr>
-  <th>No</th>
-  <th style="text-align:left">Team</th>
-  <th>WWCD</th>
-  <th>Place</th>
-  <th>Kill</th>
-  <th>Total</th>
-</tr>
-</thead>
-<tbody id="allTable"></tbody>
-</table>
-</div>
-
-</div>
-
-<!-- KILL POPUP -->
-<div class="popup" id="killPopup">
- <div class="popup-box">
-  <h4>Pilih Kill</h4>
-  <div class="kill-grid" id="killGrid"></div>
-  <div class="popup-actions">
-    <button class="btn btn-reset" onclick="closeKill()">Cancel</button>
-    <button class="btn btn-lock" onclick="saveKill()">Save</button>
+  <div class="mgrid" id="mgrid">
+    <a class="ncard cgold" href="Standing_Point_v2.html" target="_blank" data-view="standing">
+      <span class="cchip chip-live">MASTER</span>
+      <svg class="cicon" viewBox="0 0 56 56" fill="none"><rect x="6" y="32" width="12" height="18" rx="2.5" fill="rgba(255,255,255,.9)"/><rect x="22" y="22" width="12" height="28" rx="2.5" fill="rgba(255,255,255,.9)"/><rect x="38" y="10" width="12" height="40" rx="2.5" fill="rgba(255,255,255,.9)"/><circle cx="12" cy="30" r="3" fill="#fff"/><circle cx="28" cy="20" r="3" fill="#fff"/><circle cx="44" cy="8" r="3" fill="#fff"/></svg>
+      <span class="clabel">STANDING<br>POINT</span>
+      <span class="cdesc">Master data &middot; Map &middot; Overall</span>
+    </a>
+    <a class="ncard" href="leaderboard_FINAL.html" target="_blank" data-view="leaderboard">
+      <span class="cchip chip-live">LIVE</span>
+      <svg class="cicon" viewBox="0 0 56 56" fill="none"><path d="M28 5L33 18H47L36 27L40 41L28 33L16 41L20 27L9 18H23L28 5Z" fill="rgba(255,255,255,.92)"/><rect x="12" y="44" width="32" height="3.5" rx="1.75" fill="rgba(255,255,255,.45)"/></svg>
+      <span class="clabel">LEADER<br>BOARD</span>
+      <span class="cdesc">Dashboard &middot; Kawalan match</span>
+    </a>
+    <a class="ncard cred" href="popup_kill_FINAL.html" target="_blank" data-view="popup">
+      <span class="cchip chip-obs">OBS</span>
+      <svg class="cicon" viewBox="0 0 56 56" fill="none"><circle cx="28" cy="26" r="16" stroke="rgba(255,255,255,.9)" stroke-width="2.8" fill="none"/><circle cx="28" cy="26" r="5" fill="rgba(255,255,255,.9)"/><line x1="28" y1="5" x2="28" y2="13" stroke="rgba(255,255,255,.7)" stroke-width="2.8" stroke-linecap="round"/><line x1="28" y1="39" x2="28" y2="47" stroke="rgba(255,255,255,.7)" stroke-width="2.8" stroke-linecap="round"/><line x1="7" y1="26" x2="15" y2="26" stroke="rgba(255,255,255,.7)" stroke-width="2.8" stroke-linecap="round"/><line x1="41" y1="26" x2="49" y2="26" stroke="rgba(255,255,255,.7)" stroke-width="2.8" stroke-linecap="round"/></svg>
+      <span class="clabel">POPUP<br>KILL</span>
+      <span class="cdesc">Auto popup &middot; Eliminated &middot; WWCD</span>
+    </a>
+    <a class="ncard cblue" href="leaderboard_FINAL.html#obs" target="_blank" data-view="obs">
+      <span class="cchip chip-obs">OBS</span>
+      <svg class="cicon" viewBox="0 0 56 56" fill="none"><rect x="4" y="8" width="48" height="34" rx="5" stroke="rgba(255,255,255,.9)" stroke-width="2.5" fill="rgba(255,255,255,.08)"/><circle cx="28" cy="25" r="10" stroke="rgba(255,255,255,.9)" stroke-width="2.2" fill="rgba(255,255,255,.08)"/><circle cx="28" cy="25" r="4" fill="rgba(255,255,255,.9)"/><line x1="18" y1="42" x2="14" y2="52" stroke="rgba(255,255,255,.55)" stroke-width="2.2" stroke-linecap="round"/><line x1="38" y1="42" x2="42" y2="52" stroke="rgba(255,255,255,.55)" stroke-width="2.2" stroke-linecap="round"/><circle cx="43" cy="14" r="4" fill="rgba(255,80,80,.95)"/></svg>
+      <span class="clabel">OBS LIVE<br>LEADERBOARD</span>
+      <span class="cdesc">Browser Source &middot; 500&times;900</span>
+    </a>
+    <a class="ncard cgreen" href="HOME_DASHBOARD.html" target="_blank" data-view="dashboard">
+      <svg class="cicon" viewBox="0 0 56 56" fill="none"><rect x="5" y="5" width="20" height="20" rx="4" fill="rgba(255,255,255,.9)"/><rect x="31" y="5" width="20" height="20" rx="4" fill="rgba(255,255,255,.6)"/><rect x="5" y="31" width="20" height="20" rx="4" fill="rgba(255,255,255,.6)"/><rect x="31" y="31" width="20" height="20" rx="4" fill="rgba(255,255,255,.4)"/></svg>
+      <span class="clabel">HOME<br>DASHBOARD</span>
+      <span class="cdesc">Navigasi crew &middot; 8 modul</span>
+    </a>
+    <div class="ncard cdark" onclick="toggleInfo()">
+      <svg class="cicon" viewBox="0 0 56 56" fill="none"><circle cx="28" cy="28" r="22" stroke="rgba(255,255,255,.7)" stroke-width="2.5" fill="none"/><line x1="28" y1="24" x2="28" y2="38" stroke="rgba(255,255,255,.9)" stroke-width="3" stroke-linecap="round"/><circle cx="28" cy="17" r="2.5" fill="rgba(255,255,255,.9)"/></svg>
+      <span class="clabel">INFO &amp;<br>PANDUAN</span>
+      <span class="cdesc">Cara guna &middot; Link OBS &middot; GitHub</span>
+    </div>
   </div>
- </div>
-</div>
+
+  <!-- OBS LINKS -->
+  <div class="slabel">OBS BROWSER SOURCE</div>
+  <div class="obs-section">
+    <div class="obs-hdr">
+      <span class="obs-hdr-title">&#x1F4FA; OBS OVERLAY LINKS</span>
+      <span style="font-size:9px;color:rgba(100,180,255,.5);font-weight:700;letter-spacing:1px">AUTO-SAVED</span>
+    </div>
+    <div class="obs-grid" id="obsGrid"></div>
+  </div>
+
+  <!-- INFO PANEL -->
+  <div class="info-panel" id="infoPanel">
+    <div class="ibox">
+      <div class="ititle">&#x1F4CB; PANDUAN PENGGUNAAN</div>
+      <div class="igrid">
+        <div>
+          <div class="isub">Struktur Fail</div>
+          <div class="icode">
+            &#x1F4C1; folder/<br>
+            &nbsp;&nbsp;&#x1F4C4; <span style="color:var(--gold)">index.html</span><br>
+            &nbsp;&nbsp;&#x1F4C4; Standing_Point_v2.html<br>
+            &nbsp;&nbsp;&#x1F4C4; leaderboard_FINAL.html<br>
+            &nbsp;&nbsp;&#x1F4C4; popup_kill_FINAL.html<br>
+            &nbsp;&nbsp;&#x1F4C4; HOME_DASHBOARD.html
+          </div>
+        </div>
+        <div>
+          <div class="isub">OBS Setup</div>
+          <div class="itext">
+            1. OBS &rarr; Sources &rarr; + &rarr; Browser<br>
+            2. Tick Local File<br>
+            3. Browse ke leaderboard_FINAL.html<br>
+            4. Tambah <span style="color:var(--mg2)">#obs</span> di hujung URL<br>
+            5. Width: 500 &middot; Height: 900<br>
+            6. Admin buka dulu sebelum OBS
+          </div>
+        </div>
+        <div>
+          <div class="isub">Aliran Data</div>
+          <div class="itext">
+            Standing_Point &rarr; Master team list<br>
+            Leaderboard &rarr; Input PTS/ELIMS/P1-P4<br>
+            maida_live_v1 &rarr; Broadcast realtime<br>
+            Popup Kill &rarr; Auto terima event<br>
+            OBS &rarr; Papar live dari localStorage
+          </div>
+        </div>
+        <div>
+          <div class="isub">GitHub Pages</div>
+          <div class="itext">
+            1. Upload semua fail ke repo<br>
+            2. Settings &rarr; Pages &rarr; Deploy main<br>
+            3. URL: username.github.io/repo/<br>
+            4. localStorage dikongsi domain sama<br>
+            5. OBS guna URL GitHub Pages
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">MAIDA ESPORTS TOURNAMENT SYSTEM &middot; PUBG MOBILE &middot; <span id="fyear"></span></div>
+</div><!-- end .wrap -->
+
+<div class="toast" id="toast"></div>
 
 <script>
-/* ================= DATA ================= */
-const teams=[
- "OL","Zentra","JURNEE 52","HEe ESPORT","AING BALANG","MANTARAY GIANT",
- "SolJar","Yelnats","Martabak Esport","THE RED X","SANTAi KiLLERs",
- "TOP PANDA","ROBOX","DND","FAM | United","REDBULL 26 ESPORTS"
+var ADMIN_PASS = "maida2026";
+var LS_KEY     = "maida_v5";
+var SP_KEY     = "hswp_2026_pro";
+var LIVE_KEY   = "maida_live_v1";
+var OBS_KEY    = "maidaObsLinks";
+var CREW_KEY   = "maidaCrewList";
+var AUTH_KEY   = "maidaAuth";
+var TITLE_KEY  = "maidaTitle";
+
+var DEFAULT_CREW = [
+  {name:"Mijj", color:"#cc00cc"},
+  {name:"Juju", color:"#2979ff"},
+  {name:"Muiz", color:"#18e868"}
 ];
-const maps=["erangel","miramar","rondo"];
-const point=i=>[10,6,5,4,3,2,1,1][i]||0;
 
-let state=JSON.parse(localStorage.getItem("hswp"))||{
- currentMap:"erangel",
- maps:{
-  erangel:{locked:false,order:[...teams],kill:{}},
-  miramar:{locked:false,order:[...teams],kill:{}},
-  rondo:{locked:false,order:[...teams],kill:{}}
- }
+var crewList = [];
+var currentUser = null;
+
+var OBS_DEFS = [
+  {key:"obsLb",      label:"LIVE LEADERBOARD", badge:"bdg-live",  bt:"LIVE",  def:"leaderboard_FINAL.html#obs", w:500,  h:900,  ic:"lb"},
+  {key:"obsKill",    label:"POPUP KILL",        badge:"bdg-obs",   bt:"OBS",   def:"popup_kill_FINAL.html",      w:1920, h:1080, ic:"kill"},
+  {key:"obsWwcd",    label:"WWCD",              badge:"bdg-obs",   bt:"OBS",   def:"popup_kill_FINAL.html",      w:1920, h:1080, ic:"win"},
+  {key:"obsTeam",    label:"TEAM ADMIN",        badge:"bdg-admin", bt:"ADMIN", def:"leaderboard_FINAL.html",     w:1920, h:1080, ic:"team"},
+  {key:"obsMap",     label:"MAP STANDING",      badge:"bdg-admin", bt:"ADMIN", def:"Standing_Point_v2.html",     w:1400, h:900,  ic:"map"},
+  {key:"obsOverall", label:"OVERALL STANDING",  badge:"bdg-live",  bt:"LIVE",  def:"Standing_Point_v2.html",     w:1920, h:1080, ic:"rank"}
+];
+
+var SVG_IC = {
+  lb:   "<svg viewBox=\"0 0 28 28\" fill=\"none\" width=\"22\" height=\"22\"><path d=\"M14 2L17 9H25L19 13.5L21 21L14 17L7 21L9 13.5L3 9H11L14 2Z\" fill=\"rgba(100,180,255,.9)\"/></svg>",
+  kill: "<svg viewBox=\"0 0 28 28\" fill=\"none\" width=\"22\" height=\"22\"><circle cx=\"14\" cy=\"12\" r=\"8\" stroke=\"rgba(100,180,255,.9)\" stroke-width=\"2\" fill=\"none\"/><circle cx=\"14\" cy=\"12\" r=\"2.5\" fill=\"rgba(100,180,255,.9)\"/><line x1=\"14\" y1=\"2\" x2=\"14\" y2=\"6\" stroke=\"rgba(100,180,255,.7)\" stroke-width=\"1.8\" stroke-linecap=\"round\"/><line x1=\"14\" y1=\"18\" x2=\"14\" y2=\"22\" stroke=\"rgba(100,180,255,.7)\" stroke-width=\"1.8\" stroke-linecap=\"round\"/><line x1=\"4\" y1=\"12\" x2=\"8\" y2=\"12\" stroke=\"rgba(100,180,255,.7)\" stroke-width=\"1.8\" stroke-linecap=\"round\"/><line x1=\"20\" y1=\"12\" x2=\"24\" y2=\"12\" stroke=\"rgba(100,180,255,.7)\" stroke-width=\"1.8\" stroke-linecap=\"round\"/></svg>",
+  win:  "<svg viewBox=\"0 0 28 28\" fill=\"none\" width=\"22\" height=\"22\"><path d=\"M14 3C14 3 7 6 4 11C4 11 7 19 14 23C21 19 24 11 24 11C21 6 14 3 14 3Z\" stroke=\"rgba(100,180,255,.9)\" stroke-width=\"1.6\" fill=\"rgba(100,180,255,.1)\"/><path d=\"M9 13L12.5 16.5L19 10\" stroke=\"rgba(100,180,255,.95)\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>",
+  team: "<svg viewBox=\"0 0 28 28\" fill=\"none\" width=\"22\" height=\"22\"><circle cx=\"10\" cy=\"10\" r=\"4.5\" stroke=\"rgba(100,180,255,.9)\" stroke-width=\"1.6\" fill=\"rgba(100,180,255,.12)\"/><circle cx=\"19\" cy=\"10\" r=\"4.5\" stroke=\"rgba(100,180,255,.9)\" stroke-width=\"1.6\" fill=\"rgba(100,180,255,.12)\"/><path d=\"M2 24C2 19 5.6 15 10 15C12 15 14.5 16 14.5 16C14.5 16 17 15 19 15C23.4 15 27 19 27 24\" stroke=\"rgba(100,180,255,.65)\" stroke-width=\"1.6\" stroke-linecap=\"round\" fill=\"none\"/></svg>",
+  map:  "<svg viewBox=\"0 0 28 28\" fill=\"none\" width=\"22\" height=\"22\"><path d=\"M4 6L10 4L18 6L24 4V22L18 24L10 22L4 24V6Z\" stroke=\"rgba(100,180,255,.9)\" stroke-width=\"1.6\" fill=\"rgba(100,180,255,.08)\"/><circle cx=\"14\" cy=\"13\" r=\"2.2\" fill=\"rgba(100,180,255,.9)\"/></svg>",
+  rank: "<svg viewBox=\"0 0 28 28\" fill=\"none\" width=\"22\" height=\"22\"><rect x=\"2\" y=\"17\" width=\"6\" height=\"9\" rx=\"1.2\" fill=\"rgba(100,180,255,.9)\"/><rect x=\"11\" y=\"11\" width=\"6\" height=\"15\" rx=\"1.2\" fill=\"rgba(100,180,255,.9)\"/><rect x=\"20\" y=\"5\" width=\"6\" height=\"21\" rx=\"1.2\" fill=\"rgba(100,180,255,.9)\"/></svg>"
 };
-maps.forEach(m=>teams.forEach(t=>{
- if(state.maps[m].kill[t]===undefined) state.maps[m].kill[t]=null;
-}));
-const save=()=>localStorage.setItem("hswp",JSON.stringify(state));
 
-/* ================= MAP SWITCH ================= */
-function switchMap(m){
- state.currentMap=m;
- document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
- document.getElementById("tab-"+m).classList.add("active");
- renderMap();
+/* ── CREW ── */
+function loadCrew(){try{var r=localStorage.getItem(CREW_KEY);crewList=r?JSON.parse(r):DEFAULT_CREW.map(function(c){return{name:c.name,color:c.color};});}catch(e){crewList=DEFAULT_CREW.map(function(c){return{name:c.name,color:c.color};});}}
+function saveCrew(){localStorage.setItem(CREW_KEY,JSON.stringify(crewList));}
+function randColor(){var c=["#cc00cc","#2979ff","#18e868","#ff3b5c","#ffb400","#00e5ff","#ff6d00","#aa00ff"];return c[Math.floor(Math.random()*c.length)];}
+
+function renderCrew(){
+  loadCrew();
+  var el=document.getElementById("crewList");
+  if(!el)return;
+  el.innerHTML=crewList.map(function(c,i){
+    return "<div class=\"crew-item\" onclick=\"doCrewLogin('"+c.name+"','"+c.color+"')\">"+
+      "<div class=\"crew-av\" style=\"background:"+c.color+"22;border:2px solid "+c.color+"\">"+
+      "<span style=\"color:"+c.color+"\">"+c.name[0].toUpperCase()+"</span></div>"+
+      "<div class=\"crew-info\"><div class=\"crew-nm\">"+c.name+"</div>"+
+      "<div class=\"crew-rl\">CREW &middot; Akses terhad</div></div>"+
+      "<div class=\"crew-del\" onclick=\"event.stopPropagation();doDelCrew("+i+")\" title=\"Padam\">&#x2715;</div></div>";
+  }).join("");
 }
 
-/* ================= LOCK ================= */
-function toggleLock(){
- const map=state.maps[state.currentMap];
- if(!confirm(map.locked?"Buka MODE EDIT?":"Bekukan data map ini?"))return;
- map.locked=!map.locked;
- save(); renderMap();
+function doAddCrew(){
+  var inp=document.getElementById("newCrewInp");
+  var name=inp.value.trim();
+  if(!name){setCrewErr("Sila masukkan nama!");return;}
+  loadCrew();
+  if(crewList.some(function(c){return c.name.toLowerCase()===name.toLowerCase();})){setCrewErr("Nama sudah wujud!");return;}
+  crewList.push({name:name,color:randColor()});
+  saveCrew();inp.value="";
+  renderCrew();showToast("&#x2713; "+name+" ditambah");
 }
 
-/* ================= RESET ================= */
-function resetMap(){
- const map=state.maps[state.currentMap];
- if(map.locked){alert("UNLOCK dahulu");return;}
- if(!confirm("Reset map ini?"))return;
- map.order=[...teams];
- teams.forEach(t=>map.kill[t]=null);
- save(); renderMap();
+function doDelCrew(i){
+  loadCrew();
+  var name=crewList[i]?crewList[i].name:"";
+  crewList.splice(i,1);saveCrew();
+  renderCrew();showToast("&#x2713; "+name+" dipadam");
 }
 
-/* ================= DRAG & DROP ================= */
-let dragFrom=null;
-function enableDrag(){
- const map=state.maps[state.currentMap];
- document.querySelectorAll("#mapTable tr").forEach((row,i)=>{
-  row.draggable=!map.locked;
-  row.classList.remove("dragging","drag-over");
+function setCrewErr(msg){var e=document.getElementById("crewErr");if(e){e.textContent=msg;setTimeout(function(){e.textContent="";},2500);}}
 
-  row.addEventListener("dragstart",e=>{
-    if(map.locked)return;
-    dragFrom=i;
-    row.classList.add("dragging");
-    e.dataTransfer.effectAllowed="move";
-  });
-
-  row.addEventListener("dragover",e=>{
-    if(map.locked)return;
-    e.preventDefault();
-    row.classList.add("drag-over");
-  });
-
-  row.addEventListener("dragleave",()=>row.classList.remove("drag-over"));
-
-  row.addEventListener("drop",e=>{
-    if(map.locked)return;
-    e.preventDefault();
-    row.classList.remove("drag-over");
-    if(dragFrom===null||dragFrom===i)return;
-    const moved=map.order.splice(dragFrom,1)[0];
-    map.order.splice(i,0,moved);
-    dragFrom=null;
-    save();
-    renderMap(i);
-  });
-
-  row.addEventListener("dragend",()=>{
-    row.classList.remove("dragging","drag-over");
-    dragFrom=null;
-  });
- });
-}
-
-/* ================= RENDER ================= */
-function renderMap(animate){
- const map=state.maps[state.currentMap];
- const lockBtn=document.getElementById("lockBtn");
- lockBtn.innerText=map.locked?"UNLOCK":"LOCK";
- lockBtn.className="btn "+(map.locked?"btn-unlock":"btn-lock");
-
- const tb=document.getElementById("mapTable");
- tb.innerHTML="";
- map.order.forEach((t,i)=>{
-  const p=point(i);
-  const k=map.kill[t];
-  tb.innerHTML+=`
-   <tr class="drag-row ${i===animate?"drop-animate":""}">
-    <td><span class="drag-handle ${map.locked?"disabled":""}">≡</span> ${i+1}</td>
-    <td class="team">${t}</td>
-    <td>${i===0?'<span class="badge wwcd">WWCD</span>':""}</td>
-    <td>${p}</td>
-    <td onclick="${map.locked?"":"openKill('"+t+"')"}">
-      ${k===null?'<span class="kill-plain">0</span>':'<span class="badge kill">'+k+'</span>'}
-    </td>
-    <td>${p+(k||0)}</td>
-   </tr>`;
- });
- enableDrag();
- renderAll();
-}
-
-/* ================= ALL STANDING ================= */
-function renderAll(){
- const agg={}; teams.forEach(t=>agg[t]={w:0,p:0,k:0});
- Object.values(state.maps).forEach(m=>{
-  if(m.locked){
-    m.order.forEach((t,i)=>{
-      agg[t].p+=point(i);
-      if(i===0)agg[t].w++;
-      if(m.kill[t])agg[t].k+=m.kill[t];
-    });
+/* ── LOGIN TABS ── */
+function switchTab(tab){
+  document.querySelectorAll(".ltab").forEach(function(t){t.classList.remove("active");});
+  document.querySelectorAll(".lsec").forEach(function(s){s.classList.remove("show");});
+  if(tab==="admin"){
+    document.querySelector(".ladmin").classList.add("active");
+    document.getElementById("secAdmin").classList.add("show");
+    setTimeout(function(){var el=document.getElementById("adminPw");if(el)el.focus();},100);
+  } else {
+    document.querySelector(".lcrew").classList.add("active");
+    document.getElementById("secCrew").classList.add("show");
+    renderCrew();
   }
- });
- const sorted=[...teams].sort((a,b)=>(agg[b].p+agg[b].k)-(agg[a].p+agg[a].k));
- const tb=document.getElementById("allTable");
- tb.innerHTML="";
- sorted.forEach((t,i)=>{
-  const A=agg[t];
-  tb.innerHTML+=`
-   <tr>
-    <td>${i+1}</td>
-    <td class="team">${t}</td>
-    <td>${A.w}</td>
-    <td>${A.p}</td>
-    <td>${A.k}</td>
-    <td>${A.p+A.k}</td>
-   </tr>`;
- });
 }
 
-/* ================= KILL ================= */
-let currentTeam=null,selectedKill=null;
-function openKill(t){
- currentTeam=t;
- selectedKill=null;
- const g=document.getElementById("killGrid");
- g.innerHTML="";
- for(let i=0;i<=34;i++){
-  const d=document.createElement("div");
-  d.innerText=i;
-  d.onclick=()=>{
-    document.querySelectorAll(".kill-grid div").forEach(x=>x.classList.remove("active"));
-    d.classList.add("active");
-    selectedKill=i;
-  };
-  g.appendChild(d);
- }
- document.getElementById("killPopup").style.display="flex";
-}
-function saveKill(){
- if(currentTeam===null)return;
- state.maps[state.currentMap].kill[currentTeam]=selectedKill;
- save();
- closeKill();
- renderMap();
-}
-function closeKill(){
- document.getElementById("killPopup").style.display="none";
-}
-
-/* ================= EXPORT / IMPORT ================= */
-function exportData(){
- const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
- const a=document.createElement("a");
- a.href=URL.createObjectURL(blob);
- a.download="hswp-data.json";
- a.click();
-}
-function importData(){
- document.getElementById("importFile").click();
-}
-document.getElementById("importFile").addEventListener("change",e=>{
- const file=e.target.files[0];
- if(!file)return;
- const r=new FileReader();
- r.onload=()=>{
-  if(confirm("Import akan gantikan semua data. Teruskan?")){
-    state=JSON.parse(r.result);
-    save();
-    renderMap();
+/* ── LOGIN ADMIN ── */
+function doAdminLogin(){
+  var pw=document.getElementById("adminPw").value;
+  var err=document.getElementById("adminErr");
+  if(pw!==ADMIN_PASS){
+    err.textContent="&#x274C; Password salah!";
+    document.getElementById("adminPw").value="";
+    setTimeout(function(){err.textContent="";},2500);
+    return;
   }
- };
- r.readAsText(file);
-});
+  currentUser={name:"ADMIN",role:"admin",color:"#ffb400"};
+  saveAuth();enterSys();
+}
 
-/* ================= INIT ================= */
-switchMap(state.currentMap);
+/* ── LOGIN CREW ── */
+function doCrewLogin(name,color){
+  currentUser={name:name,role:"crew",color:color};
+  saveAuth();enterSys();
+}
+
+/* ── ENTER SYSTEM ── */
+function enterSys(){
+  document.getElementById("loginOverlay").style.display="none";
+  var b=document.getElementById("ubadge");
+  b.style.display="flex";
+  document.getElementById("ubname").textContent=currentUser.name;
+  document.getElementById("ubrole").textContent=currentUser.role==="admin"?"ADMIN &middot; FULL ACCESS":"CREW";
+  document.getElementById("ubdot").style.background=currentUser.color;
+  b.style.borderColor=currentUser.role==="admin"?"rgba(255,180,0,.4)":"rgba(204,0,204,.3)";
+  document.body.classList.remove("role-admin","role-crew");
+  document.body.classList.add("role-"+currentUser.role);
+  var cvb=document.getElementById("cvbar");
+  if(cvb)cvb.classList.toggle("show",currentUser.role==="crew");
+  updateStatus();
+  showToast("&#x2705; Selamat datang, "+currentUser.name+"!");
+}
+
+/* ── LOGOUT ── */
+function doLogout(){
+  if(!confirm("Log keluar dari "+currentUser.name+"?"))return;
+  currentUser=null;
+  localStorage.removeItem(AUTH_KEY);
+  document.body.classList.remove("role-admin","role-crew");
+  document.getElementById("ubadge").style.display="none";
+  document.getElementById("loginOverlay").style.display="flex";
+  document.getElementById("adminPw").value="";
+  var cvb=document.getElementById("cvbar");if(cvb)cvb.classList.remove("show");
+  switchTab("admin");
+}
+
+/* ── SESSION ── */
+function saveAuth(){try{localStorage.setItem(AUTH_KEY,JSON.stringify({name:currentUser.name,role:currentUser.role,color:currentUser.color,ts:Date.now()}));}catch(e){}}
+function restoreAuth(){
+  try{
+    var r=localStorage.getItem(AUTH_KEY);if(!r)return false;
+    var s=JSON.parse(r);
+    if(Date.now()-s.ts>8*60*60*1000){localStorage.removeItem(AUTH_KEY);return false;}
+    currentUser={name:s.name,role:s.role,color:s.color};return true;
+  }catch(e){return false;}
+}
+
+/* ── CREW VIEW ── */
+function setView(view,btn){
+  document.querySelectorAll(".cvbtn").forEach(function(b){b.classList.remove("active");});
+  btn.classList.add("active");
+  var cards=document.querySelectorAll("#mgrid .ncard, #mgrid div.ncard");
+  var map={standing:"Standing_Point_v2",leaderboard:"leaderboard_FINAL.html\"",popup:"popup_kill",obs:"leaderboard_FINAL.html#obs",dashboard:"HOME_DASHBOARD"};
+  cards.forEach(function(c){
+    if(view==="all"){c.style.display="";return;}
+    var href=c.getAttribute("href")||"";
+    var match=map[view]||"";
+    c.style.display=(href.indexOf(match.replace("\"",""))>=0)||(view==="info"&&!c.href)?"":"none";
+  });
+}
+
+/* ── OBS LINKS ── */
+function loadObs(){try{var r=localStorage.getItem(OBS_KEY);if(r){var s=JSON.parse(r);OBS_DEFS.forEach(function(d){if(s[d.key])d.url=s[d.key];else d.url=d.def;});}else{OBS_DEFS.forEach(function(d){d.url=d.def;});}}catch(e){OBS_DEFS.forEach(function(d){d.url=d.def;});}}
+function saveObs(){var o={};OBS_DEFS.forEach(function(d){o[d.key]=d.url||d.def;});localStorage.setItem(OBS_KEY,JSON.stringify(o));}
+
+function renderObs(){
+  loadObs();
+  var g=document.getElementById("obsGrid");if(!g)return;
+  g.innerHTML=OBS_DEFS.map(function(d){
+    var url=d.url||d.def;
+    return "<div class=\"obs-card\" id=\"oc_"+d.key+"\">"+
+      "<div class=\"obs-ibox\">"+(SVG_IC[d.ic]||"")+"</div>"+
+      "<div class=\"obs-info\">"+
+        "<div style=\"display:flex;align-items:center;gap:6px;margin-bottom:2px\">"+
+          "<div class=\"obs-lbl\">"+d.label+"</div>"+
+          "<div class=\"obs-bdg "+d.badge+"\">"+d.bt+"</div>"+
+        "</div>"+
+        "<div class=\"obs-url\" id=\"ou_"+d.key+"\">"+url+"</div>"+
+        "<div class=\"obs-btns\">"+
+          "<button class=\"obtn obtn-o\" onclick=\"obsOpen('"+d.key+"')\">&#x25B6; BUKA</button>"+
+          "<button class=\"obtn obtn-c\" onclick=\"obsCopy('"+d.key+"')\">&#x1F4CB; COPY</button>"+
+          "<button class=\"obtn obtn-e\" id=\"oeb_"+d.key+"\" onclick=\"obsEdit('"+d.key+"')\">&#x270F; EDIT</button>"+
+        "</div>"+
+        "<div class=\"obs-erow\" id=\"oer_"+d.key+"\">"+
+          "<input class=\"obs-einp\" id=\"oei_"+d.key+"\" value=\""+url+"\" placeholder=\"URL atau path...\""+
+          " onkeydown=\"if(event.key===\'Enter\')obsSave(\'"+d.key+"\');if(event.key===\'Escape\')obsCancel(\'"+d.key+"\')\">"+
+          "<button class=\"obtn obtn-s\" onclick=\"obsSave('"+d.key+"')\">&#x2713;</button>"+
+        "</div>"+
+      "</div>"+
+    "</div>";
+  }).join("");
+}
+
+function obsEdit(k){
+  var c=document.getElementById("oc_"+k),r=document.getElementById("oer_"+k),b=document.getElementById("oeb_"+k);
+  if(c.classList.contains("editing")){obsCancel(k);return;}
+  c.classList.add("editing");r.style.display="flex";b.textContent="&#x2715;";
+  var i=document.getElementById("oei_"+k);if(i){i.focus();i.select();}
+}
+function obsCancel(k){
+  var c=document.getElementById("oc_"+k),r=document.getElementById("oer_"+k),b=document.getElementById("oeb_"+k);
+  c.classList.remove("editing");r.style.display="none";b.innerHTML="&#x270F; EDIT";
+}
+function obsSave(k){
+  var i=document.getElementById("oei_"+k);if(!i)return;
+  var v=i.value.trim();if(!v){showToast("&#x26A0; URL kosong");return;}
+  var d=OBS_DEFS.filter(function(x){return x.key===k;})[0];if(d)d.url=v;
+  var u=document.getElementById("ou_"+k);if(u)u.textContent=v;
+  saveObs();obsCancel(k);showToast("&#x2713; Link disimpan");
+}
+function obsOpen(k){
+  var d=OBS_DEFS.filter(function(x){return x.key===k;})[0];if(!d)return;
+  var url=d.url||d.def;if(!url){showToast("&#x26A0; Set link dahulu");return;}
+  var l=Math.round((screen.width-d.w)/2),t=Math.round((screen.height-d.h)/2);
+  var w=window.open(url,"maida_"+k,"width="+d.w+",height="+d.h+",left="+l+",top="+t+",toolbar=0,menubar=0,resizable=1");
+  if(!w){showToast("&#x26A0; Popup disekat! Benarkan popup");return;}
+  showToast("&#x2713; "+d.label+" dibuka");
+}
+function obsCopy(k){
+  var d=OBS_DEFS.filter(function(x){return x.key===k;})[0];if(!d)return;
+  var url=d.url||d.def;
+  if(navigator.clipboard){navigator.clipboard.writeText(url).then(function(){showToast("&#x1F4CB; URL disalin!");}).catch(function(){fallbackCopy(url);});}
+  else fallbackCopy(url);
+}
+function fallbackCopy(t){var ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);showToast("&#x1F4CB; URL disalin!");}
+
+/* ── TITLE EDIT ── */
+function editTitle(){
+  var i=document.getElementById("tEditInp");
+  i.value=document.getElementById("mainTitle").textContent.trim();
+  document.getElementById("tEditWrap").classList.add("show");
+  document.getElementById("mainTitle").style.display="none";
+  i.focus();i.select();
+}
+function saveTitle(){
+  var v=document.getElementById("tEditInp").value.trim()||"ESPORTS TOURNAMENT 2026";
+  document.getElementById("mainTitle").textContent=v;
+  document.getElementById("mainTitle").style.display="";
+  document.getElementById("tEditWrap").classList.remove("show");
+  localStorage.setItem(TITLE_KEY,v);
+  try{var r=localStorage.getItem(SP_KEY);if(r){var sp=JSON.parse(r);sp.title=v;localStorage.setItem(SP_KEY,JSON.stringify(sp));}}catch(e){}
+  showToast("&#x2713; Nama disimpan: "+v);
+}
+function cancelEditTitle(){
+  document.getElementById("tEditWrap").classList.remove("show");
+  document.getElementById("mainTitle").style.display="";
+}
+
+/* ── INFO TOGGLE ── */
+function toggleInfo(){var p=document.getElementById("infoPanel");p.style.display=p.style.display==="none"?"block":"none";}
+
+/* ── LIVE STATUS ── */
+function updateStatus(){
+  var s=document.getElementById("liveStatus");if(!s)return;
+  try{
+    var sp=localStorage.getItem(SP_KEY);
+    var ls=localStorage.getItem(LS_KEY);
+    if(sp){
+      var spd=JSON.parse(sp);
+      var tc=(spd.teams&&spd.teams.length)||0;
+      if(ls){
+        var lsd=JSON.parse(ls);
+        var alive=0;
+        if(lsd.liveData){Object.values(lsd.liveData).forEach(function(t){if(t.alive&&t.alive.some(function(x){return x>0;}))alive++;});}
+        s.textContent="LIVE · "+tc+" TEAMS · "+alive+" ALIVE";
+      } else {
+        s.textContent="DATA READY · "+tc+" TEAMS";
+      }
+    } else {
+      s.textContent="MENUNGGU DATA STANDING POINT...";
+    }
+  }catch(e){s.textContent="SYSTEM READY";}
+}
+
+/* ── TOAST ── */
+function showToast(msg){
+  var t=document.getElementById("toast");
+  t.innerHTML=msg;t.classList.add("show");
+  clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove("show");},2800);
+}
+
+/* ── INIT ── */
+document.getElementById("fyear").textContent=new Date().getFullYear();
+
+// Title
+try{var st=localStorage.getItem(TITLE_KEY);if(st)document.getElementById("mainTitle").textContent=st;}catch(e){}
+try{var spd=JSON.parse(localStorage.getItem(SP_KEY)||"{}");if(spd.title)document.getElementById("mainTitle").textContent=spd.title;}catch(e){}
+
+// OBS
+renderObs();
+
+// Auth
+if(restoreAuth()){
+  enterSys();
+} else {
+  switchTab("admin");
+}
+
+updateStatus();
+setInterval(updateStatus,3000);
+window.addEventListener("storage",function(){updateStatus();renderObs();});
 </script>
-
 </body>
 </html>
