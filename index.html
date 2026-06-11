@@ -75,6 +75,71 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 .add-btn:hover{background:var(--mg);color:#fff;}
 .add-hint{font-size:9px;color:var(--muted);text-align:center;letter-spacing:.5px;margin-top:2px;}
 
+/* ── ADMIN CREW MANAGER ── */
+.admin-crew-link{
+  font-size:10px;color:rgba(255,180,0,.6);font-weight:700;letter-spacing:1px;
+  cursor:pointer;text-transform:uppercase;transition:.15s;
+}
+.admin-crew-link:hover{color:var(--gold);}
+.acm-back{
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  color:rgba(255,255,255,.55);padding:4px 10px;border-radius:6px;
+  font-family:"Barlow Condensed",sans-serif;font-size:11px;font-weight:700;
+  cursor:pointer;transition:.15s;letter-spacing:.5px;
+}
+.acm-back:hover{border-color:var(--gold);color:var(--gold);}
+.acm-divider{
+  font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);text-align:center;margin:10px 0 8px;
+  display:flex;align-items:center;gap:8px;
+}
+.acm-divider::before,.acm-divider::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.08);}
+.acm-add-row{display:flex;gap:6px;width:100%;align-items:center;}
+.acm-color-pick{
+  width:34px;height:34px;border-radius:7px;flex-shrink:0;cursor:pointer;
+  border:2px solid rgba(255,255,255,.15);position:relative;transition:.15s;
+}
+.acm-color-pick:hover{transform:scale(1.08);border-color:rgba(255,255,255,.4);}
+.acm-reset-btn{
+  width:100%;margin-top:8px;padding:7px;border:1px solid rgba(255,255,255,.08);
+  border-radius:7px;background:rgba(255,255,255,.03);color:var(--muted);
+  font-family:"Barlow Condensed",sans-serif;font-size:11px;font-weight:700;
+  cursor:pointer;transition:.15s;letter-spacing:.5px;
+}
+.acm-reset-btn:hover{border-color:var(--red);color:var(--red);}
+/* edit row inside crew item */
+.crew-edit-row{
+  display:none;width:100%;margin-top:6px;gap:5px;flex-direction:column;
+}
+.crew-item.editing .crew-edit-row{display:flex;}
+.crew-item.editing{border-color:rgba(255,180,0,.4);background:rgba(255,180,0,.06);}
+.cedit-inp{
+  flex:1;background:rgba(0,0,0,.4);border:1.5px solid rgba(255,180,0,.35);
+  color:#fff;padding:5px 8px;border-radius:5px;
+  font-family:"Barlow Condensed",sans-serif;font-size:12px;font-weight:700;outline:none;
+}
+.cedit-inp:focus{border-color:var(--gold);}
+.cedit-row{display:flex;gap:5px;align-items:center;}
+.cedit-color{
+  width:28px;height:28px;border-radius:5px;flex-shrink:0;cursor:pointer;
+  border:2px solid rgba(255,255,255,.2);position:relative;
+}
+.cebtn{
+  border:none;padding:5px 10px;border-radius:5px;
+  font-family:"Barlow Condensed",sans-serif;font-size:11px;font-weight:800;
+  cursor:pointer;transition:.15s;
+}
+.cebtn-save{background:rgba(24,232,104,.2);color:var(--green);border:1px solid rgba(24,232,104,.3);}
+.cebtn-save:hover{background:var(--green);color:#000;}
+.cebtn-cancel{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid rgba(255,255,255,.1);}
+.cebtn-cancel:hover{background:rgba(255,255,255,.12);color:#fff;}
+.crew-edit-btn{
+  width:26px;height:26px;border:1px solid rgba(255,180,0,.25);border-radius:6px;
+  background:rgba(255,180,0,.08);color:rgba(255,180,0,.7);font-size:11px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0;
+}
+.crew-edit-btn:hover{background:rgba(255,180,0,.2);color:var(--gold);}
+
 /* ── USER BADGE ── */
 .ubadge{position:fixed;top:10px;right:14px;z-index:9999;display:none;align-items:center;gap:7px;
   background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.12);border-radius:20px;
@@ -236,13 +301,43 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     </div>
     <!-- ADMIN -->
     <div class="lsec show" id="secAdmin">
-      <div class="lfield">
-        <span class="llabel">Password Admin</span>
-        <input type="password" class="linput" id="adminPw" placeholder="Masukkan password..."
-          onkeydown="if(event.key==='Enter')doAdminLogin()">
+      <!-- STATE 1: password input -->
+      <div id="adminPwPanel">
+        <div class="lfield">
+          <span class="llabel">Password Admin</span>
+          <input type="password" class="linput" id="adminPw" placeholder="Masukkan password..."
+            onkeydown="if(event.key==='Enter')doAdminLogin()">
+        </div>
+        <div class="lerr" id="adminErr"></div>
+        <button class="lbtn admin-btn" onclick="doAdminLogin()">&#x1F513; MASUK SEBAGAI ADMIN</button>
+        <div style="margin-top:10px;text-align:center">
+          <span class="admin-crew-link" onclick="showAdminCrewMgr()">&#x2699; Urus Senarai Crew</span>
+        </div>
       </div>
-      <div class="lerr" id="adminErr"></div>
-      <button class="lbtn admin-btn" onclick="doAdminLogin()">&#x1F513; MASUK SEBAGAI ADMIN</button>
+
+      <!-- STATE 2: crew manager (after pw verified) -->
+      <div id="adminCrewMgr" style="display:none;width:100%">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <span class="llabel" style="color:var(--gold);font-size:11px">&#x1F451; PENGURUSAN CREW</span>
+          <button class="acm-back" onclick="hideAdminCrewMgr()">&#x2190; KEMBALI</button>
+        </div>
+        <!-- Crew list with edit -->
+        <div class="crew-list" id="adminCrewList"></div>
+        <div class="lerr" id="adminCrewErr"></div>
+        <!-- Add new crew -->
+        <div class="acm-divider">TAMBAH CREW BARU</div>
+        <div class="acm-add-row">
+          <input class="add-inp" id="adminNewName" placeholder="Nama crew..." style="flex:1">
+          <div class="acm-color-pick" id="adminColorPick" onclick="document.getElementById('adminColorInp').click()"
+            style="background:#cc00cc">
+            <input type="color" id="adminColorInp" value="#cc00cc" style="position:absolute;opacity:0;width:0;height:0"
+              oninput="document.getElementById('adminColorPick').style.background=this.value">
+          </div>
+          <button class="add-btn" onclick="adminAddCrew()">+ TAMBAH</button>
+        </div>
+        <!-- Reset to default -->
+        <button class="acm-reset-btn" onclick="adminResetCrew()">&#x21BA; Reset ke default (Mijj, Juju, Muiz)</button>
+      </div>
     </div>
     <!-- CREW -->
     <div class="lsec" id="secCrew">
@@ -476,11 +571,145 @@ function doAddCrew(){
 function doDelCrew(i){
   loadCrew();
   var name=crewList[i]?crewList[i].name:"";
+  if(!confirm("Padam "+name+"?"))return;
   crewList.splice(i,1);saveCrew();
-  renderCrew();showToast("&#x2713; "+name+" dipadam");
+  renderCrew();
+  if(document.getElementById("adminCrewList"))renderAdminCrewList();
+  showToast("&#x2713; "+name+" dipadam");
 }
 
 function setCrewErr(msg){var e=document.getElementById("crewErr");if(e){e.textContent=msg;setTimeout(function(){e.textContent="";},2500);}}
+
+/* ── ADMIN CREW MANAGER ── */
+var ACM_VERIFIED = false;
+
+function showAdminCrewMgr(){
+  // Ask for password first if not yet verified
+  var pw = document.getElementById("adminPw").value;
+  if(pw !== ADMIN_PASS){
+    // Prompt for password
+    var p = prompt("Masukkan password admin untuk urus crew:");
+    if(p !== ADMIN_PASS){showToast("&#x274C; Password salah");return;}
+  }
+  ACM_VERIFIED = true;
+  document.getElementById("adminPwPanel").style.display = "none";
+  document.getElementById("adminCrewMgr").style.display = "block";
+  renderAdminCrewList();
+}
+
+function hideAdminCrewMgr(){
+  document.getElementById("adminCrewMgr").style.display = "none";
+  document.getElementById("adminPwPanel").style.display = "block";
+}
+
+function renderAdminCrewList(){
+  loadCrew();
+  var el = document.getElementById("adminCrewList");
+  if(!el) return;
+  el.innerHTML = crewList.map(function(c,i){
+    var cid = "ace_"+i;
+    var ccid = "acc_"+i;
+    return "<div class=\"crew-item\" id=\"aci_"+i+"\">"+
+      "<div class=\"crew-av\" style=\"background:"+c.color+"22;border:2px solid "+c.color+"\">"+
+        "<span style=\"color:"+c.color+"\">"+c.name[0].toUpperCase()+"</span></div>"+
+      "<div class=\"crew-info\">"+
+        "<div class=\"crew-nm\">"+c.name+"</div>"+
+        "<div class=\"crew-rl\">CREW</div>"+
+        "<div class=\"crew-edit-row\" id=\"cer_"+i+"\">"+
+          "<input class=\"cedit-inp\" id=\""+cid+"\" value=\""+c.name+"\" placeholder=\"Nama baru...\">"+
+          "<div class=\"cedit-row\">"+
+            "<div class=\"cedit-color\" id=\"ccpick_"+i+"\" "+
+              "style=\"background:"+c.color+";cursor:pointer\" "+
+              "onclick=\"document.getElementById('ccinp_"+i+"').click()\">"+
+              "<input type=\"color\" id=\"ccinp_"+i+"\" value=\""+c.color+"\" "+
+              "style=\"position:absolute;opacity:0;width:0;height:0\" "+
+              "oninput=\"document.getElementById('ccpick_"+i+"').style.background=this.value\">"+
+            "</div>"+
+            "<button class=\"cebtn cebtn-save\" onclick=\"adminSaveCrew("+i+")\">&#x2713; SIMPAN</button>"+
+            "<button class=\"cebtn cebtn-cancel\" onclick=\"adminCancelEdit("+i+")\">&#x2715;</button>"+
+          "</div>"+
+        "</div>"+
+      "</div>"+
+      "<div style=\"display:flex;gap:4px;flex-shrink:0\">"+
+        "<div class=\"crew-edit-btn\" onclick=\"adminEditCrew("+i+")\" title=\"Edit\">&#x270F;</div>"+
+        "<div class=\"crew-del\" onclick=\"doDelCrew("+i+")\" title=\"Padam\">&#x2715;</div>"+
+      "</div>"+
+    "</div>";
+  }).join("");
+}
+
+function adminEditCrew(i){
+  // Close any open edit rows first
+  document.querySelectorAll(".crew-item.editing").forEach(function(el){
+    el.classList.remove("editing");
+  });
+  var item = document.getElementById("aci_"+i);
+  if(item) item.classList.add("editing");
+  var inp = document.getElementById("ace_"+i);
+  if(inp){inp.focus();inp.select();}
+}
+
+function adminCancelEdit(i){
+  var item = document.getElementById("aci_"+i);
+  if(item) item.classList.remove("editing");
+}
+
+function adminSaveCrew(i){
+  var nameInp = document.getElementById("ace_"+i);
+  var colorInp = document.getElementById("ccinp_"+i);
+  if(!nameInp) return;
+  var newName = nameInp.value.trim();
+  var newColor = colorInp ? colorInp.value : crewList[i].color;
+  if(!newName){showToast("&#x26A0; Nama tidak boleh kosong");return;}
+  // Check duplicate (excluding self)
+  if(crewList.some(function(c,idx){return idx!==i && c.name.toLowerCase()===newName.toLowerCase();})){
+    showToast("&#x26A0; Nama sudah wujud");return;
+  }
+  loadCrew();
+  crewList[i].name = newName;
+  crewList[i].color = newColor;
+  saveCrew();
+  adminCancelEdit(i);
+  renderAdminCrewList();
+  renderCrew(); // update crew tab too
+  showToast("&#x2713; "+newName+" dikemaskini");
+}
+
+function adminAddCrew(){
+  var nameInp = document.getElementById("adminNewName");
+  var colorInp = document.getElementById("adminColorInp");
+  var name = nameInp ? nameInp.value.trim() : "";
+  var color = colorInp ? colorInp.value : randColor();
+  if(!name){
+    var e=document.getElementById("adminCrewErr");
+    if(e){e.textContent="Sila masukkan nama!";setTimeout(function(){e.textContent="";},2000);}
+    return;
+  }
+  loadCrew();
+  if(crewList.some(function(c){return c.name.toLowerCase()===name.toLowerCase();})){
+    var e=document.getElementById("adminCrewErr");
+    if(e){e.textContent="Nama sudah wujud!";setTimeout(function(){e.textContent="";},2000);}
+    return;
+  }
+  crewList.push({name:name, color:color});
+  saveCrew();
+  if(nameInp) nameInp.value="";
+  if(colorInp){colorInp.value="#cc00cc";}
+  var cp=document.getElementById("adminColorPick");
+  if(cp) cp.style.background="#cc00cc";
+  renderAdminCrewList();
+  renderCrew();
+  showToast("&#x2713; "+name+" ditambah sebagai crew");
+}
+
+function adminResetCrew(){
+  if(!confirm("Reset ke senarai default?\nMijj, Juju, Muiz\n\nSemua crew lain akan dipadam.")) return;
+  crewList = DEFAULT_CREW.map(function(c){return {name:c.name,color:c.color};});
+  saveCrew();
+  renderAdminCrewList();
+  renderCrew();
+  showToast("&#x21BA; Senarai crew direset ke default");
+}
 
 /* ── LOGIN TABS ── */
 function switchTab(tab){
