@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MAIDA ESPORTS — Live Results</title>
+<script src="firebase_sync.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Barlow+Condensed:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --gold:#ffb400;--green:#18e868;--red:#ff3b5c;--blue:#2979ff;--mg:#cc00cc;
+  --bg:#06000e;--text:#f0e8ff;--muted:rgba(255,255,255,.45);
+}
+html,body{min-height:100vh;background:var(--bg);font-family:'Barlow Condensed',sans-serif;color:var(--text);}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%,rgba(204,0,204,.18) 0%,transparent 65%),
+    repeating-linear-gradient(0deg,transparent,transparent 80px,rgba(204,0,204,.02) 80px,rgba(204,0,204,.02) 81px),
+    repeating-linear-gradient(90deg,transparent,transparent 80px,rgba(204,0,204,.02) 80px,rgba(204,0,204,.02) 81px);}
+.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 16px 40px;}
+
+/* HEADER */
+.header{text-align:center;padding:36px 0 24px;}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:var(--mg);
+  margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:10px;}
+.eyebrow::before,.eyebrow::after{content:'';width:40px;height:1px;background:var(--mg);}
+.title{font-size:clamp(28px,6vw,56px);font-weight:900;text-transform:uppercase;letter-spacing:.03em;line-height:1.1;
+  background:linear-gradient(135deg,#fff 15%,#ff00ff 50%,var(--gold) 85%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
+.subtitle{font-size:clamp(10px,1.4vw,13px);color:var(--muted);letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:14px;}
+.live-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(24,232,104,.1);
+  border:1px solid rgba(24,232,104,.3);color:var(--green);padding:5px 14px;border-radius:20px;
+  font-size:11px;font-weight:700;letter-spacing:2px;}
+.ldot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:p .9s infinite;}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* TABS */
+.tabs{display:flex;justify-content:center;gap:8px;margin:20px 0;flex-wrap:wrap;}
+.tab{padding:8px 20px;border:1.5px solid rgba(255,255,255,.1);border-radius:24px;
+  background:rgba(255,255,255,.03);color:var(--muted);font-size:12px;font-weight:800;
+  letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:.2s;}
+.tab:hover{border-color:var(--gold);color:var(--gold);}
+.tab.active{background:rgba(255,180,0,.15);border-color:var(--gold);color:var(--gold);}
+
+/* MAP TABS (for live map view) */
+.map-tabs{display:flex;justify-content:center;gap:6px;margin:14px 0;flex-wrap:wrap;}
+.map-tab{padding:6px 14px;border:1px solid rgba(255,255,255,.08);border-radius:8px;
+  background:rgba(255,255,255,.03);color:var(--muted);font-size:11px;font-weight:700;
+  letter-spacing:.5px;cursor:pointer;transition:.2s;}
+.map-tab:hover{border-color:var(--mg);color:var(--mg);}
+.map-tab.active{background:rgba(204,0,204,.18);border-color:var(--mg);color:#fff;}
+
+/* CARD */
+.card{background:rgba(10,0,20,.6);border:1.5px solid rgba(204,0,204,.2);border-radius:16px;overflow:hidden;margin-bottom:20px;}
+.card-hdr{background:linear-gradient(90deg,rgba(204,0,204,.15),rgba(130,0,130,.1));
+  padding:14px 20px;border-bottom:1px solid rgba(204,0,204,.15);
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.card-title{font-family:'Orbitron',monospace;font-size:13px;font-weight:800;color:#fff;letter-spacing:2px;}
+.card-meta{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;}
+thead th{padding:10px 14px;font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);text-align:left;border-bottom:1px solid rgba(255,255,255,.06);}
+thead th.num,td.num{text-align:center;width:50px;}
+thead th.center,td.center{text-align:center;}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:.15s;}
+tbody tr:hover{background:rgba(204,0,204,.05);}
+td{padding:10px 14px;font-size:14px;font-weight:700;}
+.rank{font-family:'Orbitron',monospace;font-weight:900;font-size:15px;}
+.rank-1{color:var(--gold);}
+.rank-2{color:#c0c0d8;}
+.rank-3{color:#cd7f32;}
+.team-cell{display:flex;align-items:center;gap:10px;}
+.team-logo{width:28px;height:28px;border-radius:6px;object-fit:cover;background:rgba(255,255,255,.08);flex-shrink:0;}
+.team-logo.placeholder{display:flex;align-items:center;justify-content:center;font-weight:900;
+  font-size:12px;color:rgba(255,255,255,.4);}
+.team-name{font-weight:800;letter-spacing:.5px;}
+.pts{color:var(--gold);font-family:'Orbitron',monospace;}
+.kills{color:var(--red);}
+.wwcd-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(255,180,0,.15);
+  border:1px solid rgba(255,180,0,.4);color:var(--gold);padding:2px 9px;border-radius:12px;
+  font-size:10px;font-weight:800;letter-spacing:1px;}
+.alive-dots{display:flex;gap:3px;justify-content:center;}
+.adot{width:9px;height:9px;border-radius:2px;}
+.adot.alive{background:var(--green);}
+.adot.knocked{background:var(--red);}
+.adot.dead{background:rgba(255,255,255,.12);}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;}
+
+/* FOOTER */
+.footer{text-align:center;padding:24px;color:var(--muted);font-size:10px;letter-spacing:1.5px;font-weight:700;}
+.last-update{font-size:10px;color:rgba(255,255,255,.3);text-align:center;margin-top:6px;}
+
+@media(max-width:600px){
+  td,thead th{padding:8px 8px;font-size:12px;}
+  .team-logo{width:22px;height:22px;}
+  .team-name{font-size:12px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="eyebrow">PUBG MOBILE · ESPORTS TOURNAMENT</div>
+    <div class="title" id="pTitle">ESPORTS TOURNAMENT 2026</div>
+    <div class="subtitle">LIVE RESULTS — PUBLIC VIEW</div>
+    <div class="live-badge"><div class="ldot"></div><span id="liveLabel">LIVE</span></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" data-tab="overall" onclick="switchTab('overall',this)">🏆 Overall Standing</div>
+    <div class="tab" data-tab="maps" onclick="switchTab('maps',this)">🗺️ Map Results</div>
+    <div class="tab" data-tab="live" onclick="switchTab('live',this)">⚡ Live Match</div>
+  </div>
+
+  <!-- ═══ OVERALL STANDING ═══ -->
+  <div class="tab-panel" id="panel-overall">
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">🏆 OVERALL STANDING</span>
+        <span class="card-meta" id="overallMeta">0 TEAMS · 0/4 MAPS DONE</span>
+      </div>
+      <table>
+        <thead><tr>
+          <th class="num">#</th><th>TEAM</th>
+          <th class="center">WWCD</th><th class="center">PLACE PTS</th>
+          <th class="center">KILLS</th><th class="center">TOTAL</th>
+        </tr></thead>
+        <tbody id="overallBody"></tbody>
+      </table>
+      <div class="empty" id="overallEmpty" style="display:none">Belum ada data tournament lagi.</div>
+    </div>
+  </div>
+
+  <!-- ═══ MAP RESULTS ═══ -->
+  <div class="tab-panel" id="panel-maps" style="display:none">
+    <div class="map-tabs" id="mapTabs"></div>
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title" id="mapTitle">MAP RESULT</span>
+        <span class="card-meta" id="mapMeta"></span>
+      </div>
+      <table>
+        <thead><tr>
+          <th class="num">#</th><th>TEAM</th>
+          <th class="center">WWCD</th><th class="center">PLACE</th>
+          <th class="center">KILL</th><th class="center">TOTAL</th>
+        </tr></thead>
+        <tbody id="mapBody"></tbody>
+      </table>
+      <div class="empty" id="mapEmpty" style="display:none">Map ini belum dimainkan.</div>
+    </div>
+  </div>
+
+  <!-- ═══ LIVE MATCH ═══ -->
+  <div class="tab-panel" id="panel-live" style="display:none">
+    <div class="card">
+      <div class="card-hdr">
+        <span class="card-title">⚡ LIVE MATCH LEADERBOARD</span>
+        <span class="card-meta" id="liveMeta">Menunggu data live...</span>
+      </div>
+      <table>
+        <thead><tr>
+          <th class="num">#</th><th>TEAM</th>
+          <th class="center">ALIVE</th><th class="center">PTS</th><th class="center">ELIMS</th>
+        </tr></thead>
+        <tbody id="liveBody"></tbody>
+      </table>
+      <div class="empty" id="liveEmpty" style="display:none">Tiada match live sedang berjalan.</div>
+    </div>
+  </div>
+
+  <div class="last-update" id="lastUpdate"></div>
+  <div class="footer">MAIDA ESPORTS TOURNAMENT SYSTEM · PUBG MOBILE · <span id="fyear"></span></div>
+
+</div>
+
+<script>
+/* ═══ STORAGE KEYS — sama dengan sistem admin ═══ */
+var SK     = 'hswp_2026_pro';   // Standing Point
+var LS_KEY = 'maida_v5';        // Leaderboard live match
+var TITLE_KEY = 'maidaTitle';
+
+var DT = ['AING BALANG','OL','Zentra','JURNEE 52','HEe ESPORT','THE RED X',
+  'MANTARAY GIANT','SolJar','Yelnats','Martabak Esport','SANTAi KiLLERs',
+  'TOP PANDA','ROBOX','DND','FAM | United','REDBULL'];
+var DM = ['DAY 1 | MATCH 1/4 | ERANGEL','DAY 1 | MATCH 2/4 | RONDO',
+  'DAY 2 | MATCH 3/4 | MIRAMAR','DAY 2 | MATCH 4/4 | SANHOK'];
+var PP_TABLE = [10,6,5,4,3,2,1,1];
+function PP(i){ return PP_TABLE[i] || 0; }
+
+var currentMapIdx = 0;
+
+/* ═══ LOAD STATE ═══ */
+/* ═══ FIREBASE CACHE — overrides localStorage when fresher ═══ */
+var _fsSpCache = null;
+var _fsLiveCache = null;
+
+function loadSP(){
+  // Prefer Firebase cache (cross-device authoritative) if available
+  if(_fsSpCache && _fsSpCache.teams && _fsSpCache.teams.length){
+    var local = null;
+    try{ var raw = localStorage.getItem(SK); if(raw) local = JSON.parse(raw); }catch(e){}
+    // Merge: use Firebase team list/maps/title, keep local logos by name
+    var localByName = {};
+    if(local && local.teams) local.teams.forEach(function(t){ localByName[t.name]=t; });
+    // Decode map keys ('/' was encoded as '%2F' for Firebase compat)
+    var decodedMaps = null;
+    if(_fsSpCache.maps){
+      decodedMaps = {};
+      Object.keys(_fsSpCache.maps).forEach(function(encM){
+        var m = encM.replace(/%2F/g,'/').replace(/%2E/g,'.');
+        decodedMaps[m] = _fsSpCache.maps[encM];
+      });
+    }
+    var decodedCurrentMap = _fsSpCache.currentMap
+      ? _fsSpCache.currentMap.replace(/%2F/g,'/').replace(/%2E/g,'.')
+      : (local?local.currentMap:'') || '';
+    var merged = {
+      title: _fsSpCache.title || (local?local.title:'') || '',
+      currentMap: decodedCurrentMap,
+      maps: decodedMaps || (local?local.maps:{}) || {},
+      teams: _fsSpCache.teams.map(function(t){
+        var lt = localByName[t.name] || {};
+        return { name:t.name, fullName:t.fullName||lt.fullName||'', logo:lt.logo||'', banner:lt.banner||'' };
+      })
+    };
+    return merged;
+  }
+  try{
+    var raw = localStorage.getItem(SK);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return null;
+}
+function loadLive(){
+  if(_fsLiveCache && _fsLiveCache.liveData){
+    return { liveData: _fsLiveCache.liveData, stage: _fsLiveCache.stage };
+  }
+  try{
+    var raw = localStorage.getItem(LS_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return null;
+}
+
+/* ═══ TABS ═══ */
+function switchTab(name, el){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.style.display='none';});
+  el.classList.add('active');
+  document.getElementById('panel-'+name).style.display='block';
+  renderAll();
+}
+
+/* ═══ BUILD AGGREGATE (overall standing) ═══ */
+function buildAgg(state){
+  var agg = {};
+  state.teams.forEach(function(t){ agg[t.name] = {w:0,p:0,k:0}; });
+  Object.values(state.maps).forEach(function(m){
+    if(!m.locked) return;
+    m.order.forEach(function(t,i){
+      if(!agg[t]) return;
+      agg[t].p += PP(i);
+      if(i===0) agg[t].w++;
+      agg[t].k += m.kill[t] || 0;
+    });
+  });
+  return agg;
+}
+function getRanked(state, agg){
+  return state.teams.map(function(t){return t.name;}).sort(function(a,b){
+    var A=agg[a], B=agg[b];
+    return (B.p+B.k)-(A.p+A.k) || B.w-A.w || B.k-A.k;
+  });
+}
+
+/* ═══ TEAM LOGO/AVATAR HELPER ═══ */
+function teamLogoHtml(team){
+  if(team && team.logo){
+    return '<img class="team-logo" src="'+team.logo+'" alt="">';
+  }
+  var initial = team && team.name ? team.name[0].toUpperCase() : '?';
+  return '<div class="team-logo placeholder">'+initial+'</div>';
+}
+
+/* ═══ RENDER OVERALL STANDING ═══ */
+function renderOverall(state){
+  var body = document.getElementById('overallBody');
+  var empty = document.getElementById('overallEmpty');
+  var meta = document.getElementById('overallMeta');
+
+  if(!state || !state.teams || !state.teams.length){
+    body.innerHTML=''; empty.style.display='block';
+    meta.textContent = '0 TEAMS · 0/4 MAPS DONE';
+    return;
+  }
+  empty.style.display='none';
+
+  var agg = buildAgg(state);
+  var ranked = getRanked(state, agg);
+  var mapsDone = Object.values(state.maps).filter(function(m){return m.locked;}).length;
+  meta.textContent = state.teams.length+' TEAMS · '+mapsDone+'/'+Object.keys(state.maps).length+' MAPS DONE';
+
+  var teamByName = {};
+  state.teams.forEach(function(t){ teamByName[t.name]=t; });
+
+  body.innerHTML = ranked.map(function(name, i){
+    var a = agg[name];
+    var rank = i+1;
+    var rankCls = rank<=3 ? ' rank-'+rank : '';
+    var team = teamByName[name] || {name:name};
+    var total = a.p + a.k;
+    var wwcd = a.w>0 ? '<span class="wwcd-badge">'+a.w+' WWCD</span>' : '<span style="color:rgba(255,255,255,.2)">—</span>';
+    return '<tr>'+
+      '<td class="num"><span class="rank'+rankCls+'">'+rank+'</span></td>'+
+      '<td><div class="team-cell">'+teamLogoHtml(team)+'<span class="team-name">'+name+'</span></div></td>'+
+      '<td class="center">'+wwcd+'</td>'+
+      '<td class="center pts">'+a.p+'</td>'+
+      '<td class="center kills">'+a.k+'</td>'+
+      '<td class="center"><b style="font-family:Orbitron,monospace;font-size:15px">'+total+'</b></td>'+
+    '</tr>';
+  }).join('');
+}
+
+/* ═══ MAP RESULTS ═══ */
+function renderMapTabs(state){
+  var wrap = document.getElementById('mapTabs');
+  var maps = state ? Object.keys(state.maps) : DM;
+  wrap.innerHTML = maps.map(function(m,i){
+    var label = m.split('|').pop().trim(); // last part e.g. ERANGEL
+    var dayPart = m.split('|')[0].trim();  // DAY 1
+    var active = i===currentMapIdx ? ' active' : '';
+    return '<div class="map-tab'+active+'" onclick="selMap('+i+')">'+dayPart+' · '+label+'</div>';
+  }).join('');
+}
+function selMap(i){
+  currentMapIdx = i;
+  renderAll();
+}
+function renderMap(state){
+  var body = document.getElementById('mapBody');
+  var empty = document.getElementById('mapEmpty');
+  var titleEl = document.getElementById('mapTitle');
+  var metaEl = document.getElementById('mapMeta');
+
+  if(!state || !state.teams || !state.teams.length){
+    body.innerHTML=''; empty.style.display='block';
+    titleEl.textContent='MAP RESULT'; metaEl.textContent='';
+    return;
+  }
+
+  var mapKeys = Object.keys(state.maps);
+  if(currentMapIdx >= mapKeys.length) currentMapIdx = 0;
+  var mapKey = mapKeys[currentMapIdx];
+  var m = state.maps[mapKey];
+
+  titleEl.textContent = mapKey;
+  metaEl.textContent = m.locked ? '✓ SELESAI' : '⏳ BELUM DIMAINKAN';
+
+  if(!m.locked){
+    body.innerHTML=''; empty.style.display='block';
+    empty.textContent = 'Map ini belum dimainkan.';
+    return;
+  }
+  empty.style.display='none';
+
+  var teamByName = {};
+  state.teams.forEach(function(t){ teamByName[t.name]=t; });
+
+  body.innerHTML = m.order.map(function(name, i){
+    var rank = i+1;
+    var rankCls = rank<=3 ? ' rank-'+rank : '';
+    var team = teamByName[name] || {name:name};
+    var kill = m.kill[name] || 0;
+    var place = PP(i);
+    var total = place + kill;
+    var wwcd = i===0 ? '<span class="wwcd-badge">WWCD</span>' : '<span style="color:rgba(255,255,255,.2)">—</span>';
+    return '<tr>'+
+      '<td class="num"><span class="rank'+rankCls+'">'+rank+'</span></td>'+
+      '<td><div class="team-cell">'+teamLogoHtml(team)+'<span class="team-name">'+name+'</span></div></td>'+
+      '<td class="center">'+wwcd+'</td>'+
+      '<td class="center pts">'+place+'</td>'+
+      '<td class="center kills">'+kill+'</td>'+
+      '<td class="center"><b style="font-family:Orbitron,monospace;font-size:15px">'+total+'</b></td>'+
+    '</tr>';
+  }).join('');
+}
+
+/* ═══ LIVE MATCH ═══ */
+/* Derive tag the same way leaderboard_FINAL.html does:
+   first word of team name, first 4 chars, uppercase */
+function deriveTag(name, idx){
+  var tag = (name||'').split(' ')[0].substring(0,4).toUpperCase();
+  return tag || ('T'+(idx+1));
+}
+
+function renderLive(state, live){
+  var body = document.getElementById('liveBody');
+  var empty = document.getElementById('liveEmpty');
+  var meta = document.getElementById('liveMeta');
+
+  if(!live || !live.liveData || !state || !state.teams){
+    body.innerHTML=''; empty.style.display='block';
+    empty.textContent='Tiada match live sedang berjalan.';
+    meta.textContent='Menunggu data live...';
+    return;
+  }
+
+  // Build list of teams with live data — match by derived tag
+  var rows = [];
+  state.teams.forEach(function(t, i){
+    var tag = deriveTag(t.name, i);
+    var ld = live.liveData[tag] || live.liveData[t.name];
+    if(!ld) return;
+    rows.push({
+      name: t.fullName || t.name,
+      team: t,
+      pts: ld.pts||0,
+      elims: ld.elims||0,
+      alive: ld.alive||[0,0,0,0]
+    });
+  });
+
+  if(!rows.length){
+    body.innerHTML=''; empty.style.display='block';
+    empty.textContent='Tiada match live sedang berjalan.';
+    meta.textContent='Menunggu data live...';
+    return;
+  }
+  empty.style.display='none';
+
+  rows.sort(function(a,b){ return b.pts - a.pts || b.elims - a.elims; });
+
+  var aliveTotal = 0;
+  rows.forEach(function(r){ aliveTotal += r.alive.filter(function(x){return x>0;}).length; });
+  meta.textContent = rows.length+' TEAMS · '+aliveTotal+' PLAYERS ALIVE';
+
+  body.innerHTML = rows.map(function(r, i){
+    var rank = i+1;
+    var rankCls = rank<=3 ? ' rank-'+rank : '';
+    var aliveDots = [0,1,2,3].map(function(j){
+      var v = r.alive[j] || 0;
+      var cls = v>0 ? 'alive' : (v===0 ? 'dead' : 'knocked');
+      return '<div class="adot '+cls+'"></div>';
+    }).join('');
+    return '<tr>'+
+      '<td class="num"><span class="rank'+rankCls+'">'+rank+'</span></td>'+
+      '<td><div class="team-cell">'+teamLogoHtml(r.team)+'<span class="team-name">'+r.name+'</span></div></td>'+
+      '<td class="center"><div class="alive-dots">'+aliveDots+'</div></td>'+
+      '<td class="center pts">'+r.pts+'</td>'+
+      '<td class="center kills">'+r.elims+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+/* ═══ RENDER ALL ═══ */
+function renderAll(){
+  var state = loadSP();
+  var live = loadLive();
+
+  // Title
+  if(state && state.title){
+    document.getElementById('pTitle').textContent = state.title.replace(/\n/g,' ');
+  } else {
+    try{
+      var st = localStorage.getItem(TITLE_KEY);
+      if(st) document.getElementById('pTitle').textContent = st;
+    }catch(e){}
+  }
+
+  var activeTab = document.querySelector('.tab.active');
+  var tabName = activeTab ? activeTab.dataset.tab : 'overall';
+
+  if(tabName==='overall') renderOverall(state);
+  if(tabName==='maps'){ renderMapTabs(state); renderMap(state); }
+  if(tabName==='live') renderLive(state, live);
+
+  document.getElementById('lastUpdate').textContent =
+    'Kemaskini terakhir: ' + new Date().toLocaleTimeString('ms-MY');
+}
+
+/* ═══ FIREBASE SYNC ═══ */
+(function initPublicFirebase(){
+  if(typeof fsListen !== 'function') return;
+
+  // Listen Standing Point data (teams, maps, title)
+  fsListen('maida/spData', function(sp){
+    if(sp && sp.teams && sp.teams.length){
+      _fsSpCache = sp;
+      renderAll();
+    }
+  }, 2);
+
+  // Listen live match data
+  fsListen('maida/liveData', function(ld){
+    if(ld && ld.liveData){
+      _fsLiveCache = ld;
+      renderAll();
+    }
+  }, 1);
+})();
+
+/* ═══ INIT ═══ */
+document.getElementById('fyear').textContent = new Date().getFullYear();
+renderAll();
+
+// Auto-refresh every 2 seconds
+setInterval(renderAll, 1000);
+
+// React to storage changes immediately (other tabs)
+window.addEventListener('storage', renderAll);
+</script>
+</body>
+</html>
