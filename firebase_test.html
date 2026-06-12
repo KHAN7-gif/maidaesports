@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Firebase Test — Maida Esports</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:monospace;background:#0a0a0a;color:#eee;padding:20px;font-size:13px;}
+h2{color:#ffb400;margin-bottom:16px;font-size:18px;}
+.card{background:#111;border:1px solid #222;border-radius:10px;padding:16px;margin-bottom:12px;}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center;}
+input{padding:8px 12px;border:1px solid #333;background:#1a1a1a;color:#fff;border-radius:6px;flex:1;min-width:160px;}
+button{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:12px;transition:.15s;}
+button:hover{filter:brightness(1.2);}
+.bw{background:#2979ff;color:#fff;}
+.br{background:#00c853;color:#fff;}
+.bl{background:#ff9800;color:#000;}
+.bs{background:#f44336;color:#fff;}
+#status{padding:10px 14px;border-radius:8px;margin-bottom:12px;font-weight:700;font-size:13px;}
+.connected{background:#0d2a0d;border:1px solid #0f0;color:#0f0;}
+.disconnected{background:#2a0d0d;border:1px solid #f44;color:#f44;}
+.checking{background:#1a1a00;border:1px solid #fa0;color:#fa0;}
+#log{max-height:320px;overflow-y:auto;}
+.lg{padding:4px 0;border-bottom:1px solid #1a1a1a;word-break:break-all;}
+.lg.ok{color:#0f0;} .lg.err{color:#f44;} .lg.info{color:#6af;} .lg.warn{color:#fa0;}
+.fb-data{background:#0d1a0d;border:1px solid #1a3a1a;border-radius:6px;padding:10px;margin-top:8px;
+  font-size:11px;color:#8f8;white-space:pre-wrap;max-height:200px;overflow-y:auto;}
+</style>
+</head>
+<body>
+
+<h2>🔥 Firebase Connection Test — Maida Esports</h2>
+
+<div id="status" class="checking">⏳ Checking connection...</div>
+
+<div class="card">
+  <b style="color:#ffb400">TEST TULIS / BACA</b>
+  <div class="row" style="margin-top:10px">
+    <input id="testVal" placeholder="Masukkan nilai test..." value="Hello!">
+    <button class="bw" onclick="doWrite()">▶ TULIS</button>
+    <button class="br" onclick="doRead()">📖 BACA</button>
+    <button class="bl" onclick="toggleListen()">👂 LISTEN</button>
+    <button class="bs" onclick="clearLog()">🗑 CLEAR</button>
+  </div>
+  <div id="fbData" class="fb-data" style="display:none"></div>
+</div>
+
+<div class="card">
+  <b style="color:#ffb400">TEST DATA MAIDA</b>
+  <div class="row" style="margin-top:10px">
+    <button class="br" onclick="readMaida()">📊 BACA maida/spData</button>
+    <button class="br" onclick="readLive()">🏆 BACA maida/liveData</button>
+    <button class="br" onclick="readUsers()">👥 BACA maida/users</button>
+  </div>
+  <div id="maidaData" class="fb-data" style="display:none"></div>
+</div>
+
+<div class="card">
+  <b style="color:#ffb400">LOG</b>
+  <div id="log" style="margin-top:10px"></div>
+</div>
+
+<script src="firebase_sync.js"></script>
+<script>
+var BASE = "https://maida-esports-default-rtdb.asia-southeast1.firebasedatabase.app";
+var listening = false;
+
+function log(msg, cls) {
+  var d = document.getElementById('log');
+  var t = new Date().toLocaleTimeString();
+  d.innerHTML = '<div class="lg '+(cls||'info')+'">['+t+'] '+msg+'</div>' + d.innerHTML;
+}
+
+function setStatus(msg, type) {
+  var s = document.getElementById('status');
+  s.textContent = msg;
+  s.className = type === 'ok' ? 'connected' : type === 'err' ? 'disconnected' : 'checking';
+}
+
+function clearLog() { document.getElementById('log').innerHTML = ''; }
+
+function doWrite() {
+  var val = document.getElementById('testVal').value || 'test';
+  var data = { value: val, device: navigator.platform, ts: Date.now() };
+  log('Writing to maida_test: ' + JSON.stringify(data));
+  setStatus('⏳ Writing...', 'check');
+
+  fbSet("maida_test", data,
+    function() { log('✅ TULIS BERJAYA!', 'ok'); setStatus('✅ FIREBASE CONNECTED — Write OK', 'ok'); },
+    function(e) { log('❌ TULIS GAGAL: ' + e, 'err'); setStatus('❌ GAGAL: ' + e, 'err'); }
+  );
+}
+
+function doRead() {
+  log('Reading maida_test...');
+  fbGet("maida_test", function(d) {
+    if (d) {
+      log('✅ BACA BERJAYA: ' + JSON.stringify(d), 'ok');
+      setStatus('✅ FIREBASE CONNECTED — Read OK', 'ok');
+      var fd = document.getElementById('fbData');
+      fd.style.display = 'block';
+      fd.textContent = JSON.stringify(d, null, 2);
+    } else {
+      log('⚠ Data null — cuba TULIS dulu', 'warn');
+      setStatus('⚠ Connected tapi tiada data', 'check');
+    }
+  }, function(e) {
+    log('❌ BACA GAGAL: ' + e, 'err');
+    setStatus('❌ TIDAK CONNECT: ' + e, 'err');
+  });
+}
+
+function toggleListen() {
+  if (listening) {
+    fbUnlisten("maida_test");
+    listening = false;
+    log('Listener stopped');
+    document.querySelector('.bl').textContent = '👂 LISTEN';
+  } else {
+    listening = true;
+    document.querySelector('.bl').textContent = '⏹ STOP';
+    log('Starting realtime listener (poll 2s)...');
+    fbListen("maida_test", function(d) {
+      if (!d) return;
+      log('🔄 REALTIME: ' + JSON.stringify(d), 'ok');
+      var fd = document.getElementById('fbData');
+      fd.style.display = 'block';
+      fd.textContent = JSON.stringify(d, null, 2);
+    }, 2);
+  }
+}
+
+function readMaida() {
+  log('Reading maida/spData...');
+  fbGet("maida/spData", function(d) {
+    var el = document.getElementById('maidaData');
+    el.style.display = 'block';
+    if (d) {
+      var teams = d.teams ? d.teams.length : 0;
+      log('✅ spData: ' + teams + ' teams', 'ok');
+      el.textContent = 'TEAMS: ' + teams + '\n' + JSON.stringify(d, null, 2).substring(0, 800) + '...';
+    } else {
+      log('⚠ spData kosong', 'warn');
+      el.textContent = 'NULL — tiada data lagi';
+    }
+  });
+}
+
+function readLive() {
+  log('Reading maida/liveData...');
+  fbGet("maida/liveData", function(d) {
+    var el = document.getElementById('maidaData');
+    el.style.display = 'block';
+    if (d) {
+      log('✅ liveData ada', 'ok');
+      el.textContent = JSON.stringify(d, null, 2).substring(0, 600);
+    } else {
+      log('⚠ liveData kosong', 'warn');
+      el.textContent = 'NULL';
+    }
+  });
+}
+
+function readUsers() {
+  log('Reading maida/users...');
+  fbGet("maida/users", function(d) {
+    var el = document.getElementById('maidaData');
+    el.style.display = 'block';
+    if (d) {
+      log('✅ users: ' + (Array.isArray(d) ? d.length : Object.keys(d).length) + ' entries', 'ok');
+      el.textContent = JSON.stringify(d, null, 2);
+    } else {
+      log('⚠ users kosong', 'warn');
+      el.textContent = 'NULL';
+    }
+  });
+}
+
+/* Auto test on load */
+window.onload = function() {
+  log('Device: ' + navigator.userAgent.substring(0, 50));
+  log('Testing Firebase connection...');
+  fbCheckStatus(function(ok) {
+    if (ok) {
+      setStatus('✅ FIREBASE CONNECTED', 'ok');
+      log('✅ Connection OK!', 'ok');
+    } else {
+      setStatus('❌ TIDAK CONNECT — semak network/rules', 'err');
+      log('❌ Connection FAILED', 'err');
+    }
+  });
+};
+</script>
+</body>
+</html>
