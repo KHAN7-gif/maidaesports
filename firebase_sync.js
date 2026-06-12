@@ -13,10 +13,17 @@ var _FB = {
 
 /* ── WRITE ── */
 function fbSet(path, data, onOk, onErr) {
+  var body = JSON.stringify(data);
+  // Firebase REST payload safety limit (~16MB hard limit, warn earlier)
+  if (body.length > 1000000) {
+    console.warn("[FB set] " + path + " — payload too large (" + (body.length/1024).toFixed(0) + "KB), aborting");
+    if (onErr) onErr(new Error("Payload too large: " + (body.length/1024).toFixed(0) + "KB"));
+    return;
+  }
   fetch(_FB.base + "/" + path + ".json", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: body
   })
   .then(function(r) {
     if (!r.ok) throw new Error("HTTP " + r.status);
