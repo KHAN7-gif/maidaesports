@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MAIDA — POPUP KILL</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+<style>
+:root{--cyan:#20e8ff;--pink:#ff0088;--green:#14ff72;--orange:#ff9800;--gold:#ffd700;--bg:#020712;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);overflow:hidden;color:white;min-height:100vh;font-family:'Barlow Condensed',sans-serif;}
+
+/* ═══════ SETTINGS PANEL ═══════ */
+.settings{
+  position:fixed;top:15px;left:15px;width:200px;
+  background:linear-gradient(180deg,#0c1730,#07101d);
+  border:1px solid rgba(255,255,255,.08);border-radius:16px;
+  padding:14px;z-index:999999;box-shadow:0 15px 40px rgba(0,0,0,.45);
+}
+.settings-title{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;margin-bottom:14px;letter-spacing:1px;}
+.setting-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.setting-label{font-size:12px;font-weight:700;letter-spacing:.5px;}
+.toggle{width:46px;height:24px;background:#333;border-radius:12px;position:relative;cursor:pointer;transition:.2s;}
+.toggle::before{content:'';position:absolute;width:18px;height:18px;top:3px;left:3px;border-radius:50%;background:white;transition:.2s;}
+.toggle.active{background:#00c853;}
+.toggle.active::before{left:25px;}
+.color-picker{width:48px;height:28px;border:none;background:none;cursor:pointer;border-radius:4px;}
+.timer-select{width:70px;height:28px;border:none;border-radius:6px;background:#13213f;color:white;font-weight:700;padding:0 6px;font-size:11px;}
+.settings-sep{height:1px;background:rgba(255,255,255,.08);margin:10px 0;}
+.btn{width:100%;height:36px;border:none;border-radius:8px;margin-top:8px;font-family:'Orbitron',sans-serif;font-weight:800;font-size:11px;cursor:pointer;transition:.15s;letter-spacing:.5px;}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.1);}
+.demo-btn{background:#ff9800;color:black;}
+.save-btn{background:#00c853;color:white;}
+.reset-btn{background:#ff1744;color:white;}
+
+/* ═══════ LIVE STATUS INDICATOR ═══════ */
+.live-badge{
+  position:fixed;top:15px;left:50%;transform:translateX(-50%);
+  background:rgba(0,200,83,.15);border:1px solid #00c853;
+  color:#00c853;padding:4px 16px;border-radius:20px;
+  font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:2px;z-index:9999;display:flex;align-items:center;gap:6px;
+}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#00c853;animation:ldot .9s infinite;}
+@keyframes ldot{0%,100%{opacity:1;}50%{opacity:.2;}}
+.live-badge.no-data{background:rgba(255,50,50,.12);border-color:#ff3333;color:#ff5555;}
+.live-badge.no-data .live-dot{background:#ff3333;}
+
+/* ═══════ FINAL 4 HEADER ═══════ */
+.final4-header{
+  position:fixed;top:18px;left:50%;transform:translateX(-50%);
+  display:flex;gap:16px;z-index:99999;pointer-events:none;
+}
+.final4-box{
+  width:220px;height:70px;
+  background:linear-gradient(180deg,#0b1832,#07101d);
+  border:2px solid #ffd700;border-radius:16px;
+  display:flex;align-items:center;gap:12px;padding:10px 14px;
+  animation:top4Glow .7s infinite alternate;
+}
+@keyframes top4Glow{
+  from{box-shadow:0 0 8px rgba(255,215,0,.25),0 0 18px rgba(255,215,0,.15);}
+  to{box-shadow:0 0 22px rgba(255,215,0,.95),0 0 55px rgba(255,215,0,.55);}
+}
+.final4-logo{width:46px;height:46px;object-fit:cover;border-radius:10px;flex-shrink:0;}
+.final4-name{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:900;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ═══════ POPUP CONTAINER ═══════ */
+#popupContainer{position:fixed;inset:0;pointer-events:none;z-index:888888;}
+
+/* ═══════ ELIMINATION POPUP ═══════ */
+.elim-popup{
+  position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:min(900px,90vw);
+  background:linear-gradient(180deg,rgba(5,20,40,.97),rgba(2,10,20,.98));
+  border:2px solid var(--cyan);border-radius:22px;overflow:hidden;
+  z-index:999999;animation:popupIn .35s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:auto;
+}
+@keyframes popupIn{from{opacity:0;transform:translate(-50%,-50%) scale(.85);}to{opacity:1;transform:translate(-50%,-50%) scale(1);}}
+
+.elim-top{height:200px;display:grid;grid-template-columns:200px 1fr 200px;}
+.elim-side{display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.elim-rank,.elim-kill{font-family:'Orbitron',sans-serif;font-size:80px;font-weight:900;line-height:1;}
+.elim-rank-lbl,.elim-kill-lbl{font-size:11px;color:rgba(255,255,255,.45);font-weight:700;letter-spacing:2px;margin-top:3px;}
+.elim-center{display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.elim-logo{width:76px;height:76px;object-fit:contain;border-radius:12px;margin-bottom:8px;}
+.elim-team{font-family:'Orbitron',sans-serif;font-size:clamp(24px,4vw,52px);font-weight:900;text-transform:uppercase;}
+.elim-ktext{margin-top:5px;color:var(--cyan);font-size:16px;font-weight:700;}
+.elim-bottom{
+  height:54px;background:linear-gradient(90deg,#cc006e,#ff0088,#cc006e);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-size:28px;font-weight:900;color:white;letter-spacing:4px;
+}
+/* hide classes */
+.hide-rank .elim-rank,.hide-rank .elim-rank-lbl{display:none;}
+.hide-name .elim-team,.hide-name .elim-ktext{display:none;}
+.hide-logo .elim-logo{display:none;}
+.hide-kill .elim-kill,.hide-kill .elim-kill-lbl{display:none;}
+
+/* ═══════ WWCD POPUP ═══════ */
+.wwcd-popup{
+  position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:min(800px,88vw);
+  background:linear-gradient(180deg,rgba(14,12,0,.97),rgba(5,5,2,.98));
+  border:2px solid #ffd700;border-radius:24px;overflow:hidden;
+  z-index:9999999;pointer-events:auto;
+  box-shadow:0 0 40px rgba(255,215,0,.25);
+  animation:wwcdEnter .45s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes wwcdEnter{from{opacity:0;transform:translate(-50%,-50%) scale(.8);}to{opacity:1;transform:translate(-50%,-50%) scale(1);}}
+.wwcd-top{
+  position:relative;height:260px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;overflow:hidden;
+}
+.wwcd-top::before{
+  content:'';position:absolute;width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(rgba(255,215,0,.22),transparent 70%);
+  top:-200px;filter:blur(8px);z-index:0;
+}
+.wwcd-logo{width:86px;height:86px;object-fit:contain;margin-bottom:10px;position:relative;z-index:2;border-radius:12px;}
+.wwcd-title{
+  position:relative;z-index:2;
+  font-family:'Orbitron',sans-serif;font-size:72px;font-weight:900;color:#ffd700;
+  text-shadow:0 0 12px rgba(255,215,0,.9),0 0 30px rgba(255,215,0,.5);
+  animation:wwcdPulse .8s infinite alternate;
+}
+@keyframes wwcdPulse{from{text-shadow:0 0 12px rgba(255,215,0,.9),0 0 30px rgba(255,215,0,.5);}to{text-shadow:0 0 20px rgba(255,215,0,1),0 0 50px rgba(255,215,0,.7),0 0 80px rgba(255,215,0,.3);}}
+.wwcd-team{position:relative;z-index:2;margin-top:8px;font-family:'Orbitron',sans-serif;font-size:clamp(24px,4vw,52px);font-weight:900;color:white;text-transform:uppercase;}
+.wwcd-bottom{
+  height:64px;background:linear-gradient(90deg,#c8a000,#ffd700,#c8a000);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-size:clamp(14px,2vw,22px);font-weight:900;color:black;letter-spacing:3px;
+}
+
+/* ═══════ TEAM GRID (bottom strip) ═══════ */
+.team-grid{
+  position:fixed;bottom:0;left:0;right:0;padding:10px 12px;
+  display:grid;grid-template-columns:repeat(8,1fr);gap:10px;
+  background:linear-gradient(transparent,rgba(2,7,18,.95));
+  max-height:45vh;overflow-y:auto;
+}
+.team-card{
+  background:linear-gradient(180deg,#0b1832,#07101d);
+  border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px;
+  box-shadow:0 6px 20px rgba(0,0,0,.35);
+}
+.team-card.final4{border:2px solid #ffd700;animation:f4Glow .7s infinite alternate;}
+@keyframes f4Glow{from{box-shadow:0 0 10px rgba(255,215,0,.3);}to{box-shadow:0 0 24px rgba(255,215,0,.7);}}
+.team-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.team-logo{width:36px;height:36px;object-fit:cover;border-radius:8px;background:rgba(255,255,255,.1);}
+.team-name{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:800;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.players{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.player{height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;cursor:default;transition:.15s;}
+.alive{background:#0d4020;border:1.5px solid var(--green);color:var(--green);}
+.knock{background:#4d2000;border:1.5px solid var(--orange);color:#ffb347;}
+.dead{background:#1a1a1a;border:1.5px solid #444;color:#666;}
+</style>
+</head>
+<body>
+
+<!-- SETTINGS PANEL -->
+<div class="settings">
+  <div class="settings-title">SETTINGS</div>
+  <div class="setting-row">
+    <span class="setting-label">SHOW #RANK</span>
+    <div class="toggle active" id="togRank" onclick="toggleSetting(this,'rank')"></div>
+  </div>
+  <div class="setting-row">
+    <span class="setting-label">SHOW TEAM NAME</span>
+    <div class="toggle active" id="togName" onclick="toggleSetting(this,'name')"></div>
+  </div>
+  <div class="setting-row">
+    <span class="setting-label">SHOW LOGO</span>
+    <div class="toggle active" id="togLogo" onclick="toggleSetting(this,'logo')"></div>
+  </div>
+  <div class="setting-row">
+    <span class="setting-label">SHOW ELIMS</span>
+    <div class="toggle active" id="togKill" onclick="toggleSetting(this,'kill')"></div>
+  </div>
+  <div class="setting-row">
+    <span class="setting-label">BACKGROUND</span>
+    <input type="color" class="color-picker" id="bgPicker" value="#020712" oninput="changeBackground(this.value)">
+  </div>
+  <div class="setting-row">
+    <span class="setting-label">POPUP TIMER</span>
+    <select class="timer-select" id="popupDurSel" onchange="popupDuration=parseInt(this.value)*1000">
+      <option value="4">4s</option><option value="6">6s</option>
+      <option value="8">8s</option><option value="10">10s</option>
+    </select>
+  </div>
+  <div class="settings-sep"></div>
+  <button class="btn demo-btn" onclick="demoPopup()">DEMO KILL POPUP</button>
+  <button class="btn save-btn" onclick="saveData()">SAVE DATA</button>
+  <button class="btn reset-btn" onclick="resetAll()">RESET ALL</button>
+</div>
+
+<!-- LIVE STATUS -->
+<div class="live-badge" id="liveBadge">
+  <div class="live-dot"></div>
+  <span id="liveStatus">MENUNGGU DATA...</span>
+</div>
+
+<!-- FINAL 4 HEADER — muncul apabila tinggal 4 pasukan -->
+<div class="final4-header" id="final4Header"></div>
+
+<!-- POPUP CONTAINER -->
+<div id="popupContainer"></div>
+
+<!-- TEAM GRID -->
+<div class="team-grid" id="teamGrid"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   KEYS — sama dengan leaderboard_FINAL.html
+═══════════════════════════════════════════════════ */
+const LIVE_KEY = 'maida_live_v1';
+const SP_KEY   = 'hswp_2026_pro';
+const LS_KEY   = 'maida_v5';
+
+/* ═══════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════ */
+let teams = [];
+let popupSettings = {rank:true, name:true, logo:true, kill:true};
+let popupDuration = 4000;
+let wwcdShown = false;
+let lastLiveTs = 0;
+let lastSavedAt = 0;
+
+/* ═══════════════════════════════════════════════════
+   BUILD TEAMS FROM DATA SOURCES
+   Priority: LIVE_KEY snapshot > LS_KEY > SP_KEY
+═══════════════════════════════════════════════════ */
+function buildTeamsFromLive(snapTeams){
+  // Merge snapshot into local teams — keep alive/pts/elims from snapshot
+  const newTeams = snapTeams.map(st => ({
+    id:      st.id,
+    tag:     st.tag,
+    logo:    st.logo || '',
+    country: st.country || '🇲🇾',
+    alive:   st.alive || [1,1,1,1],
+    pts:     st.pts   || 0,
+    elims:   st.elims || 0,
+    lobby:   st.lobby || 0,
+  }));
+  teams = newTeams;
+  renderTeams();
+  updateLiveStatus('LIVE — '+teams.length+' TEAMS', false);
+}
+
+function loadFromLSKEY(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return false;
+    const d = JSON.parse(raw);
+    if(!d.teams||!d.teams.length) return false;
+    if(d.savedAt === lastSavedAt) return false;
+    lastSavedAt = d.savedAt;
+    teams = d.teams.map(t => ({
+      id:t.id, tag:t.tag, logo:t.logo||'', country:t.country||'🇲🇾',
+      alive:t.alive||[1,1,1,1], pts:t.pts||0, elims:t.elims||0, lobby:t.lobby||0,
+    }));
+    renderTeams();
+    updateLiveStatus('SYNCED — '+teams.length+' TEAMS', false);
+    return true;
+  }catch(e){ return false; }
+}
+
+function loadFromSPKEY(){
+  try{
+    const raw = localStorage.getItem(SP_KEY);
+    if(!raw) return false;
+    const sp = JSON.parse(raw);
+    if(!sp.teams||!sp.teams.length) return false;
+    teams = sp.teams.map((spt,i) => {
+      const spTag = (spt.name||'TEAM '+(i+1)).substring(0,12);
+      return {
+        id: i+1, tag: spTag, logo: spt.logo||'', country: '🇲🇾',
+        alive: [1,1,1,1], pts: 0, elims: 0, lobby: i+1,
+      };
+    });
+    // Overlay live match data if available
+    if(sp._liveMatch && sp._liveMatch.teams){
+      sp._liveMatch.teams.forEach(lt => {
+        const t = teams.find(x => x.tag === lt.tag);
+        if(t){ t.alive=lt.alive||t.alive; t.pts=lt.pts||t.pts; t.elims=lt.elims||t.elims; }
+      });
+    }
+    renderTeams();
+    updateLiveStatus('SP SYNC — '+teams.length+' TEAMS', false);
+    return true;
+  }catch(e){ return false; }
+}
+
+function updateLiveStatus(msg, noData){
+  const badge = document.getElementById('liveBadge');
+  const status = document.getElementById('liveStatus');
+  if(badge) badge.className = 'live-badge'+(noData?' no-data':'');
+  if(status) status.textContent = msg;
+}
+
+/* ═══════════════════════════════════════════════════
+   HANDLE LIVE EVENTS FROM LEADERBOARD
+═══════════════════════════════════════════════════ */
+function handleLiveEvent(ev){
+  if(!ev || ev.ts <= lastLiveTs) return;
+  lastLiveTs = ev.ts;
+
+  if(ev.type === 'SNAPSHOT'){
+    if(ev.payload && ev.payload.teams){
+      buildTeamsFromLive(ev.payload.teams);
+    }
+    return;
+  }
+
+  if(ev.type === 'ELIMINATED'){
+    const p = ev.payload;
+    // Update local team state
+    const t = teams.find(x => x.id===p.teamId || x.tag===p.tag);
+    if(t){ t.alive=[0,0,0,0]; t.elims=p.elims||t.elims; }
+    renderTeams();
+    // Show popup
+    showElimPopup({tag:p.tag, logo:p.logo||'', elims:p.elims||0}, p.placement||0);
+    return;
+  }
+
+  if(ev.type === 'WWCD'){
+    const p = ev.payload;
+    if(wwcdShown) return;
+    wwcdShown = true;
+    showWWCD({tag:p.tag, logo:p.logo||'', elims:p.elims||0});
+    return;
+  }
+
+  if(ev.type === 'KNOCKED'){
+    const p = ev.payload;
+    const t = teams.find(x => x.id===p.teamId || x.tag===p.tag);
+    if(t && p.player>=1 && p.player<=4){ t.alive[p.player-1]=2; }
+    renderTeams();
+    return;
+  }
+
+  if(ev.type === 'STATS_UPDATE'){
+    const p = ev.payload;
+    const t = teams.find(x => x.id===p.teamId || x.tag===p.tag);
+    if(t){ t.pts=p.pts; t.elims=p.elims; }
+    return;
+  }
+}
+
+function pollLive(){
+  try{
+    const raw = localStorage.getItem(LIVE_KEY);
+    if(!raw){ updateLiveStatus('TIADA DATA — buka Leaderboard', true); return; }
+    const ev = JSON.parse(raw);
+    handleLiveEvent(ev);
+  }catch(e){}
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER FINAL 4 HEADER
+   Muncul di atas apabila tinggal ≤ 4 pasukan hidup
+═══════════════════════════════════════════════════ */
+function renderFinal4(){
+  const hdr = document.getElementById('final4Header');
+  if(!hdr) return;
+  const aliveTeams = teams.filter(t => !t.alive.every(x=>x===0));
+  hdr.innerHTML = '';
+  if(aliveTeams.length > 0 && aliveTeams.length <= 4){
+    aliveTeams.forEach(team => {
+      const logoH = team.logo
+        ? `<img src="${team.logo}" class="final4-logo" onerror="this.style.display='none'">`
+        : `<div class="final4-logo" style="background:rgba(255,215,0,.15);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#ffd700;border-radius:10px">${(team.tag||'?')[0]}</div>`;
+      hdr.innerHTML += `<div class="final4-box">${logoH}<div class="final4-name">${team.tag}</div></div>`;
+    });
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER TEAM GRID
+═══════════════════════════════════════════════════ */
+function renderTeams(){
+  const grid = document.getElementById('teamGrid');
+  if(!grid) return;
+  const aliveTeams = teams.filter(t => !t.alive.every(x=>x===0));
+  const isFinal4 = aliveTeams.length > 0 && aliveTeams.length <= 4;
+
+  grid.innerHTML = teams.map((team,i) => {
+    const isAlive = !team.alive.every(x=>x===0);
+    const f4 = isFinal4 && isAlive ? 'final4' : '';
+    const players = team.alive.map((s,p) => {
+      const cls = s===1?'alive':s===2?'knock':'dead';
+      return `<div class="player ${cls}">P${p+1}</div>`;
+    }).join('');
+    const logoH = team.logo
+      ? `<img src="${team.logo}" class="team-logo" onerror="this.style.display='none'">`
+      : `<div class="team-logo" style="display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#ffd700">${(team.tag||'?')[0]}</div>`;
+    return `<div class="team-card ${f4}">
+      <div class="team-head">${logoH}<div class="team-name">${team.tag}</div></div>
+      <div class="players">${players}</div>
+    </div>`;
+  }).join('');
+  renderFinal4();
+}
+
+/* ═══════════════════════════════════════════════════
+   SHOW ELIMINATION POPUP
+═══════════════════════════════════════════════════ */
+function showElimPopup(team, placement){
+  removeElimPopup();
+  let hideClass = '';
+  if(!popupSettings.rank)  hideClass += ' hide-rank';
+  if(!popupSettings.name)  hideClass += ' hide-name';
+  if(!popupSettings.logo)  hideClass += ' hide-logo';
+  if(!popupSettings.kill)  hideClass += ' hide-kill';
+
+  const logoH = team.logo
+    ? `<img src="${team.logo}" class="elim-logo" onerror="this.style.display='none'">`
+    : `<div class="elim-logo" style="background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900">${(team.tag||'?')[0]}</div>`;
+
+  const popup = document.createElement('div');
+  popup.className = 'elim-popup' + hideClass;
+  popup.innerHTML = `
+    <div class="elim-top">
+      <div class="elim-side">
+        <div class="elim-rank">#${String(placement).padStart(2,'0')}</div>
+        <div class="elim-rank-lbl">RANK</div>
+      </div>
+      <div class="elim-center">
+        ${logoH}
+        <div class="elim-team">${team.tag}</div>
+        <div class="elim-ktext">${team.elims} KILLS</div>
+      </div>
+      <div class="elim-side">
+        <div class="elim-kill">${team.elims}</div>
+        <div class="elim-kill-lbl">ELIMS</div>
+      </div>
+    </div>
+    <div class="elim-bottom">ELIMINATED</div>`;
+
+  document.getElementById('popupContainer').appendChild(popup);
+  setTimeout(removeElimPopup, popupDuration);
+}
+
+function removeElimPopup(){
+  document.querySelectorAll('.elim-popup').forEach(x=>x.remove());
+}
+
+/* ═══════════════════════════════════════════════════
+   SHOW WWCD
+═══════════════════════════════════════════════════ */
+function showWWCD(team){
+  document.querySelectorAll('.wwcd-popup').forEach(x=>x.remove());
+  const logoH = team.logo
+    ? `<img src="${team.logo}" class="wwcd-logo" onerror="this.style.display='none'">`
+    : `<div class="wwcd-logo" style="background:rgba(255,215,0,.15);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900">${(team.tag||'?')[0]}</div>`;
+  const div = document.createElement('div');
+  div.className = 'wwcd-popup';
+  div.innerHTML = `
+    <div class="wwcd-top">
+      ${logoH}
+      <div class="wwcd-title">WWCD</div>
+      <div class="wwcd-team">${team.tag}</div>
+    </div>
+    <div class="wwcd-bottom">WINNER WINNER CHICKEN DINNER</div>`;
+  document.getElementById('popupContainer').appendChild(div);
+}
+
+/* ═══════════════════════════════════════════════════
+   DEMO
+═══════════════════════════════════════════════════ */
+function demoPopup(){
+  removeElimPopup();
+  const alive = teams.filter(t => !t.alive.every(x=>x===0));
+  const demo = alive.length ? alive[Math.floor(Math.random()*alive.length)] : {tag:'DEMO',logo:'',elims:7};
+  showElimPopup({tag:demo.tag, logo:demo.logo||'', elims:Math.floor(Math.random()*15)},
+    Math.floor(Math.random()*12)+1);
+}
+
+/* ═══════════════════════════════════════════════════
+   SETTINGS
+═══════════════════════════════════════════════════ */
+function toggleSetting(el,type){
+  el.classList.toggle('active');
+  popupSettings[type] = el.classList.contains('active');
+}
+
+function changeBackground(color){
+  document.documentElement.style.setProperty('--bg', color);
+  document.body.style.background = color;
+  localStorage.setItem('pkBG', color);
+}
+
+function saveData(){
+  localStorage.setItem('pkSettings', JSON.stringify({popupSettings, popupDuration}));
+  alert('✓ SETTINGS SAVED');
+}
+
+function resetAll(){
+  if(!confirm('Reset semua?')) return;
+  teams = [];
+  wwcdShown = false;
+  lastLiveTs = 0;
+  lastSavedAt = 0;
+  removeElimPopup();
+  document.querySelectorAll('.wwcd-popup').forEach(x=>x.remove());
+  // Reload from LS_KEY
+  loadFromLSKEY() || loadFromSPKEY();
+  renderTeams();
+}
+
+function loadSettings(){
+  const s = localStorage.getItem('pkSettings');
+  if(s){ try{
+    const d = JSON.parse(s);
+    if(d.popupSettings){ popupSettings=d.popupSettings; updateToggles(); }
+    if(d.popupDuration){ popupDuration=d.popupDuration; const sel=document.getElementById('popupDurSel'); if(sel)sel.value=popupDuration/1000; }
+  }catch(e){} }
+  const bg = localStorage.getItem('pkBG');
+  if(bg){ changeBackground(bg); const el=document.getElementById('bgPicker'); if(el)el.value=bg; }
+}
+
+function updateToggles(){
+  ['rank','name','logo','kill'].forEach(k=>{
+    const el = document.getElementById('tog'+k.charAt(0).toUpperCase()+k.slice(1));
+    if(el){ if(popupSettings[k])el.classList.add('active'); else el.classList.remove('active'); }
+  });
+}
+
+/* ESC to dismiss */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    removeElimPopup();
+    document.querySelectorAll('.wwcd-popup').forEach(x=>x.remove());
+    wwcdShown=false;
+  }
+});
+
+/* ═══════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════ */
+loadSettings();
+
+// Try to get initial data immediately
+const liveRaw = localStorage.getItem(LIVE_KEY);
+if(liveRaw){
+  try{
+    const ev = JSON.parse(liveRaw);
+    if(ev && ev.type==='SNAPSHOT' && ev.payload && ev.payload.teams){
+      buildTeamsFromLive(ev.payload.teams);
+    } else {
+      loadFromLSKEY() || loadFromSPKEY();
+    }
+  }catch(e){ loadFromLSKEY() || loadFromSPKEY(); }
+} else {
+  loadFromLSKEY() || loadFromSPKEY();
+  if(!teams.length) updateLiveStatus('TIADA DATA — buka Leaderboard dulu', true);
+}
+
+// Poll LIVE_KEY every 300ms for instant popup
+setInterval(pollLive, 300);
+
+// Storage event — immediate response when same browser
+window.addEventListener('storage', e=>{
+  if(e.key === LIVE_KEY){
+    try{ handleLiveEvent(JSON.parse(e.newValue||'{}')); }catch(e2){}
+    return;
+  }
+  if(e.key === LS_KEY){ loadFromLSKEY(); return; }
+  if(e.key === SP_KEY){ if(!teams.length) loadFromSPKEY(); }
+});
+
+// Slower refresh for SP sync (in case leaderboard not open)
+setInterval(()=>{
+  if(teams.length===0) loadFromSPKEY();
+}, 5000);
+</script>
+</body>
+</html>

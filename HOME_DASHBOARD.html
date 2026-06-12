@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MAIDA ESPORTS — HOME DASHBOARD</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Barlow+Condensed:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --mg:#cc00cc;--mg2:#ff00ff;--mg3:#990099;--mg4:#660066;
+  --bg:#0a0010;--bg2:#120018;--bg3:#1a0024;
+  --gold:#ffb400;--green:#18e868;--red:#ff3b5c;--cyan:#00e5ff;
+  --text:#fff;--muted:rgba(255,255,255,.5);
+}
+html,body{height:100%;background:var(--bg);font-family:'Barlow Condensed',sans-serif;color:var(--text);overflow:hidden;}
+
+/* BG EFFECTS */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%,rgba(204,0,204,.18) 0%,transparent 70%),
+    radial-gradient(ellipse 40% 40% at 10% 90%,rgba(153,0,153,.1) 0%,transparent 60%),
+    radial-gradient(ellipse 30% 30% at 90% 80%,rgba(0,229,255,.06) 0%,transparent 60%),
+    repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(204,0,204,.03) 60px,rgba(204,0,204,.03) 61px),
+    repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(204,0,204,.03) 60px,rgba(204,0,204,.03) 61px);
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 100% 100% at 50% 50%,transparent 40%,rgba(0,0,0,.6) 100%);
+}
+
+/* SCANLINE */
+.scanline{position:fixed;inset:0;pointer-events:none;z-index:1;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.08) 2px,rgba(0,0,0,.08) 4px);
+}
+
+/* LAYOUT */
+.app{position:relative;z-index:2;height:100vh;display:flex;flex-direction:column;}
+
+/* ── TOPBAR ── */
+.topbar{
+  height:56px;flex-shrink:0;
+  background:rgba(10,0,16,.9);
+  border-bottom:2px solid var(--mg);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;
+  box-shadow:0 0 30px rgba(204,0,204,.25);
+}
+.logo-wrap{display:flex;align-items:center;gap:12px;}
+.logo-icon{
+  width:36px;height:36px;background:var(--mg);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:#fff;
+  box-shadow:0 0 16px rgba(204,0,204,.6);
+}
+.logo-text{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:#fff;letter-spacing:2px;}
+.logo-text span{color:var(--mg2);}
+.logo-sub{font-size:9px;color:var(--muted);font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-top:1px;}
+
+.topbar-center{display:flex;align-items:center;gap:8px;}
+.stage-badge{
+  background:rgba(204,0,204,.15);border:1px solid var(--mg);
+  color:var(--mg2);padding:5px 14px;border-radius:6px;
+  font-family:'Orbitron',monospace;font-size:11px;font-weight:700;letter-spacing:2px;
+}
+.stage-select{
+  background:rgba(204,0,204,.12);border:1.5px solid var(--mg3);
+  color:var(--mg2);padding:5px 12px;border-radius:6px;
+  font-family:'Orbitron',monospace;font-size:11px;font-weight:700;
+  cursor:pointer;outline:none;letter-spacing:1px;
+}
+.stage-select option{background:#1a0024;color:#fff;}
+
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.status-dot{display:flex;align-items:center;gap:5px;font-family:'Orbitron',monospace;font-size:9px;font-weight:700;color:var(--green);letter-spacing:1px;}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:blink .9s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+.timer-wrap{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(0,0,0,.4);border:1px solid var(--mg3);
+  padding:5px 10px;border-radius:8px;
+}
+.timer-disp{font-family:'Orbitron',monospace;font-size:15px;font-weight:700;color:var(--gold);min-width:52px;text-align:center;}
+.timer-disp.running{color:var(--green);animation:timerGlow 1s infinite alternate;}
+@keyframes timerGlow{from{text-shadow:0 0 8px var(--green);}to{text-shadow:0 0 20px var(--green);}}
+.tbtn{width:22px;height:22px;border:none;border-radius:5px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:.15s;}
+.tbtn:hover{background:var(--mg);box-shadow:0 0 10px rgba(204,0,204,.5);}
+.crew-count{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;}
+
+/* ── MAIN CONTENT ── */
+.main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:24px;overflow:hidden;}
+
+/* TOURNAMENT TITLE */
+.tournament-info{text-align:center;margin-bottom:6px;}
+.t-eyebrow{font-family:'Orbitron',monospace;font-size:10px;color:var(--mg);letter-spacing:4px;text-transform:uppercase;margin-bottom:8px;opacity:.8;}
+.t-title{
+  font-family:'Barlow Condensed',sans-serif;font-size:clamp(22px,3.5vw,42px);
+  font-weight:900;text-transform:uppercase;letter-spacing:.04em;line-height:1;
+  background:linear-gradient(135deg,#fff 20%,var(--mg2) 60%,var(--gold) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  cursor:pointer;display:inline-block;
+}
+.t-title:hover{opacity:.85;}
+.t-sub{font-size:11px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:5px;}
+.t-edit-wrap{display:flex;align-items:center;justify-content:center;gap:8px;display:none;}
+.t-edit-wrap.show{display:flex;}
+.t-input{
+  background:rgba(204,0,204,.12);border:1.5px solid var(--mg);
+  color:#fff;padding:6px 14px;border-radius:7px;
+  font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;
+  letter-spacing:.04em;text-transform:uppercase;outline:none;
+  min-width:320px;text-align:center;
+}
+.t-save-btn{background:var(--mg);border:none;color:#fff;padding:6px 14px;border-radius:7px;font-weight:800;font-size:12px;cursor:pointer;}
+
+/* ── BUTTON GRID ── */
+.btn-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  width:100%;
+  max-width:860px;
+}
+
+.nav-btn{
+  aspect-ratio:1;
+  border:none;border-radius:16px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  position:relative;overflow:hidden;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s;
+  background:var(--mg);
+  box-shadow:0 4px 20px rgba(204,0,204,.35), inset 0 1px 0 rgba(255,255,255,.15);
+}
+.nav-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.15) 0%,transparent 50%,rgba(0,0,0,.1) 100%);
+  pointer-events:none;
+}
+.nav-btn::after{
+  content:'';position:absolute;
+  inset:-2px;border-radius:18px;
+  border:2px solid transparent;
+  background:linear-gradient(135deg,rgba(255,255,255,.3),rgba(255,255,255,.0)) border-box;
+  -webkit-mask:linear-gradient(#fff 0 0) padding-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:destination-out;mask-composite:exclude;
+  pointer-events:none;opacity:0;transition:opacity .2s;
+}
+.nav-btn:hover{transform:scale(1.06) translateY(-3px);box-shadow:0 12px 40px rgba(204,0,204,.6), inset 0 1px 0 rgba(255,255,255,.2);}
+.nav-btn:hover::after{opacity:1;}
+.nav-btn:active{transform:scale(.97) translateY(0);}
+
+/* VARIANT COLOURS */
+.nav-btn.obs   {background:linear-gradient(135deg,#004d99,#0066cc);box-shadow:0 4px 20px rgba(0,102,204,.4);}
+.nav-btn.obs:hover{box-shadow:0 12px 40px rgba(0,102,204,.7);}
+.nav-btn.obs::after{background:linear-gradient(135deg,rgba(0,180,255,.4),rgba(0,180,255,.0)) border-box;}
+.nav-btn.setting{background:linear-gradient(135deg,#1a1a2e,#252540);box-shadow:0 4px 20px rgba(100,100,200,.3);border:1.5px solid rgba(100,100,255,.3);}
+.nav-btn.setting:hover{box-shadow:0 12px 40px rgba(100,100,255,.5);}
+
+/* ICON — SVG */
+.btn-icon{
+  width:clamp(36px,5vw,52px);height:clamp(36px,5vw,52px);
+  filter:drop-shadow(0 2px 8px rgba(0,0,0,.5));
+  flex-shrink:0;
+}
+/* LABEL */
+.btn-label{
+  font-family:'Orbitron',monospace;font-size:clamp(10px,1.4vw,14px);font-weight:900;
+  color:#fff;letter-spacing:1.5px;text-transform:uppercase;text-align:center;
+  line-height:1.2;text-shadow:0 1px 4px rgba(0,0,0,.4);
+}
+/* STATUS CHIP on button */
+.btn-chip{
+  position:absolute;top:10px;right:10px;
+  background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.2);
+  border-radius:4px;padding:2px 6px;font-family:'Barlow Condensed',sans-serif;
+  font-size:9px;font-weight:800;letter-spacing:1px;color:rgba(255,255,255,.7);
+}
+.btn-chip.live{background:rgba(24,232,104,.2);border-color:var(--green);color:var(--green);}
+
+/* PULSE animation for active buttons */
+.nav-btn.pulse-ring::before{
+  animation:pulseRing 2s cubic-bezier(.36,.11,.89,.32) infinite;
+}
+@keyframes pulseRing{
+  0%{opacity:.15;transform:scale(1);}
+  50%{opacity:.05;transform:scale(1.3);}
+  100%{opacity:0;transform:scale(1.6);}
+}
+
+/* ── BOTTOM STATUS BAR ── */
+.statusbar{
+  height:36px;flex-shrink:0;
+  background:rgba(10,0,16,.95);border-top:1px solid rgba(204,0,204,.2);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;gap:20px;
+}
+.sb-item{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--muted);}
+.sb-val{color:#fff;font-family:'Orbitron',monospace;font-size:11px;}
+.sb-sep{width:1px;height:16px;background:rgba(255,255,255,.08);}
+.sb-crew-list{display:flex;gap:6px;flex-wrap:nowrap;}
+.crew-tag{
+  background:rgba(204,0,204,.15);border:1px solid rgba(204,0,204,.3);
+  color:var(--mg2);padding:2px 8px;border-radius:4px;
+  font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;
+}
+.crew-tag.active{background:rgba(24,232,104,.12);border-color:var(--green);color:var(--green);}
+
+/* ── NOTIFICATION TOAST ── */
+.toast{
+  position:fixed;bottom:50px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:rgba(20,0,30,.95);border:1.5px solid var(--mg);
+  color:#fff;padding:10px 20px;border-radius:10px;
+  font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;
+  letter-spacing:.5px;opacity:0;transition:all .3s;pointer-events:none;z-index:9999;
+  box-shadow:0 8px 30px rgba(204,0,204,.4);white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── FILE PATH MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:8888;
+  display:none;align-items:center;justify-content:center;
+}
+.modal-overlay.show{display:flex;}
+.modal{
+  background:var(--bg3);border:1.5px solid var(--mg);border-radius:16px;
+  padding:28px;max-width:520px;width:90%;
+  box-shadow:0 20px 60px rgba(204,0,204,.3);
+}
+.modal-title{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:var(--mg2);margin-bottom:6px;letter-spacing:2px;}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.6;}
+.modal-input{
+  width:100%;background:rgba(255,255,255,.05);border:1.5px solid var(--mg3);
+  color:#fff;padding:10px 14px;border-radius:8px;
+  font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;
+  outline:none;margin-bottom:12px;
+}
+.modal-input:focus{border-color:var(--mg);}
+.modal-btns{display:flex;gap:8px;}
+.mbtn{flex:1;border:none;padding:10px;border-radius:8px;font-family:'Orbitron',monospace;font-size:11px;font-weight:800;cursor:pointer;letter-spacing:1px;transition:.15s;}
+.mbtn:hover{filter:brightness(1.15);}
+.mbtn.save{background:var(--mg);color:#fff;}
+.mbtn.cancel{background:rgba(255,255,255,.07);color:var(--muted);border:1px solid rgba(255,255,255,.1);}
+.path-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.path-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 12px;}
+.path-label{font-size:11px;font-weight:700;color:var(--mg2);letter-spacing:1px;min-width:100px;}
+.path-val{flex:1;font-size:11px;color:var(--muted);font-family:'Barlow Condensed',sans-serif;word-break:break-all;}
+.path-edit{width:26px;height:26px;border:none;border-radius:5px;background:rgba(204,0,204,.15);color:var(--mg2);cursor:pointer;font-size:11px;}
+.path-edit:hover{background:var(--mg);color:#fff;}
+
+/* ── OBS EXPAND PANEL ── */
+.obs-panel{
+  width:100%;max-width:860px;
+  background:rgba(0,0,30,.85);
+  border:1.5px solid #004dcc;
+  border-radius:14px;overflow:hidden;
+  animation:fadeUp .25s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.obs-panel-title{
+  background:linear-gradient(90deg,#001a66,#003399);
+  padding:10px 16px;display:flex;justify-content:space-between;align-items:center;
+  font-family:'Orbitron',monospace;font-size:12px;font-weight:800;
+  color:#66aaff;letter-spacing:2px;text-transform:uppercase;
+}
+.obs-panel-close{
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.6);width:26px;height:26px;border-radius:6px;
+  cursor:pointer;font-size:12px;transition:.15s;
+}
+.obs-panel-close:hover{background:var(--red);color:#fff;border-color:var(--red);}
+.obs-links-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:14px;
+}
+.obs-link-card{
+  background:rgba(0,30,80,.7);border:1.5px solid rgba(0,100,255,.25);
+  border-radius:10px;padding:12px 14px;
+  display:flex;align-items:center;gap:12px;
+  cursor:pointer;transition:.2s;position:relative;overflow:hidden;
+}
+.obs-link-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,100,255,.08),transparent);
+  pointer-events:none;
+}
+.obs-link-card:hover{
+  border-color:#3399ff;
+  background:rgba(0,50,120,.8);
+  transform:translateY(-2px);
+  box-shadow:0 6px 20px rgba(0,100,255,.3);
+}
+.obs-link-card:active{transform:translateY(0);}
+.obs-link-icon{font-size:28px;flex-shrink:0;line-height:1;}
+.obs-link-info{flex:1;min-width:0;}
+.obs-link-label{
+  font-family:'Orbitron',monospace;font-size:11px;font-weight:800;
+  color:#fff;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;
+}
+.obs-link-url{
+  font-family:'Barlow Condensed',monospace;font-size:10px;
+  color:rgba(100,180,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  letter-spacing:.3px;
+}
+.obs-link-badge{
+  font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:800;
+  letter-spacing:1px;padding:2px 7px;border-radius:4px;
+  flex-shrink:0;text-transform:uppercase;align-self:flex-start;
+}
+.obs-link-badge.live{background:rgba(24,232,104,.2);border:1px solid var(--green);color:var(--green);}
+.obs-link-badge.kill{background:rgba(255,59,92,.15);border:1px solid var(--red);color:var(--red);}
+.obs-link-badge.admin{background:rgba(255,180,0,.15);border:1px solid var(--gold);color:var(--gold);}
+.obs-panel-note{
+  padding:8px 14px;font-size:10px;color:rgba(100,150,255,.6);
+  font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px;
+  border-top:1px solid rgba(0,100,255,.15);text-align:center;
+}
+
+.obs-link-icon-svg{
+  width:44px;height:44px;flex-shrink:0;
+  background:rgba(0,60,140,.5);border:1px solid rgba(0,120,255,.3);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+}
+.obs-link-actions{display:flex;gap:5px;flex-shrink:0;flex-direction:column;align-items:flex-end;}
+.obs-act-btn{
+  border:none;border-radius:5px;padding:4px 9px;
+  font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;
+  letter-spacing:.5px;cursor:pointer;transition:.15s;white-space:nowrap;
+}
+.obs-act-btn:hover{filter:brightness(1.2);transform:scale(1.05);}
+.obs-btn-open{background:rgba(0,100,255,.3);color:#66aaff;border:1px solid rgba(0,100,255,.4);}
+.obs-btn-open:hover{background:#0066ff;color:#fff;}
+.obs-btn-copy{background:rgba(255,180,0,.15);color:var(--gold);border:1px solid rgba(255,180,0,.3);}
+.obs-btn-copy:hover{background:var(--gold);color:#000;}
+.obs-btn-edit{background:rgba(255,255,255,.07);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.12);}
+.obs-btn-edit:hover{background:rgba(255,255,255,.15);color:#fff;}
+.obs-btn-save{background:rgba(24,232,104,.2);color:var(--green);border:1px solid rgba(24,232,104,.3);}
+.obs-btn-save:hover{background:var(--green);color:#000;}
+
+/* edit mode */
+.obs-link-card.editing{border-color:rgba(0,200,255,.5);background:rgba(0,40,100,.8);}
+.obs-link-edit-wrap{display:none;width:100%;margin-top:6px;}
+.obs-link-card.editing .obs-link-edit-wrap{display:flex;gap:5px;align-items:center;}
+.obs-link-input{
+  flex:1;background:rgba(0,0,0,.4);border:1.5px solid rgba(0,150,255,.4);
+  color:#fff;padding:5px 8px;border-radius:5px;
+  font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;
+  outline:none;min-width:0;
+}
+.obs-link-input:focus{border-color:#3399ff;}
+.obs-link-input::placeholder{color:rgba(255,255,255,.25);}
+
+/* ── QUICK STATS ── */
+.quick-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.qs-item{
+  background:rgba(204,0,204,.08);border:1px solid rgba(204,0,204,.2);
+  border-radius:8px;padding:8px 16px;display:flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:700;
+}
+.qs-val{font-family:'Orbitron',monospace;font-size:16px;font-weight:700;color:var(--mg2);}
+.qs-lbl{color:var(--muted);letter-spacing:1px;font-size:10px;text-transform:uppercase;}
+
+/* GLOW BORDER ANIM */
+@keyframes borderGlow{
+  0%,100%{box-shadow:0 4px 20px rgba(204,0,204,.35),inset 0 1px 0 rgba(255,255,255,.15);}
+  50%{box-shadow:0 4px 30px rgba(204,0,204,.6),inset 0 1px 0 rgba(255,255,255,.2);}
+}
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+
+<!-- ═══════════════ TOAST ═══════════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════ MODAL: FILE PATHS ═══════════════ -->
+<div class="modal-overlay" id="settingModal">
+  <div class="modal">
+    <div class="modal-title">⚙ SETTING — FILE PATHS</div>
+    <div class="modal-sub">Tetapkan lokasi fail HTML untuk setiap komponen. Fail mesti berada dalam folder yang sama atau nyatakan path penuh.</div>
+    <div class="path-list" id="pathList"></div>
+    <div class="modal-btns">
+      <button class="mbtn save" onclick="savePaths()">💾 SAVE PATHS</button>
+      <button class="mbtn cancel" onclick="closeModal()">✕ CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div class="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo-wrap">
+      <div class="logo-icon">M</div>
+      <div>
+        <div class="logo-text">MAIDA <span>ESPORTS</span></div>
+        <div class="logo-sub">Tournament Control System</div>
+      </div>
+    </div>
+
+    <div class="topbar-center">
+      <select class="stage-select" id="stageSelect" onchange="saveConfig()">
+        <option>GRAND FINAL</option>
+        <option>SEMI FINAL</option>
+        <option>QUARTER FINAL</option>
+        <option>GROUP STAGE A</option>
+        <option>GROUP STAGE B</option>
+        <option>QUALIFIER</option>
+      </select>
+      <span class="stage-badge" id="stageBadge">GRAND FINAL</span>
+    </div>
+
+    <div class="topbar-right">
+      <div class="status-dot"><div class="sdot"></div>SYSTEM ONLINE</div>
+      <div class="timer-wrap">
+        <button class="tbtn" onclick="timerReset()" title="Reset">↺</button>
+        <span class="timer-disp" id="timerDisp">00:00</span>
+        <button class="tbtn" onclick="timerToggle()" id="timerBtn" title="Start/Stop">▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- Tournament Title -->
+    <div class="tournament-info">
+      <div class="t-eyebrow">▪ PUBG MOBILE ▪ ESPORTS TOURNAMENT ▪</div>
+      <div class="t-title" id="tTitle" onclick="editTitle()" title="Klik untuk edit">
+        ESPORTS TOURNAMENT 2026
+      </div>
+      <div class="t-edit-wrap" id="tEditWrap">
+        <input class="t-input" id="tInput" placeholder="NAMA TOURNAMENT">
+        <button class="t-save-btn" onclick="saveTitle()">✓ SAVE</button>
+      </div>
+      <div class="t-sub" id="tSub">Klik pada nama untuk edit</div>
+    </div>
+
+    <!-- 8 NAVIGATION BUTTONS -->
+    <div class="btn-grid">
+
+      <!-- ROW 1 -->
+      <!-- STANDING POINT -->
+      <button class="nav-btn" onclick="openModule('standing')" id="btnStanding">
+        <span class="btn-chip live">LIVE</span>
+        <svg class="btn-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="28" width="10" height="16" rx="2" fill="rgba(255,255,255,.9)"/>
+          <rect x="19" y="18" width="10" height="26" rx="2" fill="rgba(255,255,255,.9)"/>
+          <rect x="34" y="8" width="10" height="36" rx="2" fill="rgba(255,255,255,.9)"/>
+          <polyline points="9,26 24,16 39,6" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-dasharray="3 2"/>
+          <circle cx="9" cy="26" r="2.5" fill="#fff"/>
+          <circle cx="24" cy="16" r="2.5" fill="#fff"/>
+          <circle cx="39" cy="6" r="2.5" fill="#fff"/>
+        </svg>
+        <span class="btn-label">STANDING<br>POINT</span>
+      </button>
+
+      <!-- LEADERBOARD -->
+      <button class="nav-btn" onclick="openModule('leaderboard')" id="btnLeaderboard">
+        <span class="btn-chip live">LIVE</span>
+        <svg class="btn-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M24 4L28.5 15.5H41L31 23.5L34.5 35L24 28L13.5 35L17 23.5L7 15.5H19.5L24 4Z" fill="rgba(255,255,255,.95)" stroke="rgba(255,255,255,.3)" stroke-width="1"/>
+          <rect x="10" y="38" width="28" height="3" rx="1.5" fill="rgba(255,255,255,.5)"/>
+          <rect x="14" y="43" width="20" height="2" rx="1" fill="rgba(255,255,255,.3)"/>
+        </svg>
+        <span class="btn-label">LEADER<br>BOARD</span>
+      </button>
+
+      <!-- POPUP KILL -->
+      <button class="nav-btn" onclick="openModule('popup')" id="btnPopup">
+        <span class="btn-chip">OBS</span>
+        <svg class="btn-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="22" r="14" stroke="rgba(255,255,255,.9)" stroke-width="2.5" fill="none"/>
+          <circle cx="24" cy="22" r="4" fill="rgba(255,255,255,.9)"/>
+          <line x1="24" y1="4" x2="24" y2="10" stroke="rgba(255,255,255,.7)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="24" y1="34" x2="24" y2="40" stroke="rgba(255,255,255,.7)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="6" y1="22" x2="12" y2="22" stroke="rgba(255,255,255,.7)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="36" y1="22" x2="42" y2="22" stroke="rgba(255,255,255,.7)" stroke-width="2.5" stroke-linecap="round"/>
+          <rect x="20" y="38" width="8" height="7" rx="1.5" fill="rgba(255,255,255,.5)"/>
+          <rect x="16" y="44" width="16" height="2.5" rx="1.25" fill="rgba(255,255,255,.4)"/>
+        </svg>
+        <span class="btn-label">POPUP<br>KILL</span>
+      </button>
+
+      <!-- MAP -->
+      <button class="nav-btn" onclick="openModule('map')" id="btnMap">
+        <span class="btn-chip">ADMIN</span>
+        <svg class="btn-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 10L18 6L30 10L42 6V38L30 42L18 38L6 42V10Z" stroke="rgba(255,255,255,.9)" stroke-width="2.2" fill="rgba(255,255,255,.1)" stroke-linejoin="round"/>
+          <line x1="18" y1="6" x2="18" y2="38" stroke="rgba(255,255,255,.5)" stroke-width="1.5" stroke-dasharray="3 2"/>
+          <line x1="30" y1="10" x2="30" y2="42" stroke="rgba(255,255,255,.5)" stroke-width="1.5" stroke-dasharray="3 2"/>
+          <circle cx="24" cy="22" r="3.5" fill="rgba(255,255,255,.9)"/>
+          <path d="M24 14C20.13 14 17 17.13 17 21C17 26.25 24 34 24 34C24 34 31 26.25 31 21C31 17.13 27.87 14 24 14Z" fill="rgba(255,255,255,.25)" stroke="rgba(255,255,255,.6)" stroke-width="1.5"/>
+        </svg>
+        <span class="btn-label">MAP</span>
+      </button>
+
+      <!-- ROW 2 -->
+      <!-- WWCD -->
+      <button class="nav-btn" onclick="openModule('wwcd')" id="btnWwcd">
+        <span class="btn-chip">OVERLAY</span>
+        <svg class="btn-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M24 6C24 6 14 10 8 18C8 18 12 32 24 38C36 32 40 18 40 18C34 10 24 6 24 6Z" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M16 22L21 27L32 17" stroke="rgba(255,255,255,.95)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M10 40C14 36 20 34 24 34C28 34 34 36 38 40" stroke="rgba(255,255,255,.4)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="btn-label">WWCD</span>
+      </button>
+
+      <!-- SETTING -->
+      <button class="nav-btn setting" onclick="openSettingModal()" id="btnSetting">
+        <svg class="btn-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="24" r="6" stroke="rgba(255,255,255,.9)" stroke-width="2.5" fill="none"/>
+          <path d="M24 4V10M24 38V44M4 24H10M38 24H44M9.37 9.37L13.6 13.6M34.4 34.4L38.63 38.63M38.63 9.37L34.4 13.6M13.6 34.4L9.37 38.63" stroke="rgba(255,255,255,.7)" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="24" cy="24" r="2.5" fill="rgba(255,255,255,.9)"/>
+        </svg>
+        <span class="btn-label">SETTING</span>
+      </button>
+
+      <!-- TEAM -->
+      <button class="nav-btn" onclick="openModule('team')" id="btnTeam">
+        <span class="btn-chip">ADMIN</span>
+        <svg class="btn-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="16" cy="16" r="7" stroke="rgba(255,255,255,.9)" stroke-width="2.2" fill="rgba(255,255,255,.15)"/>
+          <circle cx="32" cy="16" r="7" stroke="rgba(255,255,255,.9)" stroke-width="2.2" fill="rgba(255,255,255,.15)"/>
+          <path d="M4 40C4 32.27 9.37 26 16 26" stroke="rgba(255,255,255,.7)" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M32 26C38.63 26 44 32.27 44 40" stroke="rgba(255,255,255,.7)" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M16 26C16 26 19 28 24 28C29 28 32 26 32 26C38.63 26 44 32.27 44 40H4C4 32.27 9.37 26 16 26Z" fill="rgba(255,255,255,.1)" stroke="rgba(255,255,255,.6)" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <span class="btn-label">TEAM</span>
+      </button>
+
+      <!-- OBS -->
+      <button class="nav-btn obs" onclick="toggleObsPanel()" id="btnObs">
+        <span class="btn-chip live">OBS</span>
+        <svg class="btn-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="4" y="8" width="40" height="28" rx="4" stroke="rgba(255,255,255,.9)" stroke-width="2.2" fill="rgba(255,255,255,.1)"/>
+          <circle cx="24" cy="22" r="8" stroke="rgba(255,255,255,.9)" stroke-width="2" fill="rgba(255,255,255,.1)"/>
+          <circle cx="24" cy="22" r="3" fill="rgba(255,255,255,.9)"/>
+          <line x1="16" y1="36" x2="12" y2="44" stroke="rgba(255,255,255,.6)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="32" y1="36" x2="36" y2="44" stroke="rgba(255,255,255,.6)" stroke-width="2" stroke-linecap="round"/>
+          <line x1="10" y1="44" x2="38" y2="44" stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="36" cy="12" r="3" fill="rgba(255,100,100,.9)"/>
+        </svg>
+        <span class="btn-label">OBS</span>
+      </button>
+
+    </div>
+
+    <!-- OBS EXPAND PANEL -->
+    <div class="obs-panel" id="obsPanel" style="display:none">
+      <div class="obs-panel-title">
+        <span>📺 OBS OVERLAY LINKS</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <span style="font-size:9px;color:rgba(100,180,255,.5);letter-spacing:1px;font-weight:600">AUTO-SAVED</span>
+          <button class="obs-panel-close" onclick="toggleObsPanel()">✕</button>
+        </div>
+      </div>
+      <div class="obs-links-grid" id="obsLinksGrid"></div>
+      <div class="obs-panel-note">✏ Klik edit untuk masukkan link · ▶ Buka window · 📋 Copy URL ke OBS Browser Source</div>
+    </div>
+    <div class="quick-stats" id="quickStats">
+      <div class="qs-item">
+        <div>
+          <div class="qs-val" id="qsTeams">—</div>
+          <div class="qs-lbl">Teams</div>
+        </div>
+      </div>
+      <div class="qs-item">
+        <div>
+          <div class="qs-val" id="qsMaps">—</div>
+          <div class="qs-lbl">Maps Done</div>
+        </div>
+      </div>
+      <div class="qs-item">
+        <div>
+          <div class="qs-val" id="qsKills">—</div>
+          <div class="qs-lbl">Total Kills</div>
+        </div>
+      </div>
+      <div class="qs-item">
+        <div>
+          <div class="qs-val" id="qsLeader">—</div>
+          <div class="qs-lbl">Leader</div>
+        </div>
+      </div>
+      <div class="qs-item">
+        <div>
+          <div class="qs-val" id="qsAlive" style="color:var(--green)">—</div>
+          <div class="qs-lbl">Alive Teams</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .main -->
+
+  <!-- STATUS BAR -->
+  <div class="statusbar">
+    <div class="sb-item">
+      STAGE: <span class="sb-val" id="sbStage">GRAND FINAL</span>
+    </div>
+    <div class="sb-sep"></div>
+    <div class="sb-item">
+      MATCH: <span class="sb-val" id="sbMatch">—</span>
+    </div>
+    <div class="sb-sep"></div>
+    <div class="sb-item">
+      DATA: <span class="sb-val" id="sbData" style="color:var(--green)">READY</span>
+    </div>
+    <div class="sb-sep"></div>
+    <div class="sb-item">
+      CREW MODULES AKTIF:
+      <div class="sb-crew-list" id="crewList"></div>
+    </div>
+    <div style="flex:1"></div>
+    <div class="sb-item" style="font-family:'Orbitron',monospace;font-size:10px;color:var(--muted);">
+      <span id="clockDisp"></span>
+    </div>
+  </div>
+
+</div><!-- end .app -->
+
+<script>
+/* ═══════════════════════════════════════════════════
+   CONFIG — file paths & settings
+═══════════════════════════════════════════════════ */
+const CONFIG_KEY = 'maidaHomeConfig';
+const SP_KEY   = 'hswp_2026_pro';
+const LS_KEY   = 'maida_v5';
+const LIVE_KEY = 'maida_live_v1';
+const DATA_KEY   = 'maidaTournamentV4'; // same key as Standing_Point.html
+
+// Default file paths — crew boleh ubah dalam Setting
+const DEFAULT_PATHS = {
+  standing:    'Standing_Point_v2.html',
+  leaderboard: 'leaderboard_FINAL.html',
+  popup:       'popup_kill_FINAL.html',
+  map:         'Standing_Point_v2.html',
+  wwcd:        'popup_kill_FINAL.html',
+  team:        'leaderboard_FINAL.html',
+  obs:         'leaderboard_FINAL.html#obs',
+};
+
+// OBS specific paths (6 overlay links)
+const OBS_LINKS = {
+  obsLb:      { file:'leaderboard_FINAL.html#obs',   w:500,  h:900  },
+  obsKill:    { file:'popup_kill_FINAL.html',          w:1920, h:1080 },
+  obsWwcd:    { file:'popup_kill_FINAL.html',          w:1920, h:1080 },
+  obsTeam:    { file:'leaderboard_FINAL.html',         w:1920, h:1080 },
+  obsMap:     { file:'Standing_Point_v2.html',         w:1400, h:900  },
+  obsOverall: { file:'Standing_Point_v2.html',         w:1920, h:1080 },
+};
+
+// Module labels & window sizes
+const MODULES = {
+  standing:    {label:'STANDING POINT',  w:1400,h:900,  path:'standing'},
+  leaderboard: {label:'LEADERBOARD',     w:1920,h:1080, path:'leaderboard'},
+  popup:       {label:'POPUP KILL',      w:1920,h:1080, path:'popup'},
+  map:         {label:'MAP',             w:1400,h:900,  path:'map'},
+  wwcd:        {label:'WWCD',            w:1920,h:1080, path:'wwcd'},
+  team:        {label:'TEAM ADMIN',      w:1920,h:1080, path:'team'},
+  obs:         {label:'OBS OVERLAY',     w:500,  h:900, path:'obs'},
+};
+
+let config = {paths:{...DEFAULT_PATHS}, title:'ESPORTS TOURNAMENT 2026', stage:'GRAND FINAL'};
+let openWindows = {};
+let timerVal=0, timerRunning=false, timerInv=null;
+
+/* ── LOAD/SAVE CONFIG ── */
+function loadConfig(){
+  const raw = localStorage.getItem(CONFIG_KEY);
+  if(raw){
+    try{ config = {...config, ...JSON.parse(raw)}; }catch(e){}
+  }
+  applyConfig();
+}
+function saveConfig(){
+  config.stage = document.getElementById('stageSelect').value;
+  localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+  document.getElementById('stageBadge').textContent = config.stage;
+  document.getElementById('sbStage').textContent = config.stage;
+}
+function applyConfig(){
+  document.getElementById('tTitle').textContent = config.title||'ESPORTS TOURNAMENT 2026';
+  const sel = document.getElementById('stageSelect');
+  if(config.stage){
+    for(let o of sel.options){ if(o.value===config.stage){o.selected=true;break;} }
+  }
+  document.getElementById('stageBadge').textContent = config.stage||'GRAND FINAL';
+  document.getElementById('sbStage').textContent = config.stage||'GRAND FINAL';
+}
+
+/* ── TOURNAMENT TITLE EDIT ── */
+function editTitle(){
+  const inp = document.getElementById('tInput');
+  inp.value = document.getElementById('tTitle').textContent;
+  document.getElementById('tEditWrap').classList.add('show');
+  document.getElementById('tTitle').style.display='none';
+  document.getElementById('tSub').style.display='none';
+  inp.focus();inp.select();
+}
+function saveTitle(){
+  const val = document.getElementById('tInput').value.trim()||'ESPORTS TOURNAMENT 2026';
+  config.title = val;
+  document.getElementById('tTitle').textContent = val;
+  document.getElementById('tTitle').style.display='';
+  document.getElementById('tSub').style.display='';
+  document.getElementById('tEditWrap').classList.remove('show');
+  saveConfig();
+  // Push title to main data store so Standing_Point can pick it up
+  const raw = localStorage.getItem(DATA_KEY);
+  if(raw){try{const d=JSON.parse(raw);d.title=val;localStorage.setItem(DATA_KEY,JSON.stringify(d));}catch(e){}}
+  showToast('✓ Nama tournament disimpan');
+}
+document.getElementById('tInput').addEventListener('keydown',e=>{if(e.key==='Enter')saveTitle();if(e.key==='Escape'){document.getElementById('tEditWrap').classList.remove('show');document.getElementById('tTitle').style.display='';document.getElementById('tSub').style.display='';}});
+
+/* ═══════════════════════════════════════════════════
+   OBS LINKS — boleh edit, auto-save localStorage
+═══════════════════════════════════════════════════ */
+const OBS_LINK_KEY = 'maidaObsLinks';
+
+const OBS_DEFS = [
+  { key:'obsLb',      icon:'LB',  label:'LIVE LEADERBOARD', badge:'live',  badgeTxt:'LIVE',  def:'leaderboard_FINAL.html#obs',  w:500,  h:900  },
+  { key:'obsKill',    icon:'KILL',label:'POPUP KILL',        badge:'kill',  badgeTxt:'OBS',   def:'popup_kill_FINAL.html',        w:1920, h:1080 },
+  { key:'obsWwcd',    icon:'WIN', label:'WWCD',              badge:'kill',  badgeTxt:'OBS',   def:'popup_kill_FINAL.html',        w:1920, h:1080 },
+  { key:'obsTeam',    icon:'TEAM',label:'TEAM',              badge:'admin', badgeTxt:'ADMIN', def:'leaderboard_FINAL.html',       w:1920, h:1080 },
+  { key:'obsMap',     icon:'MAP', label:'MAP',               badge:'admin', badgeTxt:'ADMIN', def:'Standing_Point_v2.html',       w:1400, h:900  },
+  { key:'obsOverall', icon:'RANK',label:'OVERALL STANDING',  badge:'live',  badgeTxt:'LIVE',  def:'Standing_Point_v2.html',       w:1920, h:1080 },
+];
+
+// Load saved links or use defaults
+function loadObsLinks(){
+  try{
+    const raw = localStorage.getItem(OBS_LINK_KEY);
+    if(raw){
+      const saved = JSON.parse(raw);
+      OBS_DEFS.forEach(d => { if(saved[d.key]) d.url = saved[d.key]; else d.url = d.def; });
+    } else {
+      OBS_DEFS.forEach(d => d.url = d.def);
+    }
+  }catch(e){ OBS_DEFS.forEach(d => d.url = d.def); }
+}
+
+function saveObsLinks(){
+  const data = {};
+  OBS_DEFS.forEach(d => data[d.key] = d.url || d.def);
+  localStorage.setItem(OBS_LINK_KEY, JSON.stringify(data));
+}
+
+function renderObsGrid(){
+  const grid = document.getElementById('obsLinksGrid');
+  if(!grid) return;
+
+  const svgIcons = {
+    LB:   `<svg viewBox="0 0 32 32" fill="none" width="28" height="28"><path d="M16 3L19 11H28L21 16.5L23.5 25L16 20L8.5 25L11 16.5L4 11H13L16 3Z" fill="rgba(100,180,255,.9)"/></svg>`,
+    KILL: `<svg viewBox="0 0 32 32" fill="none" width="28" height="28"><circle cx="16" cy="14" r="9" stroke="rgba(100,180,255,.9)" stroke-width="2" fill="none"/><circle cx="16" cy="14" r="3" fill="rgba(100,180,255,.9)"/><line x1="16" y1="2" x2="16" y2="7" stroke="rgba(100,180,255,.7)" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="21" x2="16" y2="26" stroke="rgba(100,180,255,.7)" stroke-width="2" stroke-linecap="round"/><line x1="4" y1="14" x2="9" y2="14" stroke="rgba(100,180,255,.7)" stroke-width="2" stroke-linecap="round"/><line x1="23" y1="14" x2="28" y2="14" stroke="rgba(100,180,255,.7)" stroke-width="2" stroke-linecap="round"/></svg>`,
+    WIN:  `<svg viewBox="0 0 32 32" fill="none" width="28" height="28"><path d="M16 4C16 4 9 7 5 12C5 12 8 21 16 25C24 21 27 12 27 12C23 7 16 4 16 4Z" fill="rgba(100,180,255,.15)" stroke="rgba(100,180,255,.9)" stroke-width="1.8" stroke-linejoin="round"/><path d="M11 15L14.5 18.5L21 12" stroke="rgba(100,180,255,.95)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+    TEAM: `<svg viewBox="0 0 32 32" fill="none" width="28" height="28"><circle cx="11" cy="11" r="5" stroke="rgba(100,180,255,.9)" stroke-width="1.8" fill="rgba(100,180,255,.15)"/><circle cx="21" cy="11" r="5" stroke="rgba(100,180,255,.9)" stroke-width="1.8" fill="rgba(100,180,255,.15)"/><path d="M3 27C3 21.5 6.6 17 11 17C13 17 16 18 16 18C16 18 19 17 21 17C25.4 17 29 21.5 29 27" stroke="rgba(100,180,255,.7)" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>`,
+    MAP:  `<svg viewBox="0 0 32 32" fill="none" width="28" height="28"><path d="M4 7L12 4L20 7L28 4V25L20 28L12 25L4 28V7Z" stroke="rgba(100,180,255,.9)" stroke-width="1.8" fill="rgba(100,180,255,.08)" stroke-linejoin="round"/><line x1="12" y1="4" x2="12" y2="25" stroke="rgba(100,180,255,.4)" stroke-width="1" stroke-dasharray="2 1.5"/><line x1="20" y1="7" x2="20" y2="28" stroke="rgba(100,180,255,.4)" stroke-width="1" stroke-dasharray="2 1.5"/><circle cx="16" cy="15" r="2.5" fill="rgba(100,180,255,.9)"/></svg>`,
+    RANK: `<svg viewBox="0 0 32 32" fill="none" width="28" height="28"><rect x="3" y="19" width="7" height="10" rx="1.5" fill="rgba(100,180,255,.9)"/><rect x="12.5" y="13" width="7" height="16" rx="1.5" fill="rgba(100,180,255,.9)"/><rect x="22" y="6" width="7" height="23" rx="1.5" fill="rgba(100,180,255,.9)"/></svg>`,
+  };
+
+  grid.innerHTML = OBS_DEFS.map(d => {
+    const url  = d.url || d.def;
+    const icon = svgIcons[d.icon] || d.icon;
+    return `<div class="obs-link-card" id="card_${d.key}">
+      <div class="obs-link-icon-svg">${icon}</div>
+      <div class="obs-link-info" style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+          <div class="obs-link-label">${d.label}</div>
+          <div class="obs-link-badge ${d.badge}">${d.badgeTxt}</div>
+        </div>
+        <div class="obs-link-url" id="url_${d.key}">${url}</div>
+        <div class="obs-link-edit-wrap" id="editWrap_${d.key}">
+          <input class="obs-link-input" id="inp_${d.key}" value="${url}"
+            placeholder="Masukkan URL atau path fail..."
+            onkeydown="if(event.key==='Enter')saveObsUrl('${d.key}');if(event.key==='Escape')cancelEdit('${d.key}')">
+          <button class="obs-act-btn obs-btn-save" onclick="saveObsUrl('${d.key}')">✓ SAVE</button>
+        </div>
+      </div>
+      <div class="obs-link-actions">
+        <button class="obs-act-btn obs-btn-open" onclick="openObsUrl('${d.key}')">▶ BUKA</button>
+        <button class="obs-act-btn obs-btn-copy" onclick="copyObsUrl('${d.key}')">📋 COPY</button>
+        <button class="obs-act-btn obs-btn-edit" id="editBtn_${d.key}" onclick="toggleEditUrl('${d.key}')">✏ EDIT</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleEditUrl(key){
+  const card     = document.getElementById('card_' + key);
+  const editWrap = document.getElementById('editWrap_' + key);
+  const editBtn  = document.getElementById('editBtn_' + key);
+  const inp      = document.getElementById('inp_' + key);
+  const isEditing = card.classList.contains('editing');
+  if(isEditing){
+    cancelEdit(key);
+  } else {
+    card.classList.add('editing');
+    editWrap.style.display = 'flex';
+    editBtn.textContent = '✕ BATAL';
+    editBtn.className = 'obs-act-btn obs-btn-edit';
+    inp.focus(); inp.select();
+  }
+}
+
+function cancelEdit(key){
+  const card     = document.getElementById('card_' + key);
+  const editWrap = document.getElementById('editWrap_' + key);
+  const editBtn  = document.getElementById('editBtn_' + key);
+  const def = OBS_DEFS.find(d => d.key === key);
+  card.classList.remove('editing');
+  editWrap.style.display = 'none';
+  editBtn.textContent = '✏ EDIT';
+  // Reset input to current saved value
+  const inp = document.getElementById('inp_' + key);
+  if(inp && def) inp.value = def.url || def.def;
+}
+
+function saveObsUrl(key){
+  const inp = document.getElementById('inp_' + key);
+  if(!inp) return;
+  const val = inp.value.trim();
+  if(!val){ showToast('⚠ URL tidak boleh kosong'); return; }
+  const def = OBS_DEFS.find(d => d.key === key);
+  if(def) def.url = val;
+  // Update display
+  const urlEl = document.getElementById('url_' + key);
+  if(urlEl) urlEl.textContent = val;
+  saveObsLinks();
+  cancelEdit(key);
+  showToast('✓ Link ' + (def ? def.label : key) + ' disimpan');
+}
+
+function openObsUrl(key){
+  const def = OBS_DEFS.find(d => d.key === key);
+  if(!def) return;
+  const url = def.url || def.def;
+  if(!url){ showToast('⚠ Set link dahulu dengan ✏ EDIT'); return; }
+  const left = Math.round((screen.width  - def.w) / 2);
+  const top  = Math.round((screen.height - def.h) / 2);
+  const win  = window.open(url, 'maida_' + key,
+    `width=${def.w},height=${def.h},left=${left},top=${top},toolbar=0,menubar=0,scrollbars=1,resizable=1`);
+  if(!win){ showToast('⚠ Popup disekat! Benarkan popup dalam browser.'); return; }
+  showToast('✓ ' + def.label + ' dibuka');
+}
+
+function copyObsUrl(key){
+  const def = OBS_DEFS.find(d => d.key === key);
+  if(!def) return;
+  const url = def.url || def.def;
+  if(!url){ showToast('⚠ Tiada URL untuk disalin'); return; }
+  navigator.clipboard.writeText(url).then(()=>{
+    showToast('📋 URL disalin: ' + url.substring(0, 40) + (url.length > 40 ? '...' : ''));
+  }).catch(()=>{
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = url; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('📋 URL disalin!');
+  });
+}
+
+/* ── OBS PANEL TOGGLE ── */
+let obsPanelOpen = false;
+function toggleObsPanel(){
+  obsPanelOpen = !obsPanelOpen;
+  const panel = document.getElementById('obsPanel');
+  const btn   = document.getElementById('btnObs');
+  const qs    = document.getElementById('quickStats');
+  if(obsPanelOpen){
+    loadObsLinks();
+    renderObsGrid();
+    panel.style.display = 'block';
+    if(qs) qs.style.display = 'none';
+    btn.style.boxShadow  = '0 0 24px rgba(0,100,255,.8)';
+    btn.style.borderColor = '#3399ff';
+  } else {
+    panel.style.display = 'none';
+    if(qs) qs.style.display = 'flex';
+    btn.style.boxShadow  = '';
+    btn.style.borderColor = '';
+  }
+}
+
+/* legacy compat */
+function openObsLink(key){ openObsUrl(key); }
+function updateObsUrlDisplay(){}
+
+/* ── OPEN MODULE ── */
+function openModule(key){
+  const mod = MODULES[key];
+  if(!mod) return;
+  const path = config.paths[key]||DEFAULT_PATHS[key];
+  if(!path){showToast('⚠ Path tidak ditetapkan — buka Setting');openSettingModal();return;}
+
+  // Check if window already open
+  if(openWindows[key] && !openWindows[key].closed){
+    openWindows[key].focus();
+    showToast('▶ '+mod.label+' sudah terbuka');
+    return;
+  }
+
+  // Calculate screen position
+  const left = Math.round((screen.width - mod.w)/2);
+  const top  = Math.round((screen.height - mod.h)/2);
+  const win  = window.open(path, 'maida_'+key,
+    `width=${mod.w},height=${mod.h},left=${left},top=${top},toolbar=0,menubar=0,scrollbars=1,resizable=1`);
+
+  if(!win){
+    showToast('⚠ Popup disekat! Benarkan popup dalam browser.');
+    return;
+  }
+  openWindows[key] = win;
+  // Animate button
+  const btn = document.getElementById('btn'+key.charAt(0).toUpperCase()+key.slice(1));
+  if(btn){ btn.style.animation='borderGlow 1s ease-in-out 3'; }
+  showToast('✓ '+mod.label+' dibuka');
+  updateCrewStatus();
+}
+
+/* ── SETTING MODAL ── */
+const MODULE_LABELS = {
+  standing:'📊 Standing Point', leaderboard:'🏆 Leaderboard', popup:'💀 Popup Kill',
+  map:'🗺️ Map', wwcd:'🍗 WWCD', team:'👥 Team Admin', obs:'📺 OBS'
+};
+function openSettingModal(){
+  const list = document.getElementById('pathList');
+  list.innerHTML='';
+  Object.keys(MODULES).forEach(k=>{
+    const p = config.paths[k]||DEFAULT_PATHS[k]||'';
+    list.innerHTML+=`<div class="path-item">
+      <span class="path-label">${MODULE_LABELS[k]}</span>
+      <input class="modal-input" id="pathInp_${k}" value="${p}" placeholder="${DEFAULT_PATHS[k]}" style="margin:0;flex:1;font-size:11px;padding:6px 10px;">
+    </div>`;
+  });
+  document.getElementById('settingModal').classList.add('show');
+}
+function savePaths(){
+  Object.keys(MODULES).forEach(k=>{
+    const inp=document.getElementById('pathInp_'+k);
+    if(inp) config.paths[k]=inp.value.trim();
+  });
+  saveConfig();
+  closeModal();
+  showToast('✓ File paths disimpan');
+}
+function closeModal(){
+  document.getElementById('settingModal').classList.remove('show');
+}
+
+/* ── TIMER ── */
+function timerToggle(){
+  timerRunning=!timerRunning;
+  const btn=document.getElementById('timerBtn');
+  const disp=document.getElementById('timerDisp');
+  if(timerRunning){
+    btn.textContent='⏸';disp.classList.add('running');
+    timerInv=setInterval(()=>{timerVal++;updateTimerDisp();},1000);
+  } else {
+    btn.textContent='▶';disp.classList.remove('running');
+    clearInterval(timerInv);
+  }
+}
+function timerReset(){
+  clearInterval(timerInv);timerRunning=false;timerVal=0;
+  document.getElementById('timerBtn').textContent='▶';
+  document.getElementById('timerDisp').classList.remove('running');
+  updateTimerDisp();
+}
+function updateTimerDisp(){
+  const m=Math.floor(timerVal/60),s=timerVal%60;
+  document.getElementById('timerDisp').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+
+/* ── CLOCK ── */
+function updateClock(){
+  const now=new Date();
+  const h=String(now.getHours()).padStart(2,'0');
+  const m=String(now.getMinutes()).padStart(2,'0');
+  const s=String(now.getSeconds()).padStart(2,'0');
+  const el=document.getElementById('clockDisp');
+  if(el) el.textContent=h+':'+m+':'+s;
+}
+setInterval(updateClock,1000);updateClock();
+
+/* ── QUICK STATS (read from Standing_Point localStorage) ── */
+function updateQuickStats(){
+  const raw=localStorage.getItem(DATA_KEY);
+  if(!raw){
+    document.getElementById('sbData').textContent='NO DATA';
+    document.getElementById('sbData').style.color='var(--red)';
+    return;
+  }
+  try{
+    const d=JSON.parse(raw);
+    const teams=d.teams||d.state?.teams||[];
+    const maps=d.spData?.maps||d.state?.maps||[];
+
+    // Teams count
+    const tCount=teams.length;
+    document.getElementById('qsTeams').textContent=tCount||'—';
+
+    // Maps done
+    const mDone=maps.filter(m=>m.rows&&m.rows.some(r=>r.place>0||r.kill>0)).length;
+    document.getElementById('qsMaps').textContent=mDone+'/'+maps.length||'—';
+    document.getElementById('sbMatch').textContent='MATCH '+(mDone+1);
+
+    // Total kills
+    let totalKills=0;
+    maps.forEach(m=>{if(m.rows)m.rows.forEach(r=>{totalKills+=r.kill||0;});});
+    document.getElementById('qsKills').textContent=totalKills;
+
+    // Leader
+    if(teams.length>0){
+      // Try from spData aggregate
+      const agg={};
+      teams.forEach(t=>{agg[t.id]={t,total:0};});
+      maps.forEach(m=>{if(m.rows)m.rows.forEach(r=>{if(agg[r.teamId])agg[r.teamId].total+=(r.place||0)+(r.kill||0);});});
+      const sorted=Object.values(agg).sort((a,b)=>b.total-a.total);
+      if(sorted.length>0&&sorted[0].t){
+        document.getElementById('qsLeader').textContent=sorted[0].t.tag||'—';
+      }
+    }
+
+    // Alive
+    const alive=teams.filter(t=>t.alive&&t.alive.some(x=>x>0)).length;
+    document.getElementById('qsAlive').textContent=alive||tCount;
+
+    document.getElementById('sbData').textContent='SYNCED ✓';
+    document.getElementById('sbData').style.color='var(--green)';
+
+    // title sync
+    if(d.title&&d.title!==config.title){
+      config.title=d.title;
+      document.getElementById('tTitle').textContent=d.title;
+    }
+  }catch(e){
+    document.getElementById('sbData').textContent='ERROR';
+    document.getElementById('sbData').style.color='var(--red)';
+  }
+}
+
+/* ── CREW STATUS (which windows are open) ── */
+function updateCrewStatus(){
+  const list=document.getElementById('crewList');
+  if(!list) return;
+  list.innerHTML='';
+  Object.keys(MODULES).forEach(k=>{
+    const open=openWindows[k]&&!openWindows[k].closed;
+    if(open){
+      list.innerHTML+=`<span class="crew-tag active">● ${MODULE_LABELS[k].replace(/[^\w\s]/gi,'').trim()}</span>`;
+    }
+  });
+  if(!list.innerHTML) list.innerHTML='<span class="crew-tag">Tiada window terbuka</span>';
+}
+
+/* ── TOAST ── */
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._to);t._to=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+/* ── LISTEN for data changes from other windows ── */
+window.addEventListener('storage',e=>{
+  if(e.key===DATA_KEY||e.key===DATA_KEY+'_tick'){
+    updateQuickStats();
+  }
+});
+
+/* ── KEYBOARD SHORTCUTS ── */
+document.addEventListener('keydown',e=>{
+  if(e.key==='1') openModule('standing');
+  if(e.key==='2') openModule('leaderboard');
+  if(e.key==='3') openModule('popup');
+  if(e.key==='4') openModule('map');
+  if(e.key==='5') openModule('wwcd');
+  if(e.key==='0') openModule('obs');
+  if(e.key==='t'||e.key==='T') timerToggle();
+  if(e.key==='r'||e.key==='R') timerReset();
+  if(e.key==='Escape') closeModal();
+});
+
+/* ── CLICK OUTSIDE MODAL ── */
+document.getElementById('settingModal').addEventListener('click',function(e){
+  if(e.target===this) closeModal();
+});
+
+/* ── UPDATE CREW STATUS PERIODICALLY ── */
+setInterval(()=>{updateCrewStatus();updateQuickStats();},2000);
+
+/* ── INIT ── */
+loadConfig();
+updateQuickStats();
+updateCrewStatus();
+showToast('✦ MAIDA ESPORTS SYSTEM ONLINE ✦');
+
+</script>
+</body>
+</html>
