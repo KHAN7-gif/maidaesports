@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>WWCD — MAIDA ESPORTS</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Barlow+Condensed:wght@400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07050f;--bg2:#0d0a1e;--bg3:#13102a;
+  --gold:#ffd700;--text:#f0ecff;--text2:rgba(240,236,255,.55);
+  --text3:rgba(240,236,255,.28);--green:#18e868;--border:rgba(255,255,255,.09);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:'Barlow Condensed',sans-serif;min-height:100vh}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:100;background:rgba(7,5,15,.95);
+  backdrop-filter:blur(16px);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 8px var(--green);animation:pulse 1.3s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.topbar-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:13px;
+  letter-spacing:.12em;background:linear-gradient(90deg,#fff,var(--gold));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.t-count{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)}
+.topbar-right{display:flex;gap:8px}
+.btn{border:none;border-radius:8px;padding:7px 14px;font-family:'Orbitron',sans-serif;
+  font-weight:700;font-size:10px;letter-spacing:.08em;cursor:pointer;transition:.15s}
+.btn-gold{background:var(--gold);color:#000}.btn-gold:hover{background:#ffc200}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}
+.btn-obs{background:rgba(255,59,92,.15);border:1px solid rgba(255,59,92,.4);color:#ff3b5c}
+
+.wrap{max-width:1400px;margin:0 auto;padding:20px 20px 60px}
+
+/* WWCD BANNER */
+.wwcd-banner{display:none;align-items:center;gap:14px;
+  background:linear-gradient(90deg,rgba(255,215,0,.12),rgba(255,215,0,.03));
+  border:1px solid rgba(255,215,0,.35);border-radius:12px;
+  padding:14px 18px;margin-bottom:20px}
+.wwcd-banner.show{display:flex}
+.wb-logo{width:48px;height:48px;border-radius:9px;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,215,0,.3);display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;font-family:'Orbitron',sans-serif;
+  font-weight:900;font-size:20px;color:var(--gold)}
+.wb-logo img{width:48px;height:48px;border-radius:9px;object-fit:cover}
+.wb-info{flex:1}
+.wb-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.2em;color:#ffb300}
+.wb-name{font-family:'Orbitron',sans-serif;font-weight:900;font-size:18px;color:var(--gold)}
+.wb-full{font-size:13px;color:var(--text2)}
+.wb-clear{background:rgba(255,255,255,.06);border:1px solid var(--border);
+  color:var(--text3);border-radius:7px;padding:6px 12px;font-size:10px;
+  cursor:pointer;font-family:'Share Tech Mono',monospace}
+
+/* LAYOUT */
+.main-layout{display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:start}
+@media(max-width:800px){.main-layout{grid-template-columns:1fr}}
+
+/* POSTER */
+.poster-panel{display:flex;flex-direction:column;gap:8px}
+.plabel{font-family:'Share Tech Mono',monospace;font-size:10px;
+  letter-spacing:.2em;color:var(--text3);text-transform:uppercase}
+.poster-frame{width:100%;aspect-ratio:16/9;background:var(--bg3);
+  border:2px dashed rgba(255,215,0,.2);border-radius:10px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:6px;color:var(--text3);font-size:11px;text-align:center;
+  padding:12px;position:relative}
+.poster-frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+.poster-url{background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:7px;padding:8px 10px;font-size:11px;color:var(--text);outline:none;
+  font-family:'Barlow Condensed',sans-serif;width:100%}
+.poster-url:focus{border-color:var(--gold)}
+.poster-url::placeholder{color:var(--text3);font-size:10px}
+.ptag{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);text-align:center}
+.btn-sv{background:transparent;border:1px solid var(--border);color:var(--text2);
+  border-radius:7px;padding:7px;font-size:10px;width:100%;cursor:pointer;
+  font-family:'Share Tech Mono',monospace}
+.btn-sv:hover{border-color:var(--gold);color:var(--gold)}
+
+/* GRID */
+.grid-panel{display:flex;flex-direction:column;gap:12px}
+.grid-hdr{display:flex;align-items:center;justify-content:space-between}
+.grid-title{font-family:'Orbitron',sans-serif;font-weight:800;font-size:12px;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--text2);
+  display:flex;align-items:center;gap:8px}
+.grid-title::before{content:'';width:3px;height:14px;background:var(--gold);border-radius:2px}
+.ghint{font-size:11px;color:var(--text3);font-family:'Share Tech Mono',monospace}
+.team-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}
+
+/* CARD */
+.tcard{
+  background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  padding:12px 10px 10px;display:flex;flex-direction:column;align-items:center;
+  gap:6px;filter:saturate(.5) brightness(.65);
+  transition:filter .2s,transform .2s,border-color .2s,box-shadow .2s;
+  position:relative;
+}
+.tcard.wwcd-on{
+  filter:none;border-color:var(--gold);
+  background:linear-gradient(160deg,rgba(255,215,0,.18),rgba(255,215,0,.04));
+  box-shadow:0 12px 36px rgba(255,215,0,.25);
+  transform:translateY(-4px) scale(1.04);
+}
+/* CLICK ZONE — only top portion triggers pick */
+.card-click{cursor:pointer;display:flex;flex-direction:column;align-items:center;
+  gap:6px;width:100%;text-align:center}
+.card-click:hover{opacity:.9}
+.crown{position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+  font-size:20px;animation:bob 1.8s ease-in-out infinite;
+  filter:drop-shadow(0 2px 6px rgba(255,215,0,.7))}
+@keyframes bob{0%,100%{transform:translateX(-50%)}50%{transform:translateX(-50%) translateY(-4px)}}
+.wwpill{position:absolute;top:7px;right:7px;
+  background:rgba(255,215,0,.2);border:1px solid rgba(255,215,0,.5);
+  color:var(--gold);font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:8px;letter-spacing:.1em;padding:2px 6px;border-radius:999px}
+.tlogo{width:52px;height:52px;border-radius:10px;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;
+  justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:18px;color:var(--text3);overflow:hidden}
+.tlogo img{width:52px;height:52px;object-fit:cover;border-radius:10px}
+.tname{font-weight:800;font-size:11px;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;max-width:100%;color:var(--text2)}
+.tfull{font-size:9px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;max-width:100%}
+
+/* WWCD IMAGE URL INPUT — bottom of card */
+.img-row{display:flex;gap:4px;width:100%;margin-top:2px}
+.img-inp{flex:1;min-width:0;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1);border-radius:5px;
+  padding:4px 6px;font-size:9px;color:var(--text);outline:none;
+  font-family:'Barlow Condensed',sans-serif}
+.img-inp:focus{border-color:rgba(255,215,0,.4)}
+.img-inp::placeholder{color:rgba(255,255,255,.2);font-size:8px}
+.img-ok{background:rgba(255,215,0,.15);border:1px solid rgba(255,215,0,.4);
+  color:var(--gold);border-radius:5px;padding:4px 7px;font-size:8px;font-weight:700;
+  cursor:pointer;font-family:'Orbitron',monospace;flex-shrink:0}
+.img-ok:hover{background:rgba(255,215,0,.3)}
+.img-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;
+  border:1px solid rgba(255,255,255,.1);margin-top:2px}
+
+.empty{grid-column:1/-1;text-align:center;padding:60px 20px;
+  color:var(--text3);font-size:14px;line-height:1.8}
+.footer{text-align:center;margin-top:40px;font-family:'Share Tech Mono',monospace;
+  font-size:10px;color:var(--text3);letter-spacing:.2em;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="live-dot"></div>
+    <div class="topbar-title">WWCD TRACKER</div>
+    <span class="t-count" id="tCount"></span>
+  </div>
+  <div class="topbar-right">
+    <button class="btn btn-outline" onclick="clearWWCD()">✕ CLEAR WWCD</button>
+    <button class="btn btn-obs" onclick="window.open('wwcd_obs.html','OBS','width=1920,height=1080')">📺 BUKA OBS POPUP</button>
+    <button class="btn btn-gold" onclick="location.reload()">⟳</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="wwcd-banner" id="banner">
+    <div class="wb-logo" id="bLogo"></div>
+    <div class="wb-info">
+      <div class="wb-label">👑 WINNER WINNER CHICKEN DINNER</div>
+      <div class="wb-name" id="bName">—</div>
+      <div class="wb-full" id="bFull"></div>
+    </div>
+    <button class="wb-clear" onclick="clearWWCD()">✕ CLEAR</button>
+  </div>
+
+  <div class="main-layout">
+    <!-- POSTER -->
+    <div class="poster-panel">
+      <div class="plabel">🖼 Frame Poster (1920×1080)</div>
+      <div class="poster-frame" id="pFrame">
+        <div>🏆</div><div>Paste URL poster<br>Google Drive / link</div>
+        <img id="pImg" alt="">
+      </div>
+      <input class="poster-url" id="pUrl" placeholder="🔗 URL poster Google Drive" oninput="prevPoster(this.value)">
+      <div class="ptag">1920 × 1080 · LANDSCAPE · OBS READY</div>
+      <button class="btn-sv" onclick="savePoster()">💾 SIMPAN URL</button>
+    </div>
+
+    <!-- GRID -->
+    <div class="grid-panel">
+      <div class="grid-hdr">
+        <div class="grid-title">Pilih Team WWCD</div>
+        <div class="ghint">Klik logo/nama untuk pilih · URL = image WWCD OBS</div>
+      </div>
+      <div class="team-grid" id="tGrid">
+        <div class="empty">⏳ Memuatkan...</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer" id="footer">MAIDA ESPORTS · WWCD TRACKER</div>
+
+<script src="firebase_sync.js"></script>
+<script>
+/* STATE */
+var teams = [];
+var curWWCD = null;
+var _lastPick = 0; // prevent echo loop from Firebase listener
+
+/* HELPERS */
+function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function gd(url){
+  if(!url)return url;
+  var m=url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);if(m)return'https://lh3.googleusercontent.com/d/'+m[1];
+  var m2=url.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);if(m2)return'https://lh3.googleusercontent.com/d/'+m2[1];
+  return url;
+}
+function getImg(i){try{return localStorage.getItem('wi_'+teams[i].name)||'';}catch(e){return'';}}
+function setImg(i,v){try{localStorage.setItem('wi_'+teams[i].name,v);}catch(e){}}
+
+/* POSTER */
+function prevPoster(url){
+  var img=document.getElementById('pImg');
+  var u=gd(url||'');
+  if(u){img.src=u;img.style.display='block';}
+  else img.style.display='none';
+}
+function savePoster(){
+  var url=document.getElementById('pUrl').value.trim();
+  try{localStorage.setItem('wp',url);}catch(e){}
+  prevPoster(url);
+}
+
+/* RENDER */
+function renderGrid(){
+  var g=document.getElementById('tGrid');
+  document.getElementById('tCount').textContent=teams.length?teams.length+' TEAM':'';
+  if(!teams.length){
+    g.innerHTML='<div class="empty">Tiada data team.<br>Tambah team di <strong style="color:var(--gold)">Standing Point → SETTING</strong></div>';
+    return;
+  }
+  g.innerHTML=teams.map(function(t,i){
+    var isW=curWWCD&&curWWCD.name===t.name;
+    var lUrl=t.logo?gd(t.logo):'';
+    var crown=isW?'<div class="crown">&#x1F451;</div>':'';
+    var pill=isW?'<div class="wwpill">WWCD</div>':'';
+    var lHtml=lUrl
+      ?'<div class="tlogo"><img src="'+esc(lUrl)+'" onerror="this.style.display=\'none\'"></div>'
+      :'<div class="tlogo">'+esc((t.name||'?')[0].toUpperCase())+'</div>';
+    var imgVal=getImg(i);
+    var thumbHtml=imgVal?'<img class="img-thumb" src="'+esc(gd(imgVal))+'" onerror="this.remove()">':'';
+    return '<div class="tcard'+(isW?' wwcd-on':'')+'" id="tc'+i+'">'
+      +crown+pill
+      +'<div class="card-click" onclick="pick('+i+')">'
+        +lHtml
+        +'<div class="tname">'+esc(t.name)+'</div>'
+        +'<div class="tfull">'+esc(t.fullName||'')+'</div>'
+      +'</div>'
+      +thumbHtml
+      +'<div class="img-row">'
+        +'<input class="img-inp" id="ii'+i+'" placeholder="URL image WWCD team ini" value="'+esc(imgVal)+'">'
+        +'<button class="img-ok" onclick="saveImg('+i+')">OK</button>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+/* SAVE TEAM IMAGE */
+function saveImg(i){
+  var inp=document.getElementById('ii'+i);
+  if(!inp||!teams[i])return;
+  var url=inp.value.trim();
+  setImg(i,url);
+  // Refresh thumbnail
+  var card=document.getElementById('tc'+i);
+  if(card){
+    var old=card.querySelector('.img-thumb');
+    if(old)old.remove();
+    if(url){
+      var th=document.createElement('img');
+      th.className='img-thumb';th.src=gd(url);
+      th.onerror=function(){this.remove();};
+      card.insertBefore(th, card.querySelector('.img-row'));
+    }
+  }
+  // If this team is current WWCD, update Firebase with new image
+  if(curWWCD&&curWWCD.name===teams[i].name){
+    pushWWCD(teams[i]);
+  }
+  var btn=document.getElementById('ii'+i).nextElementSibling;
+  if(btn){btn.textContent='✓';setTimeout(function(){btn.textContent='OK';},1200);}
+}
+
+/* PICK WWCD */
+function pick(i){
+  var t=teams[i];if(!t)return;
+  if(curWWCD&&curWWCD.name===t.name){clearWWCD();return;}
+  curWWCD=t;
+  showBanner(t);
+  pushWWCD(t);
+  renderGrid();
+}
+
+function pushWWCD(t){
+  if(typeof fsSet!=='function')return;
+  _lastPick=Date.now();
+  var poster=gd((document.getElementById('pUrl').value||'').trim());
+  var wwcdImg=gd(getImg(teams.indexOf(t))||'');
+  fsSet('maida/wwcd',{
+    name:t.name,fullName:t.fullName||'',logo:t.logo||'',
+    wwcdImg:wwcdImg,poster:poster,ts:Date.now()
+  });
+}
+
+function showBanner(t){
+  document.getElementById('banner').classList.add('show');
+  var lUrl=t.logo?gd(t.logo):'';
+  var lg=document.getElementById('bLogo');
+  lg.innerHTML=lUrl?'<img src="'+esc(lUrl)+'">':esc((t.name||'?')[0]);
+  document.getElementById('bName').textContent=t.name||'';
+  document.getElementById('bFull').textContent=t.fullName||'';
+}
+
+function clearWWCD(){
+  curWWCD=null;
+  document.getElementById('banner').classList.remove('show');
+  _lastPick=Date.now();
+  if(typeof fsSet==='function')fsSet('maida/wwcd',null);
+  renderGrid();
+}
+
+/* APPLY SPDATA */
+function applySP(sp){
+  if(!sp||!sp.teams||!sp.teams.length){renderGrid();return;}
+  teams=sp.teams.map(function(t){
+    return{name:t.name,fullName:t.fullName||'',logo:(t.logo&&t.logo.indexOf('data:')<0)?t.logo:''};
+  });
+  if(sp.title)document.getElementById('footer').textContent='MAIDA ESPORTS · '+sp.title+' · WWCD';
+  renderGrid();
+}
+
+/* APPLY WWCD FROM FIREBASE (listener — do NOT call pushWWCD here to avoid loop) */
+function applyWW(w){
+  // Skip if we just pushed (anti-echo, 2 second window)
+  if(Date.now()-_lastPick<2000)return;
+  curWWCD=(w&&w.name)?{name:w.name,fullName:w.fullName||'',logo:w.logo||''}:null;
+  if(curWWCD)showBanner(curWWCD);
+  else document.getElementById('banner').classList.remove('show');
+  renderGrid();
+}
+
+/* INIT */
+window.addEventListener('load',function(){
+  // Restore poster
+  try{var p=localStorage.getItem('wp');if(p){document.getElementById('pUrl').value=p;prevPoster(p);}}catch(e){}
+
+  // localStorage fallback (instant)
+  try{
+    var raw=localStorage.getItem('hswp_2026_pro');
+    if(raw){var loc=JSON.parse(raw);if(loc&&loc.teams&&loc.teams.length)applySP(loc);}
+  }catch(e){}
+
+  // Firebase
+  function go(){
+    if(typeof fsGet!=='function'){setTimeout(go,300);return;}
+    fsGet('maida/spData',applySP);
+    fsGet('maida/wwcd',applyWW);
+    if(typeof fsListen==='function'){
+      fsListen('maida/spData',applySP,3);
+      fsListen('maida/wwcd',applyWW,2);
+    }
+  }
+  go();
+});
+</script>
+</body>
+</html>
