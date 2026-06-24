@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MAIDA ESPORTS — Tournament Hub</title>
+<script src="firebase_sync.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ── */
+:root{
+  --bg:#060410;
+  --bg2:#0d0b1f;
+  --bg3:#13102a;
+  --gold:#ffd700;
+  --gold2:#ffb300;
+  --gold-dim:#7a5c00;
+  --text:#f0ecff;
+  --text2:rgba(240,236,255,.55);
+  --text3:rgba(240,236,255,.28);
+  --green:#18e868;
+  --red:#ff3b5c;
+  --border:rgba(255,255,255,.09);
+  --border2:rgba(255,215,0,.25);
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Barlow Condensed',sans-serif;
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* AMBIENT BG */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% -10%,rgba(120,60,255,.13) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 50% at 85% 110%,rgba(255,215,0,.08) 0%,transparent 55%),
+    radial-gradient(ellipse 40% 40% at 50% 50%,rgba(255,60,100,.04) 0%,transparent 60%);
+}
+
+/* ── TOP BAR ── */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(6,4,16,.88);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;height:54px;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{font-size:20px}
+.brand-name{
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:15px;
+  letter-spacing:.12em;text-transform:uppercase;
+  background:linear-gradient(90deg,#fff 0%,var(--gold) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.brand-sub{font-family:'Share Tech Mono',monospace;font-size:9px;
+  letter-spacing:.25em;color:var(--text3);text-transform:uppercase;margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.btn-add{
+  display:flex;align-items:center;gap:6px;
+  background:var(--gold);color:#000;border:none;border-radius:8px;
+  padding:7px 16px;font-family:'Orbitron',sans-serif;font-weight:700;
+  font-size:10px;letter-spacing:.08em;cursor:pointer;
+  transition:.15s;
+}
+.btn-add:hover{background:#ffc200;transform:translateY(-1px)}
+.btn-secondary{
+  background:transparent;border:1px solid var(--border2);color:var(--gold);
+  border-radius:8px;padding:7px 14px;font-family:'Orbitron',sans-serif;
+  font-weight:700;font-size:10px;letter-spacing:.08em;cursor:pointer;
+  transition:.15s;
+}
+.btn-secondary:hover{background:rgba(255,215,0,.08)}
+
+/* ── HERO ── */
+.hero{
+  position:relative;z-index:1;
+  text-align:center;padding:64px 20px 48px;
+}
+.hero-eyebrow{
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  letter-spacing:.35em;color:var(--text3);text-transform:uppercase;
+  margin-bottom:16px;
+}
+.hero-title{
+  font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:clamp(32px,6vw,72px);line-height:.95;
+  letter-spacing:-.01em;text-transform:uppercase;
+  background:linear-gradient(135deg,#fff 0%,var(--gold) 45%,var(--gold2) 70%,rgba(255,215,0,.4) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  margin-bottom:16px;
+}
+.hero-sub{font-size:clamp(14px,2vw,18px);color:var(--text2);
+  letter-spacing:.08em;text-transform:uppercase;margin-bottom:32px}
+
+/* stats bar */
+.stat-bar{
+  display:inline-flex;gap:2px;background:var(--bg3);
+  border:1px solid var(--border);border-radius:999px;
+  padding:6px 8px;font-family:'Share Tech Mono',monospace;font-size:11px;
+}
+.stat-item{padding:4px 16px;color:var(--text2)}
+.stat-item span{color:var(--gold);font-weight:700;margin-right:5px}
+.stat-sep{width:1px;background:var(--border);margin:4px 0}
+
+/* ── SECTION ── */
+.section{position:relative;z-index:1;max-width:1360px;margin:0 auto;padding:0 24px 80px}
+.section-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:24px;padding-bottom:14px;
+  border-bottom:1px solid var(--border);
+}
+.section-title{
+  font-family:'Orbitron',sans-serif;font-weight:800;
+  font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--text2);
+  display:flex;align-items:center;gap:10px;
+}
+.section-title::before{content:'';width:3px;height:16px;background:var(--gold);border-radius:2px}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap}
+.filter-btn{
+  background:transparent;border:1px solid var(--border);color:var(--text3);
+  border-radius:999px;padding:5px 14px;font-size:11px;font-weight:700;
+  letter-spacing:.06em;cursor:pointer;transition:.15s;
+  font-family:'Barlow Condensed',sans-serif;
+}
+.filter-btn:hover,.filter-btn.active{
+  background:rgba(255,215,0,.1);border-color:var(--border2);color:var(--gold);
+}
+
+/* ── TOURNAMENT GRID ── */
+.t-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:20px;
+}
+
+/* ── TOURNAMENT CARD ── */
+.t-card{
+  position:relative;background:var(--bg2);
+  border:1px solid var(--border);border-radius:var(--r);
+  overflow:hidden;cursor:pointer;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s,border-color .25s;
+  display:flex;flex-direction:column;
+}
+.t-card:hover{
+  transform:translateY(-6px) scale(1.015);
+  border-color:var(--border2);
+  box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 0 1px rgba(255,215,0,.15) inset;
+}
+.t-card-poster{
+  position:relative;width:100%;aspect-ratio:9/12;overflow:hidden;
+  background:var(--bg3);
+}
+.t-card-poster img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform .4s ease;
+}
+.t-card:hover .t-card-poster img{transform:scale(1.05)}
+.t-card-poster-placeholder{
+  width:100%;height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:12px;
+  background:linear-gradient(160deg,var(--bg3),#0a0820);
+}
+.t-card-poster-placeholder .ph-icon{
+  font-size:48px;opacity:.4;
+}
+.t-card-poster-placeholder .ph-text{
+  font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:.15em;color:var(--text3);text-transform:uppercase;
+}
+
+/* status badge */
+.t-badge{
+  position:absolute;top:10px;left:10px;z-index:2;
+  display:flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:999px;
+  font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.08em;backdrop-filter:blur(8px);
+}
+.t-badge.live{background:rgba(24,232,104,.18);border:1px solid rgba(24,232,104,.5);color:var(--green)}
+.t-badge.live::before{content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--green);box-shadow:0 0 8px var(--green);
+  animation:pulse 1.2s infinite}
+.t-badge.upcoming{background:rgba(255,215,0,.12);border:1px solid rgba(255,215,0,.35);color:var(--gold)}
+.t-badge.past{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--text3)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* games chips */
+.t-games{
+  position:absolute;bottom:10px;left:10px;right:10px;z-index:2;
+  display:flex;gap:5px;flex-wrap:wrap;
+}
+.t-game-chip{
+  padding:3px 8px;border-radius:4px;font-size:9px;font-weight:700;
+  letter-spacing:.06em;backdrop-filter:blur(6px);
+  background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);
+  color:var(--text);
+}
+
+.t-card-body{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column;gap:6px}
+.t-card-name{
+  font-family:'Orbitron',sans-serif;font-weight:800;font-size:13px;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--text);
+  line-height:1.3;
+}
+.t-card-meta{
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  color:var(--text3);letter-spacing:.05em;
+}
+.t-card-venue{font-size:12px;color:var(--text2);font-weight:600;margin-top:2px}
+.t-card-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:auto;padding-top:10px;border-top:1px solid var(--border);
+}
+.t-card-open{
+  display:flex;align-items:center;gap:6px;
+  font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:.06em;color:var(--gold);text-decoration:none;
+  transition:.15s;
+}
+.t-card-open:hover{gap:10px}
+.t-card-teams{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)}
+
+/* hover overlay */
+.t-card-hover-overlay{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.55);opacity:0;transition:.2s;z-index:3;
+  pointer-events:none;
+}
+.t-card:hover .t-card-hover-overlay{opacity:1}
+.t-card-hover-text{
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:14px;
+  letter-spacing:.15em;color:#fff;
+  background:rgba(255,215,0,.9);border-radius:8px;padding:10px 22px;
+  transform:translateY(8px);transition:.2s;
+}
+.t-card:hover .t-card-hover-text{transform:translateY(0)}
+
+/* ── EMPTY STATE ── */
+.empty-state{
+  grid-column:1/-1;text-align:center;padding:80px 20px;
+}
+.empty-big{
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:28px;
+  color:var(--text2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;
+}
+.empty-sub{font-size:15px;color:var(--text3);margin-bottom:28px}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:20px;width:100%;max-width:560px;
+  padding:28px;display:flex;flex-direction:column;gap:20px;
+  max-height:90vh;overflow-y:auto;
+}
+.modal-title{
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:16px;
+  letter-spacing:.1em;text-transform:uppercase;
+  display:flex;align-items:center;gap:10px;
+}
+.modal-row{display:flex;flex-direction:column;gap:6px}
+.modal-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-label{
+  font-size:10px;font-weight:700;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--text3);
+}
+.modal-input,.modal-select,.modal-textarea{
+  background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:8px;padding:10px 12px;font-size:14px;color:var(--text);
+  font-family:'Barlow Condensed',sans-serif;outline:none;width:100%;
+  transition:.15s;
+}
+.modal-input:focus,.modal-select:focus,.modal-textarea:focus{border-color:var(--gold)}
+.modal-select option{background:var(--bg2)}
+.modal-textarea{resize:vertical;min-height:80px}
+
+/* games checkboxes */
+.games-grid{display:flex;flex-wrap:wrap;gap:8px}
+.game-chip-check{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:6px;padding:6px 12px;cursor:pointer;transition:.15s;
+  font-size:12px;font-weight:700;color:var(--text2);
+}
+.game-chip-check input{accent-color:var(--gold)}
+.game-chip-check:has(input:checked){
+  background:rgba(255,215,0,.1);border-color:var(--border2);color:var(--gold);
+}
+
+/* poster preview */
+.poster-preview{
+  width:100%;aspect-ratio:9/12;background:var(--bg3);border-radius:10px;
+  overflow:hidden;display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:var(--text3);
+}
+.poster-preview img{width:100%;height:100%;object-fit:cover}
+
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:4px}
+.btn-cancel{background:transparent;border:1px solid var(--border);color:var(--text2);
+  border-radius:8px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;
+  font-family:'Barlow Condensed',sans-serif;letter-spacing:.05em;}
+.btn-save{background:var(--gold);color:#000;border:none;border-radius:8px;
+  padding:9px 24px;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.08em;cursor:pointer;transition:.15s;}
+.btn-save:hover{background:#ffc200}
+.btn-danger{background:rgba(255,59,92,.12);border:1px solid rgba(255,59,92,.35);
+  color:var(--red);border-radius:8px;padding:9px 16px;font-size:11px;font-weight:700;
+  cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:.05em;}
+
+/* ── FOOTER ── */
+.footer{
+  position:relative;z-index:1;text-align:center;padding:32px 20px;
+  border-top:1px solid var(--border);
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--text3);
+}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:3px}
+
+@media(max-width:600px){
+  .topbar{padding:0 16px}
+  .hero{padding:40px 16px 32px}
+  .section{padding:0 16px 60px}
+  .modal-row-2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">🎮</div>
+    <div>
+      <div class="brand-name">MAIDA ESPORTS</div>
+      <div class="brand-sub">Tournament Platform</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="btn-secondary" onclick="location.reload()">⟳ REFRESH</button>
+    <button class="btn-add" id="btnAddTournament" onclick="openAddModal()">+ TAMBAH TOURNAMENT</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">&#9632; Platform Pengurusan Esports &#9632;</div>
+  <div class="hero-title">TOURNAMENT<br>HUB</div>
+  <div class="hero-sub">Semua turnamen dalam satu paparan</div>
+  <div class="stat-bar">
+    <div class="stat-item"><span id="statTotal">0</span> Tournament</div>
+    <div class="stat-sep"></div>
+    <div class="stat-item"><span id="statLive">0</span> Live</div>
+    <div class="stat-sep"></div>
+    <div class="stat-item"><span id="statUpcoming">0</span> Akan Datang</div>
+    <div class="stat-sep"></div>
+    <div class="stat-item"><span id="statPast">0</span> Selesai</div>
+  </div>
+</div>
+
+<!-- TOURNAMENT LIST -->
+<div class="section">
+  <div class="section-hdr">
+    <div class="section-title">Semua Tournament</div>
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="setFilter('all',this)">Semua</button>
+      <button class="filter-btn" onclick="setFilter('live',this)">🔴 Live</button>
+      <button class="filter-btn" onclick="setFilter('upcoming',this)">Akan Datang</button>
+      <button class="filter-btn" onclick="setFilter('past',this)">Selesai</button>
+    </div>
+  </div>
+  <div class="t-grid" id="tGrid">
+    <div class="empty-state">
+      <div class="empty-big">Memuatkan...</div>
+      <div class="empty-sub">Menyambung ke Firebase</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">MAIDA ESPORTS &middot; Tournament Hub &middot; <span id="fyear"></span></div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="addModal" onclick="if(event.target===this)closeModal()">
+<div class="modal">
+  <div class="modal-title">🏆 <span id="modalTitleText">Tambah Tournament</span></div>
+
+  <div class="modal-row">
+    <div class="modal-label">Nama Tournament *</div>
+    <input class="modal-input" id="fName" placeholder="cth: DSBC Esports Championship 2026">
+  </div>
+
+  <div class="modal-row-2">
+    <div class="modal-row">
+      <div class="modal-label">Tarikh Mula *</div>
+      <input class="modal-input" id="fDateStart" type="date">
+    </div>
+    <div class="modal-row">
+      <div class="modal-label">Tarikh Tamat</div>
+      <input class="modal-input" id="fDateEnd" type="date">
+    </div>
+  </div>
+
+  <div class="modal-row">
+    <div class="modal-label">Lokasi / Venue</div>
+    <input class="modal-input" id="fVenue" placeholder="cth: DSBC SG LABUAN">
+  </div>
+
+  <div class="modal-row">
+    <div class="modal-label">URL Poster (Google Drive / link gambar)</div>
+    <input class="modal-input" id="fPoster" placeholder="https://..." oninput="previewPoster(this.value)">
+    <div class="poster-preview" id="posterPreview" style="margin-top:8px">
+      <span>Tiada poster — paste URL di atas</span>
+    </div>
+  </div>
+
+  <div class="modal-row">
+    <div class="modal-label">Permainan (boleh pilih lebih satu)</div>
+    <div class="games-grid" id="gamesGrid"></div>
+    <input class="modal-input" id="fGameCustom" placeholder="Tambah permainan lain (tekan Enter)" style="margin-top:8px"
+      onkeydown="if(event.key==='Enter'){addCustomGame(this.value);this.value=''}">
+  </div>
+
+  <div class="modal-row-2">
+    <div class="modal-row">
+      <div class="modal-label">Status</div>
+      <select class="modal-select" id="fStatus">
+        <option value="upcoming">Akan Datang</option>
+        <option value="live">Live / Sedang Berjalan</option>
+        <option value="past">Selesai</option>
+      </select>
+    </div>
+    <div class="modal-row">
+      <div class="modal-label">Folder ID (untuk link)</div>
+      <input class="modal-input" id="fFolderId" placeholder="cth: dsbc2026">
+    </div>
+  </div>
+
+  <div class="modal-row">
+    <div class="modal-label">Link Dashboard Tournament</div>
+    <input class="modal-input" id="fUrl" placeholder="cth: dsbc2026/index.html">
+    <div style="font-size:10px;color:var(--text3);margin-top:4px">
+      Kosongkan jika guna folder — sistem akan auto-generate dari Folder ID
+    </div>
+  </div>
+
+  <input type="hidden" id="fEditId">
+
+  <div class="modal-actions">
+    <button class="btn-danger" id="btnDelete" style="display:none;margin-right:auto" onclick="deleteTournament()">🗑 PADAM</button>
+    <button class="btn-cancel" onclick="closeModal()">BATAL</button>
+    <button class="btn-save" onclick="saveTournament()">✓ SIMPAN</button>
+  </div>
+</div>
+</div>
+
+<script>
+document.getElementById('fyear').textContent = new Date().getFullYear();
+
+/* ── GAMES LIST ── */
+var GAMES_DEFAULT = ['PUBG MOBILE','MLBB','eFootball Mobile','Tekken 8','FC 26','GT7','Free Fire','Valorant','COD Mobile'];
+var customGames = [];
+
+function buildGamesGrid(selected){
+  var all = GAMES_DEFAULT.concat(customGames);
+  var sel = selected || [];
+  document.getElementById('gamesGrid').innerHTML = all.map(function(g){
+    var checked = sel.indexOf(g) >= 0 ? 'checked' : '';
+    return '<label class="game-chip-check"><input type="checkbox" value="'+g+'" '+checked+'>'+g+'</label>';
+  }).join('');
+}
+function addCustomGame(name){
+  name = name.trim();
+  if(!name || customGames.indexOf(name)>=0 || GAMES_DEFAULT.indexOf(name)>=0) return;
+  customGames.push(name);
+  var sel = getSelectedGames();
+  buildGamesGrid(sel);
+}
+function getSelectedGames(){
+  return [...document.querySelectorAll('#gamesGrid input:checked')].map(function(i){return i.value;});
+}
+
+/* ── POSTER PREVIEW ── */
+function convertGDriveUrl(url){
+  if(!url) return url;
+  var m = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if(m) return 'https://lh3.googleusercontent.com/d/'+m[1];
+  var m2 = url.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
+  if(m2) return 'https://lh3.googleusercontent.com/d/'+m2[1];
+  var m3 = url.match(/drive\.google\.com\/uc\?.*id=([a-zA-Z0-9_-]+)/);
+  if(m3) return 'https://lh3.googleusercontent.com/d/'+m3[1];
+  return url;
+}
+function previewPoster(url){
+  var p = document.getElementById('posterPreview');
+  var u = convertGDriveUrl(url);
+  if(u) p.innerHTML = '<img src="'+esc(u)+'" onerror="this.parentNode.innerHTML=\'<span>Gagal muatkan poster</span>\'">';
+  else p.innerHTML = '<span>Tiada poster — paste URL di atas</span>';
+}
+
+/* ── ESCAPE ── */
+function esc(s){ return String(s||'').replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+/* ── STATE ── */
+var tournaments = {};
+var currentFilter = 'all';
+
+/* ── FIREBASE ── */
+function fbPath(){ return 'tournaments'; }
+
+function loadTournaments(){
+  if(typeof fsGet !== 'function'){
+    showError('Firebase tidak tersambung. Pastikan firebase_sync.js dimuat dengan betul.');
+    return;
+  }
+
+  // Show loading state
+  document.getElementById('tGrid').innerHTML='<div class="empty-state"><div class="empty-big">⏳ Memuatkan...</div><div class="empty-sub">Menyambung ke Firebase</div></div>';
+
+  fsGet(fbPath(), function(data){
+    // null = path belum wujud di Firebase (kosong, bukan error)
+    tournaments = (data && typeof data === 'object') ? data : {};
+    renderGrid();
+    console.log('[Hub] Loaded', Object.keys(tournaments).length, 'tournaments from Firebase');
+  }, function(e){
+    var msg = e&&e.message ? e.message : String(e);
+    console.error('[Hub] Firebase load error:', msg);
+    showError('Gagal sambung Firebase: '+msg.substring(0,120)+'<br><br>Semak Firebase Console → Rules pastikan .read: true dan .write: true');
+  });
+
+  if(typeof fsListen === 'function'){
+    fsListen(fbPath(), function(data){
+      tournaments = (data && typeof data === 'object') ? data : {};
+      renderGrid();
+    }, 5);
+  }
+}
+
+function saveTournamentToFb(id, data, cb){
+  var path = fbPath()+'/'+id;
+  console.log('[Hub] fsSet path:', path, 'data keys:', Object.keys(data));
+  fsSet(path, data, cb, function(e){
+    document.querySelector('.btn-save').textContent = '✓ SIMPAN';
+    var msg = e&&e.message ? e.message : String(e);
+    console.error('[Hub] fsSet error:', msg);
+    alert('Gagal simpan ke Firebase:\n\n'+msg+'\n\nSila semak Firebase Console > Rules (pastikan .write: true)');
+  });
+}
+
+function deleteTournamentFromFb(id, cb){
+  fsSet(fbPath()+'/'+id, null, cb, function(e){ alert('Gagal padam: '+(e&&e.message?e.message:e)); });
+}
+
+/* ── FILTER ── */
+function setFilter(f, btn){
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderGrid();
+}
+
+/* ── STATUS HELPERS ── */
+function getStatus(t){
+  if(t.status) return t.status;
+  var today = new Date().toISOString().slice(0,10);
+  if(t.dateStart && t.dateEnd){
+    if(today < t.dateStart) return 'upcoming';
+    if(today > t.dateEnd) return 'past';
+    return 'live';
+  }
+  if(t.dateStart && today < t.dateStart) return 'upcoming';
+  return 'upcoming';
+}
+function statusLabel(s){ return s==='live'?'LIVE':s==='past'?'SELESAI':'AKAN DATANG'; }
+function formatDate(d1,d2){
+  if(!d1) return '';
+  var opts={day:'numeric',month:'short',year:'numeric'};
+  var s = new Date(d1).toLocaleDateString('ms-MY',opts);
+  if(d2 && d2!==d1) s += ' — '+new Date(d2).toLocaleDateString('ms-MY',opts);
+  return s;
+}
+
+/* ── RENDER ── */
+function renderGrid(){
+  var grid = document.getElementById('tGrid');
+  var ids = Object.keys(tournaments);
+  var filtered = ids.filter(function(id){
+    if(currentFilter==='all') return true;
+    return getStatus(tournaments[id]) === currentFilter;
+  });
+
+  // Sort: live first, then upcoming by date, then past (newest first)
+  filtered.sort(function(a,b){
+    var sa=getStatus(tournaments[a]),sb=getStatus(tournaments[b]);
+    var order={live:0,upcoming:1,past:2};
+    if(order[sa]!==order[sb]) return order[sa]-order[sb];
+    var da=tournaments[a].dateStart||'',db=tournaments[b].dateStart||'';
+    return sa==='past'?db.localeCompare(da):da.localeCompare(db);
+  });
+
+  // Update stats
+  var total=ids.length,live=0,upcoming=0,past=0;
+  ids.forEach(function(id){
+    var s=getStatus(tournaments[id]);
+    if(s==='live') live++;
+    else if(s==='upcoming') upcoming++;
+    else past++;
+  });
+  document.getElementById('statTotal').textContent=total;
+  document.getElementById('statLive').textContent=live;
+  document.getElementById('statUpcoming').textContent=upcoming;
+  document.getElementById('statPast').textContent=past;
+
+  if(!filtered.length){
+    var isFirstTime = Object.keys(tournaments).length === 0;
+    grid.innerHTML='<div class="empty-state">'+
+      '<div class="empty-big">'+(isFirstTime?'Belum Ada Tournament':'Tiada Tournament')+'</div>'+
+      '<div class="empty-sub">'+(isFirstTime?'Klik <strong style="color:var(--gold)">+ TAMBAH TOURNAMENT</strong> di atas untuk tambah turnamen pertama.':'Tiada tournament dalam kategori ini.')+'</div>'+
+      (isFirstTime?'<br><button class="btn-add" onclick="openAddModal()" style="margin-top:8px">+ TAMBAH TOURNAMENT SEKARANG</button>':'')+
+    '</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(function(id){
+    var t = tournaments[id];
+    var status = getStatus(t);
+    var posterUrl = t.poster ? convertGDriveUrl(t.poster) : '';
+    var link = t.url || (t.folderId ? t.folderId+'/index.html' : '#');
+    var games = t.games || [];
+    var teams = t.teamCount || '';
+
+    var posterHtml = posterUrl
+      ? '<img src="'+esc(posterUrl)+'" alt="'+esc(t.name)+'" loading="lazy" onerror="this.parentNode.innerHTML=\'<div class=tc-card-poster-placeholder><div class=ph-icon>🏆</div><div class=ph-text>'+esc(t.name)+'</div></div>\'">'
+      : '<div class="t-card-poster-placeholder"><div class="ph-icon">🏆</div><div class="ph-text">'+esc(t.name)+'</div></div>';
+
+    var gamesHtml = games.slice(0,3).map(function(g){ return '<div class="t-game-chip">'+esc(g)+'</div>'; }).join('');
+    if(games.length>3) gamesHtml += '<div class="t-game-chip">+'+( games.length-3)+'</div>';
+
+    return '<div class="t-card" onclick="openTournament(\''+esc(id)+'\',\''+esc(link)+'\')" oncontextmenu="event.preventDefault();editTournament(\''+esc(id)+'\');return false">'+
+      '<div class="t-card-poster">'+posterHtml+
+        '<div class="t-badge '+status+'">'+statusLabel(status)+'</div>'+
+        (gamesHtml?'<div class="t-games">'+gamesHtml+'</div>':'')+
+        '<div class="t-card-hover-overlay"><div class="t-card-hover-text">BUKA DASHBOARD ➔</div></div>'+
+      '</div>'+
+      '<div class="t-card-body">'+
+        '<div class="t-card-name">'+esc(t.name)+'</div>'+
+        (t.dateStart?'<div class="t-card-meta">📅 '+formatDate(t.dateStart,t.dateEnd)+'</div>':'')+
+        (t.venue?'<div class="t-card-venue">📍 '+esc(t.venue)+'</div>':'')+
+        '<div class="t-card-footer">'+
+          '<a class="t-card-open" href="'+esc(link)+'" onclick="event.stopPropagation()" target="_blank">BUKA <span>→</span></a>'+
+          (teams?'<div class="t-card-teams">'+esc(String(teams))+' TEAMS</div>':
+            '<div class="t-card-teams" style="cursor:pointer;color:var(--text3);font-size:9px" onclick="event.stopPropagation();editTournament(\''+esc(id)+'\')">klik kanan untuk edit</div>')+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function openTournament(id, link){
+  if(link && link!=='#') window.open(link,'_blank');
+}
+
+function showError(msg){
+  document.getElementById('tGrid').innerHTML='<div class="empty-state"><div class="empty-big">⚠ Ralat</div><div class="empty-sub">'+msg+'</div></div>';
+}
+
+/* ── MODAL ── */
+function openAddModal(){
+  document.getElementById('modalTitleText').textContent='Tambah Tournament';
+  document.getElementById('fName').value='';
+  document.getElementById('fDateStart').value='';
+  document.getElementById('fDateEnd').value='';
+  document.getElementById('fVenue').value='';
+  document.getElementById('fPoster').value='';
+  document.getElementById('fStatus').value='upcoming';
+  document.getElementById('fFolderId').value='';
+  document.getElementById('fUrl').value='';
+  document.getElementById('fEditId').value='';
+  document.getElementById('btnDelete').style.display='none';
+  document.getElementById('posterPreview').innerHTML='<span>Tiada poster — paste URL di atas</span>';
+  buildGamesGrid([]);
+  document.getElementById('addModal').classList.add('open');
+  setTimeout(function(){ document.getElementById('fName').focus(); },100);
+}
+
+function editTournament(id){
+  var t = tournaments[id];
+  if(!t) return;
+  document.getElementById('modalTitleText').textContent='Edit Tournament';
+  document.getElementById('fName').value=t.name||'';
+  document.getElementById('fDateStart').value=t.dateStart||'';
+  document.getElementById('fDateEnd').value=t.dateEnd||'';
+  document.getElementById('fVenue').value=t.venue||'';
+  document.getElementById('fPoster').value=t.poster||'';
+  previewPoster(t.poster||'');
+  document.getElementById('fStatus').value=t.status||'upcoming';
+  document.getElementById('fFolderId').value=t.folderId||'';
+  document.getElementById('fUrl').value=t.url||'';
+  document.getElementById('fEditId').value=id;
+  document.getElementById('btnDelete').style.display='';
+  buildGamesGrid(t.games||[]);
+  document.getElementById('addModal').classList.add('open');
+}
+
+function closeModal(){
+  document.getElementById('addModal').classList.remove('open');
+}
+
+function saveTournament(){
+  var name = document.getElementById('fName').value.trim();
+  if(!name){ alert('Masukkan nama tournament'); return; }
+
+  var id = document.getElementById('fEditId').value;
+  var folderId = document.getElementById('fFolderId').value.trim().replace(/[^a-zA-Z0-9_-]/g,'');
+
+  if(!id){
+    // Generate ID from name
+    id = folderId || name.toLowerCase().replace(/[^a-z0-9]/g,'').substring(0,16)+'_'+Date.now().toString(36);
+  }
+
+  var data = {
+    name: name,
+    dateStart: document.getElementById('fDateStart').value || '',
+    dateEnd: document.getElementById('fDateEnd').value || '',
+    venue: document.getElementById('fVenue').value.trim(),
+    poster: convertGDriveUrl(document.getElementById('fPoster').value.trim()),
+    status: document.getElementById('fStatus').value,
+    folderId: folderId,
+    url: document.getElementById('fUrl').value.trim(),
+    games: getSelectedGames(),
+    updatedAt: Date.now()
+  };
+
+  console.log('[Hub] Saving tournament:', id, data);
+  document.querySelector('.btn-save').textContent = '⏳ MENYIMPAN...';
+  saveTournamentToFb(id, data, function(){
+    document.querySelector('.btn-save').textContent = '✓ SIMPAN';
+    console.log('[Hub] Tournament saved OK:', id);
+    closeModal();
+    tournaments[id] = data;
+    renderGrid();
+  });
+}
+
+function deleteTournament(){
+  var id = document.getElementById('fEditId').value;
+  if(!id) return;
+  if(!confirm('Padam tournament "'+((tournaments[id]&&tournaments[id].name)||id)+'"?\n\nTindakan ini TIDAK boleh dibatalkan.')) return;
+  deleteTournamentFromFb(id, function(){
+    delete tournaments[id];
+    closeModal();
+    renderGrid();
+  });
+}
+
+/* ── ESC to close modal ── */
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
+
+/* ── INIT ── */
+buildGamesGrid([]);
+loadTournaments();
+</script>
+</body>
+</html>
