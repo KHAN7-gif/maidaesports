@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WWCD — MAIDA ESPORTS</title>
+<script src="firebase_sync.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Barlow+Condensed:wght@400;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07050f;--bg2:#0d0a1e;--bg3:#13102a;
+  --gold:#ffd700;--gold2:#ffb300;
+  --text:#f0ecff;--text2:rgba(240,236,255,.55);--text3:rgba(240,236,255,.28);
+  --green:#18e868;--border:rgba(255,255,255,.09);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:'Barlow Condensed',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 15% 0%,rgba(120,60,255,.1) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 50% at 85% 100%,rgba(255,215,0,.07) 0%,transparent 55%);}
+
+/* TOP BAR */
+.topbar{position:sticky;top:0;z-index:100;background:rgba(7,5,15,.92);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);display:flex;align-items:center;
+  justify-content:space-between;padding:0 20px;height:52px;gap:12px;flex-wrap:wrap}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:13px;
+  letter-spacing:.12em;background:linear-gradient(90deg,#fff,var(--gold));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 8px var(--green);animation:pulse 1.3s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.topbar-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:none;border-radius:8px;padding:7px 14px;font-family:'Orbitron',sans-serif;
+  font-weight:700;font-size:10px;letter-spacing:.08em;cursor:pointer;transition:.15s}
+.btn-gold{background:var(--gold);color:#000}
+.btn-gold:hover{background:#ffc200}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}
+.btn-outline:hover{border-color:rgba(255,215,0,.3);color:var(--gold)}
+.btn-obs{background:rgba(255,59,92,.15);border:1px solid rgba(255,59,92,.4);color:#ff3b5c}
+.btn-obs:hover{background:rgba(255,59,92,.25)}
+
+/* WRAP */
+.wrap{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:24px 20px 60px}
+
+/* POSTER + GRID SECTION */
+.main-layout{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start}
+@media(max-width:900px){.main-layout{grid-template-columns:1fr}}
+
+/* POSTER FRAME (1080x1920 ratio = 9:16) */
+.poster-panel{display:flex;flex-direction:column;gap:12px}
+.poster-label{font-family:'Share Tech Mono',monospace;font-size:10px;
+  letter-spacing:.2em;color:var(--text3);text-transform:uppercase}
+.poster-frame{
+  position:relative;width:100%;aspect-ratio:16/9;
+  background:var(--bg3);border:2px dashed rgba(255,215,0,.2);
+  border-radius:12px;overflow:hidden;display:flex;align-items:center;
+  justify-content:center;flex-direction:column;gap:8px;
+}
+.poster-frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.poster-frame-placeholder{display:flex;flex-direction:column;align-items:center;
+  gap:8px;color:var(--text3);font-size:12px;text-align:center;padding:16px}
+.poster-frame-placeholder .ph-ico{font-size:32px;opacity:.4}
+.poster-url-wrap{display:flex;flex-direction:column;gap:6px}
+.poster-url-inp{background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:7px;padding:8px 10px;font-size:11px;color:var(--text);outline:none;
+  font-family:'Barlow Condensed',sans-serif;width:100%}
+.poster-url-inp:focus{border-color:var(--gold)}
+.poster-url-inp::placeholder{color:var(--text3);font-size:10px}
+.poster-size-tag{font-family:'Share Tech Mono',monospace;font-size:9px;
+  color:var(--text3);letter-spacing:.1em;text-align:center}
+
+/* GRID SECTION */
+.grid-panel{display:flex;flex-direction:column;gap:16px}
+.grid-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.grid-title{font-family:'Orbitron',sans-serif;font-weight:800;font-size:12px;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--text2);
+  display:flex;align-items:center;gap:8px}
+.grid-title::before{content:'';width:3px;height:14px;background:var(--gold);border-radius:2px}
+.grid-hint{font-size:11px;color:var(--text3);font-family:'Share Tech Mono',monospace}
+
+
+/* TEAM CARD */
+.team-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+.team-card{
+  position:relative;background:var(--bg2);
+  border:1px solid var(--border);border-radius:12px;
+  aspect-ratio:3/4;cursor:pointer;user-select:none;overflow:hidden;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s,border-color .25s;
+  filter:saturate(.5) brightness(.65);
+}
+.team-card:hover{filter:saturate(.8) brightness(.85);transform:translateY(-2px)}
+.t-darken{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.05) 0%,rgba(0,0,0,.7) 75%);z-index:1}
+.t-letter{position:absolute;top:50%;left:50%;transform:translate(-50%,-65%);
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:38px;color:var(--text3);z-index:2}
+.t-logo-sm{position:absolute;top:8px;left:8px;width:34px;height:34px;
+  border-radius:7px;object-fit:cover;border:1.5px solid rgba(255,255,255,.25);
+  z-index:3;background:rgba(0,0,0,.4)}
+.t-name-bar{position:absolute;bottom:0;left:0;right:0;z-index:3;
+  padding:6px 8px 7px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
+.t-name{font-weight:800;font-size:11px;letter-spacing:.02em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  display:block;color:#fff}
+
+/* WWCD ACTIVE STATE */
+.team-card.wwcd-active{
+  filter:none;
+  transform:translateY(-8px) scale(1.06);
+  border-color:var(--gold);
+  background:linear-gradient(160deg,rgba(255,215,0,.18),rgba(255,215,0,.04));
+  box-shadow:0 16px 48px rgba(255,215,0,.3),0 0 0 1px rgba(255,215,0,.35) inset;
+  animation:cardPop .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes cardPop{0%{transform:scale(.92) translateY(0);opacity:.6}100%{transform:translateY(-8px) scale(1.06)}}
+.team-card.wwcd-active .t-logo img,.team-card.wwcd-active .t-logo{
+  box-shadow:0 0 16px rgba(255,215,0,.4);border-color:rgba(255,215,0,.5)}
+.team-card.wwcd-active .t-name{color:var(--gold)}
+.crown-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+  font-size:20px;animation:crownBob 1.8s ease-in-out infinite;
+  filter:drop-shadow(0 2px 6px rgba(255,215,0,.7))}
+@keyframes crownBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-4px)}}
+.wwcd-pill{position:absolute;top:7px;right:7px;
+  background:rgba(255,215,0,.2);border:1px solid rgba(255,215,0,.5);
+  color:var(--gold);font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:8px;letter-spacing:.1em;padding:2px 6px;border-radius:999px}
+
+/* CURRENT WWCD BANNER */
+.wwcd-banner{
+  display:none;align-items:center;gap:14px;
+  background:linear-gradient(90deg,rgba(255,215,0,.12),rgba(255,215,0,.03));
+  border:1px solid rgba(255,215,0,.35);border-radius:12px;padding:14px 18px;
+  margin-bottom:4px;
+}
+.wwcd-banner.show{display:flex}
+.wb-logo{width:48px;height:48px;border-radius:9px;object-fit:cover;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,215,0,.3);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:18px;color:var(--gold)}
+.wb-logo img{width:100%;height:100%;border-radius:9px;object-fit:cover}
+.wb-info{display:flex;flex-direction:column;gap:2px}
+.wb-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:.2em;color:var(--gold2);text-transform:uppercase}
+.wb-name{font-family:'Orbitron',sans-serif;font-weight:900;font-size:18px;color:var(--gold)}
+.wb-full{font-size:13px;color:var(--text2)}
+.wb-clear{margin-left:auto;background:rgba(255,255,255,.06);border:1px solid var(--border);
+  color:var(--text3);border-radius:7px;padding:6px 12px;font-size:10px;
+  cursor:pointer;font-family:'Share Tech Mono',monospace;letter-spacing:.06em}
+.wb-clear:hover{border-color:rgba(255,59,92,.4);color:#ff3b5c}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px 20px;color:var(--text3);font-size:14px}
+
+/* OBS POPUP WINDOW */
+.obs-popup-wrap{display:none}
+
+/* FOOTER */
+.footer{text-align:center;margin-top:48px;font-family:'Share Tech Mono',monospace;
+  font-size:10px;color:var(--text3);letter-spacing:.2em;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="live-dot"></div>
+    <div class="topbar-title">WWCD TRACKER</div>
+    <span id="teamCountBadge" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3)"></span>
+  </div>
+  <div class="topbar-right">
+    <button class="btn btn-outline" onclick="clearWWCD()">✕ CLEAR WWCD</button>
+    <button class="btn btn-obs" onclick="openObsPopup()">📺 BUKA OBS POPUP</button>
+    <button class="btn btn-gold" onclick="location.reload()">⟳</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- CURRENT WWCD BANNER -->
+  <div class="wwcd-banner" id="wwcdBanner">
+    <div class="wb-logo" id="wbLogo"></div>
+    <div class="wb-info">
+      <div class="wb-label">👑 WINNER WINNER CHICKEN DINNER</div>
+      <div class="wb-name" id="wbName">—</div>
+      <div class="wb-full" id="wbFull"></div>
+    </div>
+    <button class="wb-clear" onclick="clearWWCD()">✕ CLEAR</button>
+  </div>
+
+  <div class="main-layout">
+
+    <!-- POSTER PANEL -->
+    <div class="poster-panel">
+      <div class="poster-label">🖼 Frame Poster (1080×1920)</div>
+      <div class="poster-frame" id="posterFrame">
+        <div class="poster-frame-placeholder" id="posterPlaceholder">
+          <div class="ph-ico">🏆</div>
+          <div>Paste URL poster<br>Google Drive / link gambar</div>
+        </div>
+        <!-- img injected by JS -->
+      </div>
+      <div class="poster-url-wrap">
+        <input class="poster-url-inp" id="posterUrlInp" placeholder="🔗 URL poster (Google Drive / link terus)"
+          oninput="updatePoster(this.value)">
+        <div class="poster-size-tag">1920 × 1080 · LANDSCAPE · OBS READY</div>
+      </div>
+      <button class="btn btn-outline" style="font-size:10px;width:100%" onclick="savePosterUrl()">💾 SIMPAN URL</button>
+    </div>
+
+    <!-- TEAM GRID PANEL -->
+    <div class="grid-panel">
+      <div class="grid-header">
+        <div class="grid-title">Pilih Team WWCD</div>
+        <div class="grid-hint">Klik kad untuk pilih · klik semula untuk nyahpilih</div>
+      </div>
+      <div class="team-grid" id="teamGrid">
+        <div class="empty">⏳ Memuatkan data team...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer" id="footerTitle">MAIDA ESPORTS · WWCD TRACKER</div>
+
+<!-- OBS POPUP WINDOW CONTENT (hidden, written to popup window) -->
+<div id="obsPopupTemplate" style="display:none">TEMPLATE</div>
+
+<script>
+/* ── HELPERS ── */
+function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+function convertGDrive(url){
+  if(!url) return url;
+  var m = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if(m) return 'https://lh3.googleusercontent.com/d/'+m[1];
+  var m2 = url.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
+  if(m2) return 'https://lh3.googleusercontent.com/d/'+m2[1];
+  var m3 = url.match(/drive\.google\.com\/uc\?.*id=([a-zA-Z0-9_-]+)/);
+  if(m3) return 'https://lh3.googleusercontent.com/d/'+m3[1];
+  return url;
+}
+
+/* ── STATE ── */
+var teams = [];
+var currentWWCD = null; // team object or null
+var posterUrl = '';
+var obsWin = null;
+
+/* ── POSTER ── */
+function updatePoster(url){
+  posterUrl = convertGDrive(url);
+  var frame = document.getElementById('posterFrame');
+  var ph = document.getElementById('posterPlaceholder');
+  var existing = frame.querySelector('img');
+  if(existing) existing.remove();
+  if(posterUrl){
+    ph.style.display = 'none';
+    var img = document.createElement('img');
+    img.src = posterUrl;
+    img.onerror = function(){ ph.style.display = ''; };
+    frame.appendChild(img);
+  } else {
+    ph.style.display = '';
+  }
+  notifyObs();
+}
+
+function savePosterUrl(){
+  var url = document.getElementById('posterUrlInp').value.trim();
+  try{ localStorage.setItem('wwcd_poster', url); }catch(e){}
+  updatePoster(url);
+}
+
+/* ── RENDER GRID ── */
+function renderGrid(){
+  var grid = document.getElementById('teamGrid');
+  console.log('[WWCD] renderGrid called, teams:', teams.length);
+  if(!teams.length){
+    grid.innerHTML = '<div class="empty">⏳ Tiada data team lagi. Pastikan team sudah ditambah di <strong>Standing Point → SETTING → Team Management</strong>.</div>';
+    return;
+  }
+
+  document.getElementById('teamCountBadge').textContent = teams.length + ' TEAM';
+
+  grid.innerHTML = teams.map(function(t, i){
+    var isWWCD = currentWWCD && currentWWCD.name === t.name;
+    var logoUrl = t.logo ? convertGDrive(t.logo) : '';
+    var bannerUrl = t.banner ? convertGDrive(t.banner) : '';
+    var bgUrl = bannerUrl || logoUrl;
+    var bgStyle = bgUrl ? 'background-image:url("'+bgUrl+'");background-size:cover;background-position:center top;' : '';
+    var darken = bgUrl ? '<div class="t-darken"></div>' : '';
+    var fallback = !bgUrl ? '<div class="t-letter">'+esc((t.name||'?')[0])+'</div>' : '';
+    var logoSm = (bgUrl && logoUrl) ? '<img class="t-logo-sm" src="'+esc(logoUrl)+'" onerror="this.style.display='none'">' : '';
+    var crown = isWWCD ? '<div class="crown-badge">\u{1F451}</div>' : '';
+    var pill  = isWWCD ? '<div class="wwcd-pill">WWCD</div>' : '';
+    return '<div class="team-card'+(isWWCD?' wwcd-active':'')+'" onclick="selectWWCD('+i+')" style="'+bgStyle+'">'
+      +crown+pill+darken+fallback+logoSm
+      +'<div class="t-name-bar"><span class="t-name">'+esc(t.name)+'</span></div>'
+    +'</div>';
+  }).join('');
+}
+
+/* ── SELECT WWCD ── */
+function selectWWCD(idx){
+  var t = teams[idx];
+  if(!t) return;
+
+  // Toggle — klik semula untuk clear
+  if(currentWWCD && currentWWCD.name === t.name){
+    clearWWCD();
+    return;
+  }
+
+  currentWWCD = t;
+
+  // Update banner
+  var banner = document.getElementById('wwcdBanner');
+  banner.classList.add('show');
+
+  var logoUrl = t.logo ? convertGDrive(t.logo) : '';
+  var logoEl = document.getElementById('wbLogo');
+  if(logoUrl){
+    logoEl.innerHTML = '<img src="'+esc(logoUrl)+'" onerror="this.parentNode.textContent=\''+esc((t.name||'?')[0])+'\'">';
+  } else {
+    logoEl.textContent = (t.name||'?')[0];
+  }
+  document.getElementById('wbName').textContent = t.name || '';
+  document.getElementById('wbFull').textContent = t.fullName || '';
+
+  // Save to Firebase for OBS
+  if(typeof fsSet === 'function'){
+    fsSet('maida/wwcd', {
+      name: t.name,
+      fullName: t.fullName || '',
+      logo: t.logo || '',
+      poster: posterUrl || '',
+      ts: Date.now()
+    }, function(){
+      console.log('[WWCD] Saved to Firebase:', t.name);
+    });
+  }
+
+  renderGrid();
+  notifyObs();
+}
+
+function clearWWCD(){
+  currentWWCD = null;
+  document.getElementById('wwcdBanner').classList.remove('show');
+  if(typeof fsSet === 'function'){
+    fsSet('maida/wwcd', null);
+  }
+  renderGrid();
+  notifyObs();
+}
+
+/* ── OBS POPUP ── */
+function openObsPopup(){
+  var url = 'wwcd_obs.html';
+  obsWin = window.open(url, 'WWCD_OBS',
+    'width=1080,height=1920,menubar=no,toolbar=no,location=no,status=no');
+}
+
+function notifyObs(){
+  // OBS window will poll Firebase for changes
+}
+
+/* ── FIREBASE SYNC ── */
+function applySpData(sp){
+  if(!sp){ console.warn('[WWCD] applySpData: sp is null'); return; }
+  console.log('[WWCD] applySpData teams:', sp.teams ? sp.teams.length : 'none');
+  if(sp.teams && sp.teams.length){
+    teams = sp.teams.map(function(t){
+      // Logo URL — accept any non-base64 URL (http/https)
+      var logoUrl = (t.logo && (t.logo.startsWith('http') || t.logo.startsWith('//'))) ? t.logo : '';
+      var bannerUrl = (t.banner && (t.banner.startsWith('http') || t.banner.startsWith('//'))) ? t.banner : '';
+      return { name:t.name, fullName:t.fullName||'', logo:logoUrl, banner:bannerUrl };
+    });
+    console.log('[WWCD] Teams loaded:', teams.map(function(t){return t.name+'(logo:'+!!t.logo+')';}).join(', '));
+  }
+  if(sp.title){
+    document.getElementById('footerTitle').textContent = 'MAIDA ESPORTS · '+sp.title+' · WWCD';
+  }
+  renderGrid();
+}
+
+(function init(){
+  // Load poster URL from localStorage
+  try{
+    var savedPoster = localStorage.getItem('wwcd_poster');
+    if(savedPoster){
+      document.getElementById('posterUrlInp').value = savedPoster;
+      updatePoster(savedPoster);
+    }
+  }catch(e){}
+
+  if(typeof fsGet !== 'function'){
+    document.getElementById('teamGrid').innerHTML =
+      '<div class="empty">⚠ Firebase tidak load. Pastikan firebase_sync.js ada dalam folder sama.</div>';
+    return;
+  }
+
+  // Try localStorage first (instant, no network wait)
+  try{
+    var SK = 'hswp_2026_pro';
+    var raw = localStorage.getItem(SK);
+    if(raw){
+      var local = JSON.parse(raw);
+      if(local && local.teams && local.teams.length){
+        console.log('[WWCD] Loaded '+local.teams.length+' teams from localStorage');
+        applySpData(local);
+      }
+    }
+  }catch(e){ console.warn('[WWCD] localStorage error:', e); }
+
+  // Load from Firebase (authoritative)
+  fsGet('maida/spData', function(sp){
+    console.log('[WWCD] Firebase spData received:', sp ? Object.keys(sp) : 'null');
+    applySpData(sp);
+  }, function(e){
+    console.warn('[WWCD] Firebase spData error:', e);
+    document.getElementById('teamGrid').innerHTML =
+      '<div class="empty">⚠ Gagal load Firebase. Data diambil dari cache tempatan.</div>';
+  });
+  if(typeof fsListen === 'function'){
+    fsListen('maida/spData', function(sp){
+      console.log('[WWCD] Firebase spData update:', sp ? (sp.teams?sp.teams.length+' teams':'no teams') : 'null');
+      applySpData(sp);
+    }, 3);
+    // Listen to current WWCD state (sync from other device if needed)
+    fsListen('maida/wwcd', function(w){
+      if(!w){ currentWWCD = null; }
+      else {
+        currentWWCD = { name:w.name, fullName:w.fullName||'', logo:w.logo||'' };
+      }
+      renderGrid();
+      if(currentWWCD){
+        var banner = document.getElementById('wwcdBanner');
+        banner.classList.add('show');
+        var logoEl = document.getElementById('wbLogo');
+        var logoUrl = w && w.logo ? convertGDrive(w.logo) : '';
+        if(logoUrl) logoEl.innerHTML = '<img src="'+esc(logoUrl)+'">';
+        else logoEl.textContent = (w&&w.name?w.name[0]:'?');
+        document.getElementById('wbName').textContent = (w&&w.name)||'';
+        document.getElementById('wbFull').textContent = (w&&w.fullName)||'';
+        // Restore poster if available
+        if(w && w.poster && !document.getElementById('posterUrlInp').value){
+          document.getElementById('posterUrlInp').value = w.poster;
+          updatePoster(w.poster);
+        }
+      } else {
+        document.getElementById('wwcdBanner').classList.remove('show');
+      }
+    }, 2);
+  }
+})();
+</script>
+</body>
+</html>
