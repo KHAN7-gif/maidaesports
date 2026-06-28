@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MAIDA — OBS KILL + STANDING (1920×1080)</title>
+<script src="firebase_sync.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Barlow+Condensed:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--cyan:#20e8ff;--pink:#ff0088;--green:#14ff72;--orange:#ff9800;--gold:#ffd700;
+      --rankblue:#1e2fff;--pts:#ffd54a;--elims:#ff6b8a;--bg:#020712;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#000;overflow:hidden;color:#fff;font-family:'Barlow Condensed',sans-serif;
+     width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;}
+
+/* ═══════ STAGE 1920×1080 (auto-scale untuk preview; 1:1 dalam OBS) ═══════ */
+#stage{position:relative;width:1920px;height:1080px;transform-origin:center center;
+       background:var(--bg);overflow:hidden;flex-shrink:0;}
+body.transp #stage{background:transparent;}
+
+/* ═══════ SETTINGS PANEL (boleh sorok — tekan H) ═══════ */
+.settings{position:absolute;top:15px;left:15px;width:210px;
+  background:linear-gradient(180deg,#0c1730,#07101d);
+  border:1px solid rgba(255,255,255,.1);border-radius:16px;
+  padding:14px;z-index:50;box-shadow:0 15px 40px rgba(0,0,0,.45);}
+.settings-title{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;margin-bottom:12px;letter-spacing:1px;}
+.setting-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+.setting-label{font-size:12px;font-weight:700;letter-spacing:.5px;}
+.toggle{width:46px;height:24px;background:#333;border-radius:12px;position:relative;cursor:pointer;transition:.2s;flex-shrink:0;}
+.toggle::before{content:'';position:absolute;width:18px;height:18px;top:3px;left:3px;border-radius:50%;background:white;transition:.2s;}
+.toggle.active{background:#00c853;}
+.toggle.active::before{left:25px;}
+.color-picker{width:48px;height:28px;border:none;background:none;cursor:pointer;border-radius:4px;}
+.timer-select{width:72px;height:28px;border:none;border-radius:6px;background:#13213f;color:white;font-weight:700;padding:0 6px;font-size:11px;}
+.settings-sep{height:1px;background:rgba(255,255,255,.1);margin:9px 0;}
+.btn{width:100%;height:34px;border:none;border-radius:8px;margin-top:7px;font-family:'Orbitron',sans-serif;font-weight:800;font-size:11px;cursor:pointer;transition:.15s;letter-spacing:.5px;}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.1);}
+.demo-btn{background:#ff9800;color:black;}
+.transp-btn{background:#1e2fff;color:white;}
+.reset-btn{background:#ff1744;color:white;}
+.hint{margin-top:10px;font-size:10px;color:rgba(255,255,255,.4);text-align:center;letter-spacing:.5px;}
+
+/* ═══════ LIVE STATUS ═══════ */
+.live-badge{position:absolute;top:15px;left:50%;transform:translateX(-50%);
+  background:rgba(0,200,83,.15);border:1px solid #00c853;color:#00c853;
+  padding:5px 18px;border-radius:20px;font-family:'Orbitron',sans-serif;
+  font-size:11px;font-weight:700;letter-spacing:2px;z-index:40;display:flex;align-items:center;gap:7px;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#00c853;animation:ldot .9s infinite;}
+@keyframes ldot{0%,100%{opacity:1;}50%{opacity:.2;}}
+.live-badge.no-data{background:rgba(255,50,50,.12);border-color:#ff3333;color:#ff5555;}
+.live-badge.no-data .live-dot{background:#ff3333;}
+
+body.hide-ui .settings,body.hide-ui .live-badge{display:none!important;}
+
+/* ═══════ FINAL 4 HEADER (di atas kawasan gameplay) ═══════ */
+.final4-header{position:absolute;top:80px;left:730px;transform:translateX(-50%);
+  display:flex;gap:16px;z-index:30;pointer-events:none;}
+.final4-box{width:220px;height:72px;background:linear-gradient(180deg,#0b1832,#07101d);
+  border:2px solid #ffd700;border-radius:16px;display:flex;align-items:center;gap:12px;
+  padding:10px 14px;animation:top4Glow .7s infinite alternate;}
+@keyframes top4Glow{from{box-shadow:0 0 8px rgba(255,215,0,.25),0 0 18px rgba(255,215,0,.15);}
+  to{box-shadow:0 0 22px rgba(255,215,0,.95),0 0 55px rgba(255,215,0,.55);}}
+.final4-logo{width:48px;height:48px;object-fit:cover;border-radius:10px;flex-shrink:0;}
+.final4-name{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ═══════ POPUP CONTAINER (kawasan KIRI / gameplay) ═══════ */
+#popupContainer{position:absolute;top:0;left:0;bottom:0;right:460px;pointer-events:none;z-index:60;}
+
+/* ═══════ ELIMINATION POPUP ═══════ */
+.elim-popup{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:900px;background:linear-gradient(180deg,rgba(5,20,40,.97),rgba(2,10,20,.98));
+  border:2px solid var(--cyan);border-radius:22px;overflow:hidden;z-index:99;
+  animation:popupIn .35s cubic-bezier(.34,1.56,.64,1);pointer-events:auto;}
+@keyframes popupIn{from{opacity:0;transform:translate(-50%,-50%) scale(.85);}to{opacity:1;transform:translate(-50%,-50%) scale(1);}}
+.elim-top{height:200px;display:grid;grid-template-columns:200px 1fr 200px;}
+.elim-side{display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.elim-rank,.elim-kill{font-family:'Orbitron',sans-serif;font-size:80px;font-weight:900;line-height:1;}
+.elim-rank-lbl,.elim-kill-lbl{font-size:12px;color:rgba(255,255,255,.45);font-weight:700;letter-spacing:2px;margin-top:4px;}
+.elim-center{display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.elim-logo{width:80px;height:80px;object-fit:contain;border-radius:12px;margin-bottom:8px;}
+.elim-team{font-family:'Orbitron',sans-serif;font-size:48px;font-weight:900;text-transform:uppercase;}
+.elim-ktext{margin-top:6px;color:var(--cyan);font-size:17px;font-weight:700;}
+.elim-bottom{height:56px;background:linear-gradient(90deg,#cc006e,#ff0088,#cc006e);
+  display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;
+  font-size:30px;font-weight:900;color:white;letter-spacing:5px;}
+.hide-rank .elim-rank,.hide-rank .elim-rank-lbl{display:none;}
+.hide-name .elim-team,.hide-name .elim-ktext{display:none;}
+.hide-logo .elim-logo{display:none;}
+.hide-kill .elim-kill,.hide-kill .elim-kill-lbl{display:none;}
+
+/* ═══════ WWCD POPUP ═══════ */
+.wwcd-popup{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:820px;
+  background:linear-gradient(180deg,rgba(14,12,0,.97),rgba(5,5,2,.98));
+  border:2px solid #ffd700;border-radius:24px;overflow:hidden;z-index:120;pointer-events:auto;
+  box-shadow:0 0 40px rgba(255,215,0,.25);animation:wwcdEnter .45s cubic-bezier(.34,1.56,.64,1);}
+@keyframes wwcdEnter{from{opacity:0;transform:translate(-50%,-50%) scale(.8);}to{opacity:1;transform:translate(-50%,-50%) scale(1);}}
+.wwcd-top{position:relative;height:270px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;}
+.wwcd-top::before{content:'';position:absolute;width:520px;height:520px;border-radius:50%;
+  background:radial-gradient(rgba(255,215,0,.22),transparent 70%);top:-200px;filter:blur(8px);z-index:0;}
+.wwcd-logo{width:90px;height:90px;object-fit:contain;margin-bottom:10px;position:relative;z-index:2;border-radius:12px;}
+.wwcd-title{position:relative;z-index:2;font-family:'Orbitron',sans-serif;font-size:74px;font-weight:900;color:#ffd700;
+  text-shadow:0 0 12px rgba(255,215,0,.9),0 0 30px rgba(255,215,0,.5);animation:wwcdPulse .8s infinite alternate;}
+@keyframes wwcdPulse{from{text-shadow:0 0 12px rgba(255,215,0,.9),0 0 30px rgba(255,215,0,.5);}to{text-shadow:0 0 20px rgba(255,215,0,1),0 0 50px rgba(255,215,0,.7),0 0 80px rgba(255,215,0,.3);}}
+.wwcd-team{position:relative;z-index:2;margin-top:8px;font-family:'Orbitron',sans-serif;font-size:50px;font-weight:900;color:white;text-transform:uppercase;}
+.wwcd-bottom{height:66px;background:linear-gradient(90deg,#c8a000,#ffd700,#c8a000);
+  display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;
+  font-size:22px;font-weight:900;color:black;letter-spacing:3px;}
+
+/* ═══════ STANDING POINT SIDEBAR (KANAN) ═══════ */
+#standingSidebar{position:absolute;top:0;right:0;width:460px;height:1080px;
+  background:linear-gradient(180deg,rgba(8,11,30,.97),rgba(3,5,16,.98));
+  border-left:3px solid var(--gold);display:flex;flex-direction:column;
+  box-shadow:-12px 0 44px rgba(0,0,0,.55);z-index:20;}
+.st-head{height:64px;background:#0f1328;border-bottom:2px solid rgba(255,215,0,.4);
+  display:flex;align-items:center;gap:10px;padding:0 20px;flex-shrink:0;}
+.st-head .star{font-size:24px;}
+.st-head .t{font-family:'Orbitron',sans-serif;font-size:19px;font-weight:900;color:var(--gold);letter-spacing:2px;}
+.st-head .sub{margin-left:auto;font-size:12px;color:#5d6899;font-weight:700;letter-spacing:1px;}
+.st-colhead{display:grid;grid-template-columns:58px 1fr 88px 58px 58px;height:34px;align-items:center;
+  background:#0a0d20;border-bottom:2px solid rgba(255,215,0,.25);flex-shrink:0;
+  font-size:11px;font-weight:800;color:#5d6899;letter-spacing:1px;text-transform:uppercase;}
+.st-colhead>div{text-align:center;}
+.st-colhead .ch-team{text-align:left;padding-left:12px;}
+.st-body{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.st-row{flex:1;min-height:0;display:grid;grid-template-columns:58px 1fr 88px 58px 58px;
+  align-items:center;border-bottom:1px solid rgba(255,255,255,.06);transition:.25s;}
+.st-row.st-dead{opacity:.32;filter:grayscale(1);}
+.st-rank{height:100%;display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:22px;color:#fff;background:var(--rankblue);}
+.st-row.r1 .st-rank{background:#c8960c;}
+.st-row.r2 .st-rank{background:#7a7f86;}
+.st-row.r3 .st-rank{background:#8a4a2a;}
+.st-team{display:flex;align-items:center;gap:10px;padding-left:12px;min-width:0;}
+.st-logo{width:34px;height:34px;border-radius:7px;object-fit:cover;background:#1a1f3a;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:14px;color:var(--gold);}
+.st-tag{font-family:'Orbitron',sans-serif;font-weight:800;font-size:17px;color:#fff;
+  text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.st-bars{display:flex;gap:4px;justify-content:center;align-items:center;}
+.sb{width:8px;height:24px;border-radius:2px;background:#3a3f55;}
+.sb.a{background:var(--green);}
+.sb.k{background:var(--orange);}
+.st-pts{font-family:'Orbitron',sans-serif;font-weight:800;font-size:21px;color:var(--pts);text-align:center;}
+.st-elims{font-family:'Orbitron',sans-serif;font-weight:800;font-size:21px;color:var(--elims);text-align:center;}
+.st-foot{height:42px;background:var(--rankblue);display:flex;gap:16px;align-items:center;padding:0 18px;flex-shrink:0;}
+.lg{display:flex;gap:6px;align-items:center;font-size:11px;font-weight:700;color:#fff;letter-spacing:.5px;text-transform:uppercase;}
+.lgd{width:11px;height:11px;border-radius:2px;}
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- SETTINGS -->
+  <div class="settings">
+    <div class="settings-title">⚙ TETAPAN OBS</div>
+    <div class="setting-row"><span class="setting-label">SHOW #RANK</span><div class="toggle active" id="togRank" onclick="toggleSetting(this,'rank')"></div></div>
+    <div class="setting-row"><span class="setting-label">SHOW NAMA</span><div class="toggle active" id="togName" onclick="toggleSetting(this,'name')"></div></div>
+    <div class="setting-row"><span class="setting-label">SHOW LOGO</span><div class="toggle active" id="togLogo" onclick="toggleSetting(this,'logo')"></div></div>
+    <div class="setting-row"><span class="setting-label">SHOW ELIMS</span><div class="toggle active" id="togKill" onclick="toggleSetting(this,'kill')"></div></div>
+    <div class="setting-row"><span class="setting-label">POPUP TIMER</span>
+      <select class="timer-select" id="popupDurSel" onchange="popupDuration=parseInt(this.value)*1000">
+        <option value="4">4s</option><option value="6">6s</option><option value="8">8s</option><option value="10">10s</option>
+      </select>
+    </div>
+    <div class="settings-sep"></div>
+    <button class="btn demo-btn" onclick="demoPopup()">DEMO KILL POPUP</button>
+    <button class="btn transp-btn" onclick="toggleTransp()">◻ TRANSPARENT BG</button>
+    <button class="btn reset-btn" onclick="resetAll()">RESET</button>
+    <div class="hint">Tekan <b>H</b> sorok UI &middot; <b>ESC</b> tutup popup</div>
+  </div>
+
+  <!-- LIVE STATUS -->
+  <div class="live-badge" id="liveBadge"><div class="live-dot"></div><span id="liveStatus">MENUNGGU DATA...</span></div>
+
+  <!-- FINAL 4 -->
+  <div class="final4-header" id="final4Header"></div>
+
+  <!-- POPUP AREA (kiri) -->
+  <div id="popupContainer"></div>
+
+  <!-- STANDING SIDEBAR (kanan) -->
+  <div id="standingSidebar">
+    <div class="st-head">
+      <span class="star">⭐</span><span class="t">STANDING POINT</span>
+      <span class="sub" id="stSub">LIVE</span>
+    </div>
+    <div class="st-colhead">
+      <div>#</div><div class="ch-team">TEAM</div><div>ALIVE</div><div>PTS</div><div>ELIM</div>
+    </div>
+    <div class="st-body" id="standingBody"></div>
+    <div class="st-foot">
+      <div class="lg"><span class="lgd" style="background:var(--green)"></span>ALIVE</div>
+      <div class="lg"><span class="lgd" style="background:var(--orange)"></span>KNOCK</div>
+      <div class="lg"><span class="lgd" style="background:#3a3f55"></span>ELIM</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ═══ KEYS — sama dengan leaderboard_FINAL.html ═══ */
+const LIVE_KEY = 'maida_live_v1';
+const SP_KEY   = 'hswp_2026_pro';
+const LS_KEY   = 'maida_v5';
+
+/* ═══ STATE ═══ */
+let teams = [];
+let popupSettings = {rank:true, name:true, logo:true, kill:true};
+let popupDuration = 4000;
+let wwcdShown = false;
+let lastLiveTs = 0;
+let lastSavedAt = 0;
+
+/* ═══ AUTO-SCALE STAGE (1:1 dalam OBS, muat skrin untuk preview) ═══ */
+function fitStage(){
+  const s=document.getElementById('stage');
+  const k=Math.min(window.innerWidth/1920, window.innerHeight/1080);
+  s.style.transform='scale('+k+')';
+}
+window.addEventListener('resize', fitStage);
+
+/* ═══ BUILD TEAMS ═══ */
+function buildTeamsFromLive(snapTeams){
+  teams = snapTeams.map(st => ({
+    id:st.id, tag:st.tag, logo:st.logo||'', country:st.country||'🇲🇾',
+    alive:st.alive||[1,1,1,1], pts:st.pts||0, elims:st.elims||0, lobby:st.lobby||0,
+  }));
+  renderTeams();
+  updateLiveStatus('LIVE — '+teams.length+' TEAMS', false);
+}
+function loadFromLSKEY(){
+  try{
+    const raw=localStorage.getItem(LS_KEY); if(!raw) return false;
+    const d=JSON.parse(raw);
+    if(!d.teams||!d.teams.length) return false;
+    if(d.savedAt===lastSavedAt) return false;
+    lastSavedAt=d.savedAt;
+    teams=d.teams.map(t=>({id:t.id,tag:t.tag,logo:t.logo||'',country:t.country||'🇲🇾',
+      alive:t.alive||[1,1,1,1],pts:t.pts||0,elims:t.elims||0,lobby:t.lobby||0}));
+    renderTeams(); updateLiveStatus('SYNCED — '+teams.length+' TEAMS', false); return true;
+  }catch(e){ return false; }
+}
+function loadFromSPKEY(){
+  try{
+    const raw=localStorage.getItem(SP_KEY); if(!raw) return false;
+    const sp=JSON.parse(raw); if(!sp.teams||!sp.teams.length) return false;
+    teams=sp.teams.map((spt,i)=>{
+      const spTag=(spt.name||'TEAM '+(i+1)).substring(0,12);
+      return {id:i+1,tag:spTag,logo:spt.logo||'',country:'🇲🇾',alive:[1,1,1,1],pts:0,elims:0,lobby:i+1};
+    });
+    if(sp._liveMatch && sp._liveMatch.teams){
+      sp._liveMatch.teams.forEach(lt=>{
+        const t=teams.find(x=>x.tag===lt.tag);
+        if(t){ t.alive=lt.alive||t.alive; t.pts=lt.pts||t.pts; t.elims=lt.elims||t.elims; }
+      });
+    }
+    renderTeams(); updateLiveStatus('SP SYNC — '+teams.length+' TEAMS', false); return true;
+  }catch(e){ return false; }
+}
+function updateLiveStatus(msg,noData){
+  const badge=document.getElementById('liveBadge'), status=document.getElementById('liveStatus');
+  if(badge) badge.className='live-badge'+(noData?' no-data':'');
+  if(status) status.textContent=msg;
+}
+
+/* ═══ HANDLE LIVE EVENTS ═══ */
+function handleLiveEvent(ev){
+  if(!ev || ev.ts<=lastLiveTs) return;
+  lastLiveTs=ev.ts;
+  if(ev.type==='SNAPSHOT'){ if(ev.payload&&ev.payload.teams) buildTeamsFromLive(ev.payload.teams); return; }
+  if(ev.type==='ELIMINATED'){
+    const p=ev.payload, t=teams.find(x=>x.id===p.teamId||x.tag===p.tag);
+    if(t){ t.alive=[0,0,0,0]; t.elims=p.elims||t.elims; }
+    renderTeams();
+    showElimPopup({tag:p.tag,logo:p.logo||'',elims:p.elims||0}, p.placement||0); return;
+  }
+  if(ev.type==='WWCD'){ const p=ev.payload; if(wwcdShown) return; wwcdShown=true; showWWCD({tag:p.tag,logo:p.logo||'',elims:p.elims||0}); return; }
+  if(ev.type==='KNOCKED'){
+    const p=ev.payload, t=teams.find(x=>x.id===p.teamId||x.tag===p.tag);
+    if(t&&p.player>=1&&p.player<=4){ t.alive[p.player-1]=2; } renderTeams(); return;
+  }
+  if(ev.type==='STATS_UPDATE'){ const p=ev.payload, t=teams.find(x=>x.id===p.teamId||x.tag===p.tag); if(t){ t.pts=p.pts; t.elims=p.elims; } renderTeams(); return; }
+}
+function pollLive(){
+  try{
+    const raw=localStorage.getItem(LIVE_KEY);
+    if(!raw){ if(!teams.length) updateLiveStatus('TIADA DATA — buka Leaderboard', true); return; }
+    handleLiveEvent(JSON.parse(raw));
+  }catch(e){}
+}
+
+/* ═══ FINAL 4 HEADER ═══ */
+function renderFinal4(){
+  const hdr=document.getElementById('final4Header'); if(!hdr) return;
+  const aliveTeams=teams.filter(t=>!t.alive.every(x=>x===0)); hdr.innerHTML='';
+  if(aliveTeams.length>0 && aliveTeams.length<=4){
+    aliveTeams.forEach(team=>{
+      const logoH=team.logo
+        ? `<img src="${team.logo}" class="final4-logo" onerror="this.style.display='none'">`
+        : `<div class="final4-logo" style="background:rgba(255,215,0,.15);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#ffd700;border-radius:10px">${(team.tag||'?')[0]}</div>`;
+      hdr.innerHTML+=`<div class="final4-box">${logoH}<div class="final4-name">${team.tag}</div></div>`;
+    });
+  }
+}
+
+/* ═══ RENDER STANDING SIDEBAR (ganti team-grid) ═══ */
+function renderTeams(){
+  const body=document.getElementById('standingBody'); if(!body) return;
+  const sorted=[...teams].sort((a,b)=> b.pts!==a.pts ? b.pts-a.pts : b.elims-a.elims);
+  body.innerHTML = sorted.map((t,i)=>{
+    const nr=i+1, isDead=t.alive.every(x=>x===0);
+    const rankCls = nr<=3 ? ' r'+nr : '';
+    const bars=t.alive.map(s=>`<span class="sb ${s===1?'a':s===2?'k':''}"></span>`).join('');
+    const logoH=t.logo
+      ? `<img src="${t.logo}" class="st-logo" onerror="this.style.display='none'">`
+      : `<div class="st-logo">${(t.tag||'?')[0]}</div>`;
+    return `<div class="st-row${rankCls}${isDead?' st-dead':''}">
+      <div class="st-rank">${nr}</div>
+      <div class="st-team">${logoH}<span class="st-tag">${t.tag}</span></div>
+      <div class="st-bars">${bars}</div>
+      <div class="st-pts">${t.pts}</div>
+      <div class="st-elims">${t.elims}</div>
+    </div>`;
+  }).join('');
+  const aliveN = teams.filter(t=>!t.alive.every(x=>x===0)).length;
+  const sub=document.getElementById('stSub'); if(sub) sub.textContent = 'ALIVE '+aliveN+'/'+teams.length;
+  renderFinal4();
+}
+
+/* ═══ ELIM POPUP ═══ */
+function showElimPopup(team, placement){
+  removeElimPopup();
+  let hideClass='';
+  if(!popupSettings.rank) hideClass+=' hide-rank';
+  if(!popupSettings.name) hideClass+=' hide-name';
+  if(!popupSettings.logo) hideClass+=' hide-logo';
+  if(!popupSettings.kill) hideClass+=' hide-kill';
+  const logoH=team.logo
+    ? `<img src="${team.logo}" class="elim-logo" onerror="this.style.display='none'">`
+    : `<div class="elim-logo" style="background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900">${(team.tag||'?')[0]}</div>`;
+  const popup=document.createElement('div');
+  popup.className='elim-popup'+hideClass;
+  popup.innerHTML=`
+    <div class="elim-top">
+      <div class="elim-side"><div class="elim-rank">#${String(placement).padStart(2,'0')}</div><div class="elim-rank-lbl">RANK</div></div>
+      <div class="elim-center">${logoH}<div class="elim-team">${team.tag}</div><div class="elim-ktext">${team.elims} KILLS</div></div>
+      <div class="elim-side"><div class="elim-kill">${team.elims}</div><div class="elim-kill-lbl">ELIMS</div></div>
+    </div>
+    <div class="elim-bottom">ELIMINATED</div>`;
+  document.getElementById('popupContainer').appendChild(popup);
+  setTimeout(removeElimPopup, popupDuration);
+}
+function removeElimPopup(){ document.querySelectorAll('.elim-popup').forEach(x=>x.remove()); }
+
+/* ═══ WWCD ═══ */
+function showWWCD(team){
+  document.querySelectorAll('.wwcd-popup').forEach(x=>x.remove());
+  const logoH=team.logo
+    ? `<img src="${team.logo}" class="wwcd-logo" onerror="this.style.display='none'">`
+    : `<div class="wwcd-logo" style="background:rgba(255,215,0,.15);display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900">${(team.tag||'?')[0]}</div>`;
+  const div=document.createElement('div'); div.className='wwcd-popup';
+  div.innerHTML=`<div class="wwcd-top">${logoH}<div class="wwcd-title">WWCD</div><div class="wwcd-team">${team.tag}</div></div>
+    <div class="wwcd-bottom">WINNER WINNER CHICKEN DINNER</div>`;
+  document.getElementById('popupContainer').appendChild(div);
+}
+
+/* ═══ DEMO ═══ */
+function demoPopup(){
+  removeElimPopup();
+  const alive=teams.filter(t=>!t.alive.every(x=>x===0));
+  const demo=alive.length?alive[Math.floor(Math.random()*alive.length)]:{tag:'DEMO',logo:'',elims:7};
+  showElimPopup({tag:demo.tag,logo:demo.logo||'',elims:Math.floor(Math.random()*15)}, Math.floor(Math.random()*12)+1);
+}
+
+/* ═══ SETTINGS / UI ═══ */
+function toggleSetting(el,type){ el.classList.toggle('active'); popupSettings[type]=el.classList.contains('active'); }
+function toggleTransp(){ document.body.classList.toggle('transp'); localStorage.setItem('combTransp', document.body.classList.contains('transp')?'1':'0'); }
+function resetAll(){
+  if(!confirm('Reset overlay?')) return;
+  teams=[]; wwcdShown=false; lastLiveTs=0; lastSavedAt=0;
+  removeElimPopup(); document.querySelectorAll('.wwcd-popup').forEach(x=>x.remove());
+  loadFromLSKEY()||loadFromSPKEY(); renderTeams();
+}
+function loadSettings(){
+  if(localStorage.getItem('combTransp')==='1') document.body.classList.add('transp');
+}
+
+/* keyboard: H sorok UI, ESC tutup popup */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ removeElimPopup(); document.querySelectorAll('.wwcd-popup').forEach(x=>x.remove()); wwcdShown=false; }
+  if(e.key==='h'||e.key==='H'){ document.body.classList.toggle('hide-ui'); }
+});
+
+/* ═══ INIT ═══ */
+fitStage();
+loadSettings();
+renderTeams();
+
+const liveRaw=localStorage.getItem(LIVE_KEY);
+if(liveRaw){
+  try{
+    const ev=JSON.parse(liveRaw);
+    if(ev&&ev.type==='SNAPSHOT'&&ev.payload&&ev.payload.teams) buildTeamsFromLive(ev.payload.teams);
+    else loadFromLSKEY()||loadFromSPKEY();
+  }catch(e){ loadFromLSKEY()||loadFromSPKEY(); }
+}else{
+  loadFromLSKEY()||loadFromSPKEY();
+  if(!teams.length) updateLiveStatus('TIADA DATA — buka Leaderboard dulu', true);
+}
+
+/* ── FIREBASE SYNC ── */
+(function initComboFirebase(){
+  if(typeof fsGet!=='function') return;
+  fsGet('maida/liveData', function(ld){
+    if(!ld||!ld.liveData) return;
+    Object.keys(ld.liveData).forEach(function(tag){
+      var t=teams.find(function(x){return x.tag===tag;});
+      if(t){ var fd=ld.liveData[tag];
+        if(fd.pts!==undefined)t.pts=fd.pts; if(fd.elims!==undefined)t.elims=fd.elims; if(fd.alive)t.alive=fd.alive; }
+    });
+    renderTeams(); console.log('[Firebase] COMBO liveData loaded');
+  });
+  if(typeof fsListen==='function'){
+    fsListen('maida/liveData', function(ld){
+      if(!ld||!ld.liveData) return;
+      Object.keys(ld.liveData).forEach(function(tag){
+        var t=teams.find(function(x){return x.tag===tag;});
+        if(t){ var fd=ld.liveData[tag];
+          if(fd.pts!==undefined)t.pts=fd.pts; if(fd.elims!==undefined)t.elims=fd.elims; if(fd.alive)t.alive=fd.alive; }
+      });
+      renderTeams();
+    }, 1);
+    fsListen('maida/spData', function(sp){
+      if(!sp||!sp.teams||!sp.teams.length) return;
+      if(teams&&teams.length) return;
+      teams=sp.teams.map(function(spt,i){
+        var spTag=(spt.name||'TEAM '+(i+1)).substring(0,12);
+        return {id:i+1,tag:spTag,logo:spt.logo||'',country:'🇲🇾',alive:[1,1,1,1],pts:0,elims:0,lobby:i+1};
+      });
+      renderTeams(); console.log('[Firebase] COMBO initial teams from spData');
+    }, 5);
+  }
+})();
+
+setInterval(pollLive, 300);
+window.addEventListener('storage', e=>{
+  if(e.key===LIVE_KEY){ try{ handleLiveEvent(JSON.parse(e.newValue||'{}')); }catch(e2){} return; }
+  if(e.key===LS_KEY){ loadFromLSKEY(); return; }
+  if(e.key===SP_KEY){ if(!teams.length) loadFromSPKEY(); }
+});
+setInterval(()=>{ if(teams.length===0) loadFromSPKEY(); }, 5000);
+</script>
+</body>
+</html>
