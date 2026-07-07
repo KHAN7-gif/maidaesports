@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAIDA ESPORTS — Tournament Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pink:#ec0b6e; --pink2:#ff2d86; --pink-soft:#ffd9ea; --pink-tint:#fff2f7;
+  --ink:#12131a; --ink2:#3a3f52; --muted:#7a8091; --faint:#aab0c0;
+  --bg:#eceef4; --card:#ffffff; --line:#eceef3; --line2:#e3e5ec;
+  --radius:22px; --radius-sm:16px;
+  --shadow:0 1px 2px rgba(18,19,26,.04), 0 10px 30px rgba(18,19,26,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:var(--bg);color:var(--ink);
+  -webkit-font-smoothing:antialiased;line-height:1.5;min-height:100vh;padding:28px 18px;
+  background-image:radial-gradient(circle at 12% 8%,rgba(236,11,110,.05),transparent 40%),radial-gradient(circle at 88% 96%,rgba(236,11,110,.05),transparent 40%);}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+::selection{background:var(--pink);color:#fff}
+
+.app{max-width:1180px;margin:0 auto;background:#fbfbfd;border:1px solid var(--line);border-radius:30px;
+  box-shadow:0 2px 8px rgba(18,19,26,.04),0 24px 70px rgba(18,19,26,.09);padding:34px 40px 30px;position:relative;overflow:hidden}
+
+/* profile top-right */
+.me{position:absolute;top:26px;right:32px;display:flex;align-items:center;gap:11px;z-index:3}
+.me .av{width:40px;height:40px;border-radius:50%;border:2px solid var(--pink);color:var(--pink);
+  display:flex;align-items:center;justify-content:center}
+.me .who{line-height:1.2;text-align:left}
+.me .who b{font-size:14px;font-weight:700;display:block}
+.me .who span{font-size:11px;color:var(--muted)}
+.me .cv{color:var(--faint)}
+
+/* header */
+.hero{text-align:center;padding:6px 0 22px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.42em;text-transform:uppercase;color:var(--pink);margin-bottom:12px}
+.hero h1{font-family:'Archivo',sans-serif;font-weight:900;font-size:clamp(38px,6vw,64px);letter-spacing:-.01em;line-height:1;text-transform:uppercase}
+.hero h1 b{color:var(--pink);font-weight:900}
+.hero .sub{font-size:13px;font-weight:600;letter-spacing:.32em;text-transform:uppercase;color:var(--faint);margin-top:14px}
+.live-pill{display:inline-flex;align-items:center;gap:9px;margin-top:20px;border:1.5px solid var(--pink-soft);
+  background:var(--pink-tint);color:var(--pink);font-size:12.5px;font-weight:700;letter-spacing:.1em;
+  padding:9px 18px;border-radius:999px;text-transform:uppercase}
+.live-pill .dot{width:8px;height:8px;border-radius:50%;background:var(--pink);animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* section label */
+.sec{text-align:center;margin:26px 0 18px;display:flex;align-items:center;justify-content:center;gap:16px;color:var(--muted)}
+.sec::before,.sec::after{content:"";height:1px;width:64px;background:linear-gradient(90deg,transparent,var(--line2))}
+.sec::before{background:linear-gradient(90deg,var(--line2),transparent)}
+.sec span{font-family:'Archivo',sans-serif;font-size:13px;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:var(--ink2)}
+
+/* module grid */
+.mods{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.mod{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:26px 20px 22px;text-align:center;transition:.2s;overflow:hidden;display:flex;flex-direction:column;align-items:center}
+.mod::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1.5px transparent;transition:.2s;pointer-events:none}
+.mod:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(236,11,110,.13);border-color:transparent}
+.mod:hover::after{box-shadow:inset 0 0 0 1.5px var(--pink)}
+.mod-badge{position:absolute;top:16px;right:16px;font-size:9.5px;font-weight:700;letter-spacing:.08em;
+  color:var(--pink);border:1px solid var(--pink-soft);background:#fff;padding:3px 9px;border-radius:999px}
+.mod-ic{height:60px;display:flex;align-items:center;justify-content:center;color:var(--pink);margin:6px 0 16px}
+.mod h3{font-family:'Archivo',sans-serif;font-size:16px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;line-height:1.15;color:var(--ink)}
+.mod p{font-size:12px;color:var(--muted);margin-top:9px;line-height:1.45;min-height:34px}
+
+/* crew */
+.crew-panel{margin-top:28px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+.crew-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.crew-head h2{font-family:'Archivo',sans-serif;font-size:15px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--pink);display:flex;align-items:center;gap:9px}
+.crew-head .aside{margin-left:auto;display:flex;align-items:center;gap:16px;font-size:12.5px;color:var(--muted)}
+.crew-head .aside a{color:var(--muted);display:inline-flex;align-items:center;gap:6px;transition:.15s}
+.crew-head .aside a:hover{color:var(--pink)}
+.crew-list{display:flex;flex-direction:column;gap:11px}
+.crew{display:flex;align-items:center;gap:14px;background:#fafbfd;border:1px solid var(--line);border-radius:15px;padding:13px 15px;transition:.15s}
+.crew:hover{border-color:var(--line2)}
+.crew .cav{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Archivo',sans-serif;font-weight:800;font-size:17px;flex-shrink:0;border:2px solid;background:#fff}
+.crew.admin .cav{color:var(--pink);border-color:var(--pink)}
+.crew.crew-r .cav{color:var(--up,#2f6bff);border-color:#2f6bff}
+.crew .ci{flex:1;min-width:0;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.crew .ci b{font-size:15px;font-weight:700}
+.crole{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px}
+.r-admin{background:var(--pink-tint);color:var(--pink)}
+.r-crew{background:#eef3ff;color:#2f6bff}
+.crew .lock{color:var(--faint);display:flex}
+.crew .cbtns{margin-left:auto;display:flex;gap:8px}
+.cbtn{width:36px;height:36px;border-radius:11px;background:#fff;border:1px solid var(--line);color:var(--muted);
+  display:flex;align-items:center;justify-content:center;transition:.15s}
+.cbtn:hover{border-color:var(--pink);color:var(--pink);background:var(--pink-tint)}
+.cbtn.dis{opacity:.4;cursor:not-allowed}
+.cbtn.dis:hover{border-color:var(--line);color:var(--muted);background:#fff}
+
+.crew-add{display:flex;gap:11px;margin-top:16px;flex-wrap:wrap;align-items:stretch}
+.crew-add input{flex:1;min-width:180px;border:1px solid var(--line);border-radius:13px;padding:13px 16px;font-size:13.5px;
+  font-family:inherit;outline:none;transition:.15s;background:#fafbfd;color:var(--ink)}
+.crew-add input:focus{border-color:var(--pink);background:#fff}
+.swatch{width:46px;border:1px solid var(--line);border-radius:13px;background:#fafbfd;display:flex;align-items:center;justify-content:center}
+.swatch i{width:18px;height:18px;border-radius:6px;display:block}
+.crew-add select{border:1px solid var(--line);border-radius:13px;padding:0 14px;font-size:13px;font-weight:700;
+  letter-spacing:.06em;font-family:'Archivo',sans-serif;background:#fafbfd;outline:none;color:var(--ink2);text-transform:uppercase}
+.btn-add{background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;font-family:'Archivo',sans-serif;
+  font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;padding:0 22px;border-radius:13px;
+  display:flex;align-items:center;gap:7px;transition:.15s;box-shadow:0 6px 18px rgba(236,11,110,.3)}
+.btn-add:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(236,11,110,.4)}
+
+.foot{text-align:center;margin-top:26px;padding-top:20px;border-top:1px solid var(--line);
+  font-size:11.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(18,19,26,.5);backdrop-filter:blur(4px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:24px;width:100%;max-width:480px;box-shadow:0 30px 70px rgba(0,0,0,.3);overflow:hidden;animation:pop .2s ease}
+@keyframes pop{from{transform:scale(.96) translateY(8px);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-head{padding:24px 26px 6px}
+.modal-head h3{font-family:'Archivo',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.modal-head p{color:var(--muted);font-size:13px;margin-top:4px}
+.modal-body{padding:16px 26px}
+.info-list{list-style:none;display:flex;flex-direction:column;gap:11px}
+.info-list li{display:flex;gap:12px;font-size:13.5px;color:var(--ink2);align-items:flex-start}
+.info-list .num{width:24px;height:24px;border-radius:8px;background:var(--pink-tint);color:var(--pink);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.modal-foot{padding:10px 26px 24px;display:flex;gap:10px;justify-content:flex-end}
+.mbtn{font-family:'Archivo',sans-serif;font-weight:800;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;padding:11px 18px;border-radius:12px;transition:.15s}
+.mbtn.ghost{background:var(--bg);color:var(--ink2);border:1px solid var(--line)}
+.mbtn.solid{background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;
+  padding:12px 20px;border-radius:13px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:200}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:980px){ .mods{grid-template-columns:repeat(2,1fr)} .app{padding:26px 22px} .me{position:static;justify-content:flex-end;margin-bottom:6px} }
+@media(max-width:560px){ .mods{grid-template-columns:1fr 1fr} .crew .ci{gap:8px} body{padding:14px 10px} .app{border-radius:22px;padding:22px 16px} }
+@media(max-width:420px){ .mods{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="me">
+    <div class="av"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+    <div class="who"><b>admin</b><span>Administrator</span></div>
+    <span class="cv"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></span>
+  </div>
+
+  <div class="hero">
+    <div class="eyebrow">■ PUBG Mobile · Esports Tournament ■</div>
+    <h1>MAIDA <b>ESPORTS</b></h1>
+    <div class="sub">Live Tournament Management System</div>
+    <div class="live-pill"><span class="dot"></span><span id="livePill">LIVE · 16 TEAMS · 16 ALIVE</span></div>
+  </div>
+
+  <div class="sec"><span>Modul Utama</span></div>
+  <div class="mods" id="mods"></div>
+
+  <div class="crew-panel">
+    <div class="crew-head">
+      <h2><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.5a3 3 0 010 5.8M21 20c0-2.4-1.4-4.5-3.5-5.4"/></svg> Pengurusan Crew</h2>
+      <div class="aside"><span id="crewCount">1 pengguna</span><a href="#" onclick="resetCrew();return false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 109-9M3 3v6h6"/></svg> Reset default</a></div>
+    </div>
+    <div class="crew-list" id="crewList"></div>
+    <div class="crew-add">
+      <input id="crewName" placeholder="Nama crew baru..." onkeydown="if(event.key==='Enter')addCrew()">
+      <div class="swatch"><i id="swatch" style="background:#2f6bff"></i></div>
+      <select id="crewRole" onchange="document.getElementById('swatch').style.background=this.value==='admin'?'#ec0b6e':'#2f6bff'">
+        <option value="crew">Crew</option><option value="admin">Admin</option>
+      </select>
+      <button class="btn-add" onclick="addCrew()">＋ Tambah</button>
+    </div>
+  </div>
+
+  <div class="foot">MAIDA Esports Tournament System · PUBG Mobile · 2026</div>
+</div>
+
+<!-- INFO MODAL -->
+<div class="overlay" id="infoModal">
+  <div class="modal">
+    <div class="modal-head"><h3>Info &amp; Panduan</h3><p>Cara guna sistem &amp; sambungan OBS.</p></div>
+    <div class="modal-body">
+      <ul class="info-list">
+        <li><span class="num">1</span><div><b>Standing Point</b> — master data. Masuk placement &amp; kill setiap map, kemudian <b>LOCK</b>.</div></li>
+        <li><span class="num">2</span><div><b>Leaderboard</b> — dashboard live. Crew update ELIMS/alive. Tekan RESET untuk game baru.</div></li>
+        <li><span class="num">3</span><div><b>Modul OBS</b> — buka link modul, dalam OBS: Add → <b>Browser / Window Capture</b>.</div></li>
+        <li><span class="num">4</span><div>Semua data auto-sync melalui localStorage + Firebase antara modul.</div></li>
+      </ul>
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+        <a class="mbtn ghost" href="https://github.com/khan7-gif/maidaesports" target="_blank">↗ GitHub Repo</a>
+        <a class="mbtn ghost" href="Standing_Point_v2.html">↗ Standing Point</a>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="mbtn solid" onclick="closeInfo()">Faham</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════ MODULES (link kekal seperti asal) ══════ */
+var MODULES=[
+  {t:'Standing Point',   b:'MASTER', d:'Master data · Map · Overall',      href:'Standing_Point_v2.html',        ic:'chart'},
+  {t:'Leader Board',     b:'LIVE',   d:'Dashboard · Kawalan match',        href:'leaderboard_FINAL.html',        ic:'star'},
+  {t:'Popup Kill',       b:'OBS',    d:'Auto popup · Eliminated · WWCD',   href:'popup_kill_FINAL.html',         ic:'target'},
+  {t:'OBS Live Leaderboard', b:'OBS', d:'Browser Source · 500x900',       href:'leaderboard_FINAL.html#obs',    ic:'monitor'},
+  {t:'Overall Standing', b:'OBS',    d:'Landscape overlay · 1920x1080',    href:'Standing_Point_v2.html#medsos', ic:'chart'},
+  {t:'WWCD',             b:'LIVE',   d:'Chicken Dinner overlay · per map', href:'wwcd_overlay.html',             ic:'crown'},
+  {t:'Public Results',   b:'PUBLIC', d:'Live results · View-only untuk peminat', href:'public_results.html',    ic:'user'},
+  {t:'Info & Panduan',   b:'INFO',   d:'Cara guna · Link OBS · Github',    href:'#info',                          ic:'info'}
+];
+var ICONS={
+  chart:'<svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="4" height="8" rx="1.2"/><rect x="10" y="7" width="4" height="13" rx="1.2"/><rect x="17" y="3" width="4" height="17" rx="1.2"/></svg>',
+  star:'<svg width="50" height="50" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6.1 6.6.9-4.8 4.6 1.2 6.6L12 18.6 6.1 21.3l1.2-6.6L2.5 9.5l6.6-.9z"/></svg>',
+  target:'<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/><path d="M12 1v3.5M12 19.5V23M1 12h3.5M19.5 12H23"/></svg>',
+  monitor:'<svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="2.5" y="4.5" width="19" height="12" rx="2"/><circle cx="12" cy="10.5" r="2.6"/><path d="M8 20.5h8M12 16.5v4"/></svg>',
+  crown:'<svg width="50" height="50" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7.5l3.6 3 3.4-5.5 2.4 5.5 3.4-5.5L21 7.5 19.4 18H4.6z"/><rect x="4" y="19" width="16" height="2.3" rx="1"/></svg>',
+  user:'<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="10" r="3"/><path d="M6.5 18.5a6 6 0 0111 0"/></svg>',
+  info:'<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v5.5M12 7.6h.01" stroke-linecap="round"/></svg>'
+};
+
+/* ══════ CREW (localStorage) ══════ */
+var CK='maida_crew_v1';
+var DEFAULT_CREW=[{id:'c1',name:'admin',role:'admin'}];
+function loadCrew(){ try{var r=localStorage.getItem(CK); if(r)return JSON.parse(r);}catch(e){} return JSON.parse(JSON.stringify(DEFAULT_CREW)); }
+function saveCrew(){ try{localStorage.setItem(CK,JSON.stringify(crew));}catch(e){} }
+var crew=loadCrew();
+
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('show');},1800); }
+
+function renderMods(){
+  document.getElementById('mods').innerHTML=MODULES.map(function(m){
+    var oc = m.href==='#info' ? ' onclick="openInfo();return false"' : '';
+    var tg = (m.b==='OBS'||m.b==='PUBLIC') ? ' target="_blank" rel="noopener"' : '';
+    return '<a class="mod" href="'+m.href+'"'+oc+tg+'>'+
+      '<span class="mod-badge">'+m.b+'</span>'+
+      '<div class="mod-ic">'+ICONS[m.ic]+'</div>'+
+      '<h3>'+m.t+'</h3><p>'+m.d+'</p></a>';
+  }).join('');
+}
+function renderCrew(){
+  document.getElementById('crewList').innerHTML=crew.map(function(c){
+    var isA=c.role==='admin';
+    var badge=isA?'<span class="crole r-admin">♛ Admin</span>':'<span class="crole r-crew">Crew</span>';
+    var lock=isA?'<span class="lock" title="Dilindungi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span>':'';
+    var xbtn = isA
+      ? '<button class="cbtn dis" title="Admin tak boleh dibuang">'+xIcon()+'</button>'
+      : '<button class="cbtn" title="Buang" onclick="delCrew(\''+c.id+'\')">'+xIcon()+'</button>';
+    return '<div class="crew '+(isA?'admin':'crew-r')+'"><div class="cav">'+esc((c.name||'?').charAt(0).toUpperCase())+'</div>'+
+      '<div class="ci"><b>'+esc(c.name)+'</b>'+badge+lock+'</div>'+
+      '<div class="cbtns">'+
+        '<button class="cbtn dis" title="—">'+svgLine('M5 12h14')+'</button>'+
+        xbtn+
+      '</div></div>';
+  }).join('');
+  document.getElementById('crewCount').textContent=crew.length+' pengguna';
+}
+function xIcon(){ return svgLine('M18 6L6 18M6 6l12 12'); }
+function svgLine(d){ return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="'+d+'"/></svg>'; }
+
+function addCrew(){
+  var nm=document.getElementById('crewName').value.trim();
+  if(!nm){ toast('Sila isi nama crew'); return; }
+  crew.push({id:'c_'+Date.now(), name:nm, role:document.getElementById('crewRole').value});
+  saveCrew(); renderCrew(); document.getElementById('crewName').value=''; toast('Crew ditambah ✓');
+}
+function delCrew(id){ crew=crew.filter(function(c){return c.id!==id;}); saveCrew(); renderCrew(); toast('Crew dibuang'); }
+function resetCrew(){ if(!confirm('Reset senarai crew ke default?'))return; crew=JSON.parse(JSON.stringify(DEFAULT_CREW)); saveCrew(); renderCrew(); toast('Crew di-reset'); }
+
+function openInfo(){ document.getElementById('infoModal').classList.add('show'); }
+function closeInfo(){ document.getElementById('infoModal').classList.remove('show'); }
+document.getElementById('infoModal').addEventListener('click',function(e){ if(e.target===this) closeInfo(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeInfo(); });
+
+/* LIVE pill — baca dari data sedia ada jika ada */
+function updateLive(){
+  var teams=16, alive=16;
+  try{ var sp=JSON.parse(localStorage.getItem('hswp_2026_pro')||'null'); if(sp&&sp.teams&&sp.teams.length) teams=sp.teams.length; }catch(e){}
+  try{ var lb=JSON.parse(localStorage.getItem('maida_v5')||'null');
+    if(lb&&lb.teams&&lb.teams.length){ alive=lb.teams.filter(function(t){return (t.alive||[]).some(function(a){return a>0;});}).length; }
+    else alive=teams;
+  }catch(e){ alive=teams; }
+  document.getElementById('livePill').textContent='LIVE · '+teams+' TEAMS · '+alive+' ALIVE';
+}
+
+renderMods(); renderCrew(); updateLive();
+</script>
+</body>
+</html>
