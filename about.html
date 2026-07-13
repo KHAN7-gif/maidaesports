@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About &amp; Panduan — MAIDA ESPORTS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pink:#ec0b6e;--pink2:#ff2d86;--pink-soft:#ffd9ea;--pink-tint:#fff2f7;
+  --ink:#12131a;--ink2:#3a3f52;--muted:#767c90;--faint:#aab0c0;
+  --bg:#eceef4;--card:#fff;--line:#eceef3;--line2:#e3e5ec;
+  --radius:20px;--shadow:0 1px 2px rgba(18,19,26,.04),0 10px 30px rgba(18,19,26,.06);
+  --master:#7a2bd0;--live:#ec0b6e;--obs:#0ea5e9;--public:#12b76a;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(circle at 10% 4%,rgba(236,11,110,.05),transparent 38%),radial-gradient(circle at 92% 98%,rgba(236,11,110,.05),transparent 40%);}
+a{color:var(--pink);text-decoration:none}a:hover{text-decoration:underline}
+code{font-family:'Share Tech Mono','Courier New',monospace;background:#f0f1f6;color:#c00a5c;padding:2px 7px;border-radius:6px;font-size:.86em;border:1px solid var(--line)}
+.wrap{max-width:1080px;margin:0 auto;padding:26px 22px 60px}
+
+/* hero */
+.brand{display:flex;align-items:center;gap:10px;font-family:'Archivo',sans-serif;font-weight:900;font-size:20px;margin-bottom:22px}
+.brand .mark{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--pink),var(--pink2));display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;box-shadow:0 4px 14px rgba(236,11,110,.4)}
+.brand b{color:var(--pink)}
+.hero{background:var(--card);border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);padding:38px 40px;position:relative;overflow:hidden;margin-bottom:22px}
+.hero::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--pink),var(--pink2),transparent)}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--pink);margin-bottom:10px}
+.hero h1{font-family:'Archivo',sans-serif;font-weight:900;font-size:clamp(30px,5vw,44px);letter-spacing:-.01em;line-height:1.05;text-transform:uppercase}
+.hero h1 b{color:var(--pink)}
+.hero p{color:var(--ink2);font-size:15.5px;margin-top:14px;max-width:720px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.pill{font-size:11.5px;font-weight:700;letter-spacing:.04em;padding:6px 13px;border-radius:999px;background:var(--pink-tint);color:var(--pink);border:1px solid var(--pink-soft)}
+
+/* section cards */
+.sec{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px 30px;margin-bottom:20px}
+.sec h2{font-family:'Archivo',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;display:flex;align-items:center;gap:11px;margin-bottom:6px}
+.sec h2 .ic{width:34px;height:34px;border-radius:10px;background:var(--pink-tint);color:var(--pink);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec .lead{color:var(--muted);font-size:14px;margin-bottom:18px}
+.sec h3{font-family:'Archivo',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);margin:20px 0 10px}
+.sec p{color:var(--ink2);font-size:14.5px;margin-bottom:10px}
+.sec ul{margin:0 0 12px 2px;padding:0;list-style:none}
+.sec li{position:relative;padding-left:22px;margin-bottom:8px;font-size:14.5px;color:var(--ink2)}
+.sec li::before{content:"";position:absolute;left:0;top:9px;width:7px;height:7px;border-radius:50%;background:var(--pink)}
+.sec li b{color:var(--ink)}
+
+/* module grid */
+.mods{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:6px}
+.mod{border:1px solid var(--line);border-radius:14px;padding:16px 17px;background:#fafbfd;transition:.15s}
+.mod:hover{border-color:var(--line2);box-shadow:0 8px 22px rgba(18,19,26,.06)}
+.mod-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
+.mod-top b{font-family:'Archivo',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.02em}
+.tag{font-size:9.5px;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:999px;color:#fff}
+.t-master{background:var(--master)}.t-live{background:var(--live)}.t-obs{background:var(--obs)}.t-public{background:var(--public)}.t-info{background:var(--muted)}
+.mod p{font-size:12.5px;color:var(--muted);margin:0 0 8px}
+.mod code{font-size:11px}
+
+/* steps */
+.steps{counter-reset:s;margin-top:6px}
+.step{position:relative;padding:14px 16px 14px 56px;border:1px solid var(--line);border-radius:13px;background:#fafbfd;margin-bottom:11px}
+.step::before{counter-increment:s;content:counter(s);position:absolute;left:14px;top:14px;width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;font-family:'Archivo',sans-serif;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(236,11,110,.3)}
+.step b{font-family:'Archivo',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.03em;display:block;margin-bottom:3px}
+.step span{font-size:13.5px;color:var(--ink2)}
+.crew-tag{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.05em;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:middle}
+.c1{background:var(--pink-tint);color:var(--pink)}.c2{background:#e6f3ff;color:var(--obs)}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;margin-top:8px;font-size:13.5px}
+.tbl th{text-align:left;background:#f6f7fb;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:10px 12px;border-bottom:2px solid var(--line2)}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);color:var(--ink2);vertical-align:top}
+.tbl td:first-child{white-space:nowrap}
+.tbl tr:last-child td{border-bottom:none}
+
+.note{background:var(--pink-tint);border:1px solid var(--pink-soft);border-radius:13px;padding:14px 16px;font-size:13.5px;color:var(--ink2);margin-top:14px}
+.note b{color:var(--pink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.foot{text-align:center;color:var(--faint);font-size:12.5px;margin-top:30px;letter-spacing:.04em}
+.foot b{color:var(--muted)}
+.backlink{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:13px;color:var(--pink);margin-bottom:18px}
+
+@media(max-width:720px){.mods,.two{grid-template-columns:1fr}.hero,.sec{padding:22px 20px}.wrap{padding:16px 14px 44px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="backlink" href="index.html">← Kembali ke Home</a>
+  <div class="brand"><span class="mark">M</span>MAIDA <b>ESPORTS</b></div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="eyebrow">■ Tentang Projek ■ Bahan Rujukan</div>
+    <h1>MAIDA <b>ESPORTS</b><br>Tournament Management System</h1>
+    <p>Sistem pengurusan tournament <b>PUBG Mobile</b> berasaskan web — satu platform untuk urus data perlawanan,
+       kira mata (standing), dan hasilkan <b>overlay siaran langsung (OBS)</b> secara automatik. Dibina sepenuhnya
+       guna HTML/CSS/JavaScript, disimpan di GitHub Pages, dan disegerakkan melalui <b>localStorage + Firebase</b>.</p>
+    <div class="badges">
+      <span class="pill">PUBG Mobile</span>
+      <span class="pill">Live Tournament</span>
+      <span class="pill">OBS Ready · 1920×1080</span>
+      <span class="pill">Firebase Sync</span>
+      <span class="pill">Zero Backend</span>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="sec">
+    <h2><span class="ic">📋</span> Ringkasan Sistem</h2>
+    <p class="lead">Bagaimana semuanya berhubung kait.</p>
+    <p><b>Standing Point</b> ialah otak sistem (master data). Semua placement &amp; kill dimasukkan di sini,
+       kemudian di-<b>LOCK</b> setiap map. Data yang disahkan mengalir automatik ke <b>Leaderboard</b> (dashboard live)
+       dan ke semua <b>overlay OBS</b> (Popup Kill, WWCD, Overall/Map Standing). Penonton pula boleh lihat keputusan
+       melalui <b>Public Results</b>.</p>
+    <div class="note">💡 <b>Konsep utama:</b> 1 sumber kebenaran (Standing Point) → banyak paparan (Leaderboard + Overlay + Public).
+       Kemas kini sekali, semua ikut.</div>
+  </div>
+
+  <!-- MODULES -->
+  <div class="sec">
+    <h2><span class="ic">🧩</span> Modul Utama</h2>
+    <p class="lead">8 modul, setiap satu fail HTML tersendiri.</p>
+    <div class="mods">
+      <div class="mod"><div class="mod-top"><b>Standing Point</b><span class="tag t-master">MASTER</span></div>
+        <p>Master data: Team Management, Map Config, Map Standing &amp; Overall Standing, statistik (HAVOR), overlay (MEDSOS).</p>
+        <code>Standing_Point_v2.html</code></div>
+      <div class="mod"><div class="mod-top"><b>Leaderboard</b><span class="tag t-live">LIVE</span></div>
+        <p>Dashboard kawalan match langsung — kemas kini ELIMS &amp; status alive setiap pasukan.</p>
+        <code>leaderboard_FINAL.html</code></div>
+      <div class="mod"><div class="mod-top"><b>Popup Kill</b><span class="tag t-obs">OBS</span></div>
+        <p>Overlay popup automatik bila ada kill / eliminated / WWCD. Green-screen untuk OBS.</p>
+        <code>popup_kill_FINAL.html</code></div>
+      <div class="mod"><div class="mod-top"><b>OBS Live Leaderboard</b><span class="tag t-obs">OBS</span></div>
+        <p>Overlay ranking langsung (Browser Source ~500×900) untuk sidebar siaran.</p>
+        <code>leaderboard_FINAL.html#obs</code></div>
+      <div class="mod"><div class="mod-top"><b>Overall / Map Standing</b><span class="tag t-obs">OBS</span></div>
+        <p>Overlay landscape 1920×1080 — kad #1 featured + senarai penuh. Boleh papar overall atau setiap map.</p>
+        <code>Standing_Point_v2.html#medsos</code></div>
+      <div class="mod"><div class="mod-top"><b>WWCD</b><span class="tag t-live">LIVE</span></div>
+        <p>Overlay Winner Winner Chicken Dinner — juara setiap map.</p>
+        <code>wwcd_overlay.html</code></div>
+      <div class="mod"><div class="mod-top"><b>Public Results</b><span class="tag t-public">PUBLIC</span></div>
+        <p>Halaman keputusan view-only untuk peminat / penonton.</p>
+        <code>public_results.html</code></div>
+      <div class="mod"><div class="mod-top"><b>Home / Login</b><span class="tag t-info">HUB</span></div>
+        <p>Landing hub dengan login gate &amp; pengurusan crew. Pintu masuk ke semua modul.</p>
+        <code>index.html</code></div>
+    </div>
+  </div>
+
+  <!-- STANDING POINT TABS -->
+  <div class="sec">
+    <h2><span class="ic">📊</span> Tab Standing Point</h2>
+    <p class="lead">4 tab dalam fail master.</p>
+    <ul>
+      <li><b>STANDING</b> — Map Standing (susun placement, isi kill setiap map, <b>LOCK/UNLOCK</b>) &amp; Overall Standing (kumulatif semua map locked). Ada <b>PRINT SEMUA</b> (map + overall sekali cetak).</li>
+      <li><b>HAVOR</b> — Analisis statistik: jumlah team, maps locked, total kills, WWCD, top score, best kill, Kill MVP, avg/map + Kill Leaderboard + WWCD &amp; Placement.</li>
+      <li><b>MEDSOS</b> — Overlay OBS (Overall / Map Standing) 1920×1080. Pilih <b>PAPAR: OVERALL atau map tertentu</b>, tekan <b>BUKA TAB BARU</b> untuk OBS.</li>
+      <li><b>SETTING</b> — Map Config (tambah/edit/padam map) &amp; Team Management (tambah team, upload <b>logo</b> &amp; <b>banner</b> via URL, kad bernombor) &amp; Data Management (Save/Export/Import/Reset).</li>
+    </ul>
+  </div>
+
+  <!-- WORKFLOW -->
+  <div class="sec">
+    <h2><span class="ic">🎮</span> Aliran Kerja Crew</h2>
+    <p class="lead">Peranan <span class="crew-tag c1">CREW 1 · Standing</span> dan <span class="crew-tag c2">CREW 2 · Broadcast</span>.</p>
+    <div class="steps">
+      <div class="step"><b>Sebelum Event</b><span>Crew 1 buka <b>Standing Point → SETTING</b>: daftar semua pasukan (nama, logo, banner) &amp; setup map (Map Config).</span></div>
+      <div class="step"><b>Semasa Game <span class="crew-tag c2">CREW 2</span></b><span>Crew 2 buka <b>Leaderboard</b> — kemas kini ELIMS (setiap kill = +1 ELIMS &amp; +1 PTS) &amp; status alive pasukan secara langsung untuk OBS.</span></div>
+      <div class="step"><b>Selepas Game <span class="crew-tag c1">CREW 1</span></b><span>Crew 1 buka <b>Standing Point → STANDING</b> — susun placement, isi kill, kemudian <b>LOCK</b>. Data disahkan &amp; auto-sync ke Leaderboard + semua overlay.</span></div>
+      <div class="step"><b>Game Baharu <span class="crew-tag c2">CREW 2</span></b><span>Crew 2 tekan <b>RESET</b> di Leaderboard — ELIMS kembali 0, PTS kekal. Ulang untuk game seterusnya.</span></div>
+      <div class="step"><b>Paparan Siaran</b><span>Overlay (Overall Standing, Popup Kill, WWCD) auto-update setiap 2 saat mengikut data terkini.</span></div>
+    </div>
+  </div>
+
+  <!-- OBS -->
+  <div class="sec">
+    <h2><span class="ic">🖥</span> Cara Setup OBS</h2>
+    <div class="steps">
+      <div class="step"><b>Buka Modul Overlay</b><span>Dari Home, klik modul OBS (cth <b>Overall Standing</b> atau <b>Popup Kill</b>) → tekan <b>BUKA TAB BARU</b>.</span></div>
+      <div class="step"><b>Tambah Sumber di OBS</b><span>OBS → <b>Add</b> → <b>Window Capture</b> (atau Browser Source untuk link) → pilih tetingkap yang dibuka.</span></div>
+      <div class="step"><b>Saiz &amp; Auto-update</b><span>Overlay standing = <b>1920×1080</b>. Popup Kill = green-screen (guna Chroma Key). Semua auto-update <b>2 saat</b>.</span></div>
+    </div>
+    <div class="note">🎯 <b>Tip:</b> Popup Kill guna latar hijau — tambah filter <b>Chroma Key</b> di OBS untuk buang latar. Overlay standing guna latar gelap penuh (window capture terus).</div>
+  </div>
+
+  <!-- SCORING & DATA -->
+  <div class="two">
+    <div class="sec">
+      <h2><span class="ic">🏆</span> Sistem Mata</h2>
+      <table class="tbl">
+        <tr><th>Istilah</th><th>Maksud</th></tr>
+        <tr><td><b>RANK</b> (Place)</td><td>Mata kedudukan: 10·6·5·4·3·2·1·1 (#1–#8), 0 selepas itu</td></tr>
+        <tr><td><b>ELIM</b> (Kill)</td><td>Jumlah bunuh</td></tr>
+        <tr><td><b>TOTAL</b></td><td>RANK + ELIM (mata keseluruhan)</td></tr>
+        <tr><td><b>WWCD</b></td><td>Bilangan kali dapat #1 (Chicken Dinner)</td></tr>
+      </table>
+    </div>
+    <div class="sec">
+      <h2><span class="ic">🔗</span> Data &amp; Sync</h2>
+      <table class="tbl">
+        <tr><th>Kunci</th><th>Fungsi</th></tr>
+        <tr><td><code>hswp_2026_pro</code></td><td>Master Standing Point (team, map, kill)</td></tr>
+        <tr><td><code>maida_v5</code></td><td>State Leaderboard live</td></tr>
+        <tr><td><code>medsos_view</code></td><td>Pilihan overlay (overall / map)</td></tr>
+        <tr><td><code>maida_crew_v1</code></td><td>Senarai crew</td></tr>
+        <tr><td>Firebase</td><td><code>maida/spData</code>, <code>maida/liveData</code> — sync antara peranti</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- SETUP / DEPLOY -->
+  <div class="sec">
+    <h2><span class="ic">🚀</span> Deployment &amp; Login</h2>
+    <h3>GitHub Pages</h3>
+    <ul>
+      <li>Semua fail diletak di repo GitHub (satu folder) &amp; diaktifkan <b>GitHub Pages</b>.</li>
+      <li>Muat naik / ganti fail bila ada kemas kini, kemudian refresh sumber OBS.</li>
+      <li>Tiada backend / pelayan — 100% statik.</li>
+    </ul>
+    <h3>Login</h3>
+    <ul>
+      <li>Login gate dalam <code>index.html</code> — masukkan username &amp; password untuk masuk hub.</li>
+      <li>Butang <b>Log Keluar</b> di penjuru kanan atas. "Ingat saya" simpan username.</li>
+      <li><b>Nota:</b> ini gate paparan (bukan keselamatan sebenar pada hosting statik).</li>
+    </ul>
+  </div>
+
+  <!-- FILE LIST -->
+  <div class="sec">
+    <h2><span class="ic">🗂</span> Senarai Fail Repo</h2>
+    <table class="tbl">
+      <tr><th>Fail</th><th>Keterangan</th></tr>
+      <tr><td><code>index.html</code></td><td>Home hub + login + pengurusan crew</td></tr>
+      <tr><td><code>Standing_Point_v2.html</code></td><td>Master (STANDING/HAVOR/MEDSOS/SETTING)</td></tr>
+      <tr><td><code>leaderboard_FINAL.html</code></td><td>Leaderboard live (+ <code>#obs</code>)</td></tr>
+      <tr><td><code>popup_kill_FINAL.html</code></td><td>Overlay popup kill (OBS)</td></tr>
+      <tr><td><code>wwcd_overlay.html</code></td><td>Overlay WWCD</td></tr>
+      <tr><td><code>public_results.html</code></td><td>Keputusan awam (view-only)</td></tr>
+      <tr><td><code>firebase_sync.js</code></td><td>Modul sync Firebase RTDB</td></tr>
+      <tr><td><code>about.html</code></td><td>Halaman ini (rujukan)</td></tr>
+      <tr><td><code>icon-192 / icon-512.png</code></td><td>Ikon aplikasi</td></tr>
+    </table>
+  </div>
+
+  <div class="foot">© 2026 <b>MAIDA ESPORTS</b> — Tournament Management System · PUBG Mobile · Bahan Rujukan</div>
+</div>
+</body>
+</html>
